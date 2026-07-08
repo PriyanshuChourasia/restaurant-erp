@@ -1,0 +1,123 @@
+# Project Knowledge — Restaurant ERP
+
+Durable knowledge about this codebase: architecture, domain concepts, and decisions.
+This file changes slowly — only update it when something structurally true about the
+project changes (new module, new convention, new tech choice). For fast-moving state
+(what's in progress, open questions, gotchas) use `memory.md` instead. For a log of
+what was done per prompt, see `tasks/`.
+
+## What this project is
+
+A restaurant ERP system: monorepo (pnpm workspace + Turborepo) with a NestJS API and
+a React SPA.
+
+## Structure
+
+- `apps/api/` — NestJS REST API (PostgreSQL + TypeORM)
+- `apps/restaurant-ui/` — React SPA (Vite + TanStack Router + Tailwind CSS v4)
+- `packages/` — Shared config packages (ESLint, TypeScript, UI)
+
+## Backend (`apps/api/`)
+
+- NestJS 11, TypeORM + PostgreSQL, JWT auth (Passport) + bcrypt
+- Validation via class-validator + class-transformer
+- Testing: Jest + Supertest
+- Modules (`apps/api/src/`): `auth/`, `users/`, `roles/`, `permissions/`, `category/`,
+  `items/`, `inventory/`, `purchases/`, `suppliers/`, `sales/`, `kot/`, `ledger/`, `shared/`
+- Each module follows: `controller -> service -> repository (interface) -> entity`
+- `shared/` holds guards, decorators, filters, interfaces
+- Auth decorators: `@Public()`, `@Roles()`, `@Permissions()`, `@CurrentUser()`
+
+## Frontend (`apps/restaurant-ui/`)
+
+- React 19, Vite 5, TanStack Router (file-based routing, routes in `src/routes/`,
+  route tree auto-generated)
+- TanStack React Query + TanStack Table 8 for server data/tables
+- TanStack Form + React Hook Form + Zod + @hookform/resolvers for forms
+- Tailwind CSS v4 + Tailwind merge, Lucide React icons, Shadcn-compatible primitives
+- Axios via `src/lib/axios-client.ts` — a configured instance with interceptor for
+  auto-refresh token rotation and request queuing on 401s
+- Auth via `AuthContext` provider (`src/lib/auth-context.tsx`) — login, logout,
+  refresh token rotation, session restoration from localStorage
+- Feature modules under `src/modules/`, each with: `api/`, `hooks/`, `types/`,
+  `schemas/`, `components/`, `dialogs/`, `forms/`, `pages/`, `utils/`
+- UI primitives in `src/components/ui/`; layout components in `src/components/layout/`
+- `@/` path alias maps to `src/`
+
+## Conventions
+
+- TypeScript throughout
+- PascalCase: components/types/classes; camelCase: functions/variables; kebab-case: files
+- Prettier: 2-space indent, single quotes, trailing commas
+- No direct commits to main — be careful with state-changing git operations
+
+## Dev commands
+
+```bash
+pnpm dev          # Run both API + UI in dev mode
+pnpm build        # Build all packages
+pnpm lint         # Lint all packages
+
+cd apps/api && pnpm start:dev    # API watch mode (NODE_ENV=development)
+cd apps/api && pnpm start:prod   # NODE_ENV=production, runs dist/main
+cd apps/api && pnpm test         # API unit tests
+cd apps/api && pnpm test:e2e     # API e2e tests
+
+cd apps/restaurant-ui && pnpm dev     # Vite dev server
+cd apps/restaurant-ui && pnpm build   # Type-check + build
+```
+
+## Backend environments
+
+`apps/api` loads `.env.${NODE_ENV}` (see `app.module.ts`'s `ConfigModule.forRoot`).
+Files are gitignored except `.env.example` (safe placeholder template):
+
+- `apps/api/.env.development` — real local config, points at a local Postgres
+  database `restaurant_erp_dev` (localhost:5432).
+- `apps/api/.env.production` — placeholder template (`REPLACE_WITH_*` values);
+  real prod secrets must come from actual deployment infra, never hardcoded here.
+
+`DatabaseSeedService.onApplicationBootstrap()` auto-seeds demo data (permissions,
+roles, 3 demo users, categories) whenever the DB is empty — idempotent, checks
+row counts first. Demo login: `admin@restaurant.com` / `Admin@123456` (also
+shown on the frontend login page).
+
+**Gotcha**: TypeORM entity columns typed `T | null` in TypeScript need an
+explicit `@Column({ type: '...' })` — without it, TS's decorator metadata
+erases the union to `Object` and TypeORM throws `DataTypeNotSupportedError` at
+DB-connect time. This only surfaces when actually connecting to a real
+database, not via `tsc`/`eslint`.
+
+## Frontend auth
+
+- `apps/restaurant-ui/vite.config.ts` proxies `/api/*` to `http://localhost:3000`
+  in dev — required for every relative-path axios call in the app to reach the
+  backend. Vite does not hot-reload this file — restart `pnpm dev` after editing it.
+- **AuthContext** (`src/lib/auth-context.tsx`) — React Context wrapping the whole app
+  via `AuthProvider` in `main.tsx`. Provides `user`, `login()`, `logout()`, `refreshing`.
+- **AxiosClient** (`src/lib/axios-client.ts`) — configured axios instance with:
+  - Base URL `/api`
+  - Access token from `AuthContext` attached as `Authorization: Bearer` header
+  - Response interceptor that catches 401s, queues concurrent requests, calls
+    `/api/auth/refresh` with the stored refresh token, retries the original request
+- **Session persistence** — access + refresh tokens stored in `localStorage` via
+  `src/lib/session.ts`; `AuthContext` restores them on mount.
+- **No route-guard/protected-route pattern yet** — any route is reachable without
+  signing in.
+
+## History
+
+- Repo started from `create-turbo` scaffold, then API and restaurant-ui apps were added.
+- 2026-07-08 — Set up `.project/` documentation system (this file, `memory.md`, `tasks/`).
+- 2026-07-08 — Fixed all lint/type/build errors repo-wide. Notable structural
+  fixes: root `package.json` must declare `@repo/eslint-config` as a
+  devDependency (root `.eslintrc.js` extends it, and restaurant-ui's eslint 8
+  cascades up to it); `apps/api`'s eslint config sets
+  `no-unused-vars: { ignoreRestSiblings: true }` for the password-exclusion
+  destructuring pattern; `apps/restaurant-ui`'s `lint` script globs
+  `*.{ts,tsx}` (was `*.ts` only, silently skipping all `.tsx` files).
+- 2026-07-08 — Full POS billing system built: 7 new backend modules (items, inventory,
+  purchases, suppliers, sales, KOT, ledger), frontend upgraded to React 19, AuthContext
+  + AxiosClient with refresh token rotation, complete GST billing (CGST/SGST/INR),
+  KOT board with kitchen stations, purchase/sales/ledger pages, sidebar reorganization.
+  See `.project/tasks/2026-07-08-build-pos-billing-system.md`.
