@@ -9,6 +9,52 @@ Newest entries at the top.
 
 ---
 
+## 2026-07-09 — Inventory Management Module functional spec written
+
+- Full business/functional spec (no tech stack) for a 12-sub-module Inventory Management
+  system written to `.project/docs/inventory-management-module-spec.md`: Units, Categories,
+  Items, Suppliers, Purchases, Goods Receipt, Stock Adjustments, Stock Consumption, Stock
+  Transfer, Waste Management, Stock Count, Inventory Reports.
+- This is considerably broader than what's implemented today — the codebase currently only
+  has `items`, `inventory` (basic on-hand + opening balance), `purchases`, and `suppliers`
+  modules. Goods Receipt, Stock Transfer, Waste Management, and Stock Count don't exist yet.
+- Spec recommends adding a dedicated **Storekeeper/Inventory** role (doesn't exist among the
+  6 seeded roles) to own receiving/adjustments/counts, defaulting to Manager until added.
+- Key open decisions flagged in the spec that need a real business call before/during
+  implementation: negative-stock policy (block vs. warn-and-allow, globally or per item) and
+  over-receipt tolerance policy for Goods Receipt.
+- See `.project/tasks/2026-07-09-inventory-module-functional-spec.md` for full detail.
+
+## 2026-07-08 — Health check API + Docker auto-seed
+
+- Added `GET /api/health` (public endpoint) that returns server status, DB connectivity, uptime, NODE_ENV.
+- Updated docker-compose.yml: `NODE_ENV=development` enables TypeORM schema sync + auto-seed on startup. Added healthcheck for API service (wget on Alpine).
+- Demo data seeds automatically when `docker compose up` runs on a fresh database.
+- 0 TypeScript errors.
+
+## 2026-07-08 — Beautified OrdersPage with Tailwind CSS v4
+
+- Completely redesigned `apps/restaurant-ui/src/modules/orders/pages/OrdersPage.tsx` from custom CSS to Tailwind v4, matching the dashboard's design language.
+- Adds: KPI stat cards (total/in-progress/completed/revenue), status filter tabs with counts, search + filter bar, modern table with hover states & server avatars, slide-out order details drawer with status actions, empty state, footer stats.
+- Drawer has ARIA accessibility: `role=dialog`, `aria-modal`, `aria-label`, Escape-to-close, close-button `aria-label`.
+- 0 TypeScript errors.
+
+## 2026-07-08 — Unit tests for auth, users, category services
+
+- Wrote 81 unit tests across 3 service spec files (all pass):
+  - `auth.service.spec.ts` (17 tests): login (success, not found, inactive, wrong pwd), refresh (rotation, expiry, inactive user), logout, register (conflict, no role), profile
+  - `users.service.spec.ts` (18 tests): findAll/findOne/findByEmail, create (conflict, role), update (conflict, role), soft-delete, restore (not-deleted guard)
+  - `category.service.spec.ts` (46 tests): create (slug/name/parent/depth validations), findOne/findBySlug, getTree/breadcrumb/children/descendants/ancestors, update, move (root/parent/circular/self), remove (force/non-force), restore, activate/deactivate, paginated findAll/getRoots
+- Key gotchas: `jest.spyOn(bcrypt, ...)` fails (bcrypt uses non-configurable C++ addon props) → use `jest.mock('bcrypt', ...)`; uuid v9+ is ESM-only → use `jest.mock('uuid', ...)`; standalone `jest.fn()` with `.mockResolvedValueOnce()` chain is more reliable than chaining `.mockResolvedValueOnce()` + `.mockResolvedValue()` on existing repository mock for tests with variable call counts.
+
+## 2026-07-08 — Docker setup for backend + PostgreSQL
+
+- Created `apps/api/Dockerfile` (multi-stage build using pnpm monorepo), `apps/api/.dockerignore`, `docker-compose.yml` (api + postgres:16-alpine).
+- Dockerfile: builder stage installs deps, builds, prunes dev deps; runner stage is minimal Alpine with only dist/ and production node_modules.
+- docker-compose.yml: db on host port 5433 (avoids clash with existing PG containers), api on port 3000, depends_on with healthcheck, persistent volume for DB data.
+- .env.production updated with Docker-safe defaults (DB_HOST=db, JWT_SECRET placeholder, JWT_EXPIRES_IN=1h).
+- Could not build in-session (Docker daemon not in this env). Run `docker compose build` locally.
+
 ## 2026-07-08 — Seeded all roles, permissions, and users
 
 - Seed service rewritten to be idempotent: 77 permissions across 17 modules, 6 roles (added chef, cashier, waiter), 6 demo users.

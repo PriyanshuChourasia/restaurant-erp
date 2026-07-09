@@ -1,0 +1,17 @@
+node_modules
+dist
+.turbo
+*.log
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+test
+coverage
+*.md
+.prettierrc
+eslint.config.mjs
+tsconfig.json
+tsconfig.build.json
+nest-cli.json

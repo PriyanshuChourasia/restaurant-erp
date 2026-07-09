@@ -13,7 +13,7 @@ export interface CreateInvoiceRequest {
   customerName?: string
   customerPhone?: string
   customerGstin?: string
-  tableNumber?: string
+  tableNumbers?: string[]
   paymentMethod?: string
   discount?: number
   notes?: string
@@ -27,7 +27,7 @@ export async function createInvoice(payload: CreateInvoiceRequest) {
 
 export async function createKot(payload: {
   orderId?: string
-  tableNumber?: string
+  tableNumbers?: string[]
   station: string
   notes?: string
   items: Array<{ itemId: string; itemName: string; quantity: number; instructions?: string }>

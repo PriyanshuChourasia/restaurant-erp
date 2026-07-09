@@ -24,9 +24,11 @@ import { Route as LedgerRouteImport } from './routes/ledger'
 import { Route as KotRouteImport } from './routes/kot'
 import { Route as ItemsRouteImport } from './routes/items'
 import { Route as InventoryRouteImport } from './routes/inventory'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ItemsCreateRouteImport } from './routes/items_.create'
+import { Route as ItemsIdRouteImport } from './routes/items_.$id'
 import { Route as CategoriesTreeRouteImport } from './routes/categories_.tree'
 import { Route as CategoriesCreateRouteImport } from './routes/categories_.create'
 import { Route as CategoriesIdRouteImport } from './routes/categories_.$id'
@@ -107,6 +109,11 @@ const InventoryRoute = InventoryRouteImport.update({
   path: '/inventory',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CategoriesRoute = CategoriesRouteImport.update({
   id: '/categories',
   path: '/categories',
@@ -120,6 +127,11 @@ const IndexRoute = IndexRouteImport.update({
 const ItemsCreateRoute = ItemsCreateRouteImport.update({
   id: '/items_/create',
   path: '/items/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ItemsIdRoute = ItemsIdRouteImport.update({
+  id: '/items_/$id',
+  path: '/items/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CategoriesTreeRoute = CategoriesTreeRouteImport.update({
@@ -146,6 +158,7 @@ const CategoriesIdEditRoute = CategoriesIdEditRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/categories': typeof CategoriesRoute
+  '/dashboard': typeof DashboardRoute
   '/inventory': typeof InventoryRoute
   '/items': typeof ItemsRoute
   '/kot': typeof KotRoute
@@ -164,12 +177,14 @@ export interface FileRoutesByFullPath {
   '/categories/$id': typeof CategoriesIdRoute
   '/categories/create': typeof CategoriesCreateRoute
   '/categories/tree': typeof CategoriesTreeRoute
+  '/items/$id': typeof ItemsIdRoute
   '/items/create': typeof ItemsCreateRoute
   '/categories/$id/edit': typeof CategoriesIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/categories': typeof CategoriesRoute
+  '/dashboard': typeof DashboardRoute
   '/inventory': typeof InventoryRoute
   '/items': typeof ItemsRoute
   '/kot': typeof KotRoute
@@ -188,6 +203,7 @@ export interface FileRoutesByTo {
   '/categories/$id': typeof CategoriesIdRoute
   '/categories/create': typeof CategoriesCreateRoute
   '/categories/tree': typeof CategoriesTreeRoute
+  '/items/$id': typeof ItemsIdRoute
   '/items/create': typeof ItemsCreateRoute
   '/categories/$id/edit': typeof CategoriesIdEditRoute
 }
@@ -195,6 +211,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/categories': typeof CategoriesRoute
+  '/dashboard': typeof DashboardRoute
   '/inventory': typeof InventoryRoute
   '/items': typeof ItemsRoute
   '/kot': typeof KotRoute
@@ -213,6 +230,7 @@ export interface FileRoutesById {
   '/categories_/$id': typeof CategoriesIdRoute
   '/categories_/create': typeof CategoriesCreateRoute
   '/categories_/tree': typeof CategoriesTreeRoute
+  '/items_/$id': typeof ItemsIdRoute
   '/items_/create': typeof ItemsCreateRoute
   '/categories_/$id_/edit': typeof CategoriesIdEditRoute
 }
@@ -221,6 +239,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/categories'
+    | '/dashboard'
     | '/inventory'
     | '/items'
     | '/kot'
@@ -239,12 +258,14 @@ export interface FileRouteTypes {
     | '/categories/$id'
     | '/categories/create'
     | '/categories/tree'
+    | '/items/$id'
     | '/items/create'
     | '/categories/$id/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/categories'
+    | '/dashboard'
     | '/inventory'
     | '/items'
     | '/kot'
@@ -263,12 +284,14 @@ export interface FileRouteTypes {
     | '/categories/$id'
     | '/categories/create'
     | '/categories/tree'
+    | '/items/$id'
     | '/items/create'
     | '/categories/$id/edit'
   id:
     | '__root__'
     | '/'
     | '/categories'
+    | '/dashboard'
     | '/inventory'
     | '/items'
     | '/kot'
@@ -287,6 +310,7 @@ export interface FileRouteTypes {
     | '/categories_/$id'
     | '/categories_/create'
     | '/categories_/tree'
+    | '/items_/$id'
     | '/items_/create'
     | '/categories_/$id_/edit'
   fileRoutesById: FileRoutesById
@@ -294,6 +318,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CategoriesRoute: typeof CategoriesRoute
+  DashboardRoute: typeof DashboardRoute
   InventoryRoute: typeof InventoryRoute
   ItemsRoute: typeof ItemsRoute
   KotRoute: typeof KotRoute
@@ -312,6 +337,7 @@ export interface RootRouteChildren {
   CategoriesIdRoute: typeof CategoriesIdRoute
   CategoriesCreateRoute: typeof CategoriesCreateRoute
   CategoriesTreeRoute: typeof CategoriesTreeRoute
+  ItemsIdRoute: typeof ItemsIdRoute
   ItemsCreateRoute: typeof ItemsCreateRoute
   CategoriesIdEditRoute: typeof CategoriesIdEditRoute
 }
@@ -423,6 +449,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InventoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/categories': {
       id: '/categories'
       path: '/categories'
@@ -442,6 +475,13 @@ declare module '@tanstack/react-router' {
       path: '/items/create'
       fullPath: '/items/create'
       preLoaderRoute: typeof ItemsCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/items_/$id': {
+      id: '/items_/$id'
+      path: '/items/$id'
+      fullPath: '/items/$id'
+      preLoaderRoute: typeof ItemsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/categories_/tree': {
@@ -478,6 +518,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CategoriesRoute: CategoriesRoute,
+  DashboardRoute: DashboardRoute,
   InventoryRoute: InventoryRoute,
   ItemsRoute: ItemsRoute,
   KotRoute: KotRoute,
@@ -496,6 +537,7 @@ const rootRouteChildren: RootRouteChildren = {
   CategoriesIdRoute: CategoriesIdRoute,
   CategoriesCreateRoute: CategoriesCreateRoute,
   CategoriesTreeRoute: CategoriesTreeRoute,
+  ItemsIdRoute: ItemsIdRoute,
   ItemsCreateRoute: ItemsCreateRoute,
   CategoriesIdEditRoute: CategoriesIdEditRoute,
 }

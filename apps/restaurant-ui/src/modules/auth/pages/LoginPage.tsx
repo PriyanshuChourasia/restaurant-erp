@@ -37,11 +37,29 @@ export function LoginPage() {
     <div className="login-page">
       {/* Left decorative panel */}
       <div className="login-panel">
+        {/* Decorative floating orbs */}
+        <div className="login-panel-orb login-panel-orb--1" />
+        <div className="login-panel-orb login-panel-orb--2" />
+
+        {/* Floating particle dots */}
+        <div className="login-panel-particles">
+          <div className="login-particle" />
+          <div className="login-particle" />
+          <div className="login-particle" />
+          <div className="login-particle" />
+          <div className="login-particle" />
+          <div className="login-particle" />
+          <div className="login-particle" />
+          <div className="login-particle" />
+          <div className="login-particle" />
+          <div className="login-particle" />
+        </div>
+
         <div className="login-panel-content">
           <div className="login-brand-icon">
             <UtensilsCrossed size={32} />
           </div>
-          <h1 className="login-panel-title">RestaurantERP</h1>
+          <h1 className="login-panel-title">CodyERP</h1>
           <p className="login-panel-subtitle">
             Complete restaurant management solution. Manage orders, inventory, staff, and more from one place.
           </p>
@@ -65,7 +83,7 @@ export function LoginPage() {
           </div>
         </div>
         <p className="login-panel-copyright">
-          &copy; 2026 RestaurantERP. All rights reserved.
+          &copy; 2026 CodyERP. All rights reserved.
         </p>
       </div>
 

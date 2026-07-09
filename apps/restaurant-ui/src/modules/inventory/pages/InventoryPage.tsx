@@ -1,117 +1,214 @@
-import { Plus, Search, Package, Filter, AlertTriangle } from 'lucide-react'
-import '../../../styles/global.css'
+import { useState, useMemo } from 'react'
+import { createColumnHelper, type ColumnDef } from '@tanstack/react-table'
+import { Plus, Search, Package, AlertTriangle, Filter } from 'lucide-react'
+import { useInventory, useLowStock } from '../hooks/useInventoryQueries'
+import { DataTable } from '@/components/ui/data-table'
 
-const inventory = [
-  { name: 'Tomato Sauce', category: 'Sauces', stock: 2, unit: 'cases', minLevel: 5, status: 'Critical' as const },
-  { name: 'Mozzarella', category: 'Dairy', stock: 4, unit: 'kg', minLevel: 8, status: 'Low' as const },
-  { name: 'Olive Oil', category: 'Oils', stock: 3, unit: 'bottles', minLevel: 6, status: 'Low' as const },
-  { name: 'Basil', category: 'Herbs', stock: 12, unit: 'bunches', minLevel: 5, status: 'Ok' as const },
-  { name: 'Pasta Flour', category: 'Dry Goods', stock: 15, unit: 'kg', minLevel: 10, status: 'Ok' as const },
-  { name: 'Parmesan', category: 'Dairy', stock: 6, unit: 'kg', minLevel: 4, status: 'Ok' as const },
-  { name: 'Pancetta', category: 'Meat', stock: 3, unit: 'kg', minLevel: 3, status: 'Low' as const },
-  { name: 'Salmon', category: 'Seafood', stock: 5, unit: 'fillets', minLevel: 8, status: 'Low' as const },
-  { name: 'Arborio Rice', category: 'Dry Goods', stock: 8, unit: 'kg', minLevel: 5, status: 'Ok' as const },
-  { name: 'Heavy Cream', category: 'Dairy', stock: 4, unit: 'liters', minLevel: 6, status: 'Low' as const },
-]
+interface InventoryRow {
+  id: string
+  itemName: string
+  categoryName: string | null
+  sku: string
+  currentStock: number
+  minStockLevel: number
+  unitCost: number
+  unit: string
+  status: string
+}
 
-function stockBadge(status: string) {
-  const map: Record<string, string> = {
-    'Critical': 'badge-error',
-    'Low': 'badge-warning',
-    'Ok': 'badge-success',
+const columnHelper = createColumnHelper<InventoryRow>()
+
+function getStockStatus(item: { currentStock: number; minStockLevel: number }) {
+  if (item.minStockLevel <= 0) return 'Ok'
+  if (item.currentStock <= 0) return 'Critical'
+  if (item.currentStock < item.minStockLevel) return 'Low'
+  return 'Ok'
+}
+
+const stockBadgeClass = (status: string) => {
+  switch (status) {
+    case 'Critical': return 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700'
+    case 'Low': return 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700'
+    default: return 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700'
   }
-  return `badge ${map[status] || 'badge-gray'}`
 }
 
 export function InventoryPage() {
-  return (
-    <div>
-      <div className="page-header">
-        <div>
-          <div className="page-title">Inventory</div>
-          <div className="page-subtitle">Track stock levels, manage supplies, and receive deliveries.</div>
-        </div>
-        <div className="page-header-actions">
-          <div className="search-box">
-            <Search size={16} style={{ color: 'var(--color-gray-400)' }} />
-            <input type="text" placeholder="Search inventory..." />
+  const [page, setPage] = useState(1)
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
+
+  const { data, isLoading } = useInventory({ page, limit: 20, search: search || undefined, status: statusFilter || undefined })
+  const { data: lowStockData } = useLowStock()
+
+  const rawItems = data?.data || []
+  const total = data?.total || 0
+  const lowStockCount = lowStockData?.length || 0
+  const criticalCount = lowStockData?.filter((item: any) => item.currentStock === 0 || (item.minStockLevel > 0 && item.currentStock / item.minStockLevel <= 0.25)).length || 0
+
+  const inventoryRows: InventoryRow[] = useMemo(
+    () =>
+      rawItems.map((item: any) => ({
+        id: item.id,
+        itemName: item.item?.name || 'Unknown',
+        categoryName: item.item?.category?.name || null,
+        sku: item.item?.sku || '-',
+        currentStock: item.currentStock,
+        minStockLevel: item.minStockLevel,
+        unitCost: Number(item.unitCost || 0),
+        unit: item.item?.unit || '',
+        status: getStockStatus(item),
+      })),
+    [rawItems],
+  )
+
+  const columns = useMemo<ColumnDef<InventoryRow, any>[]>(
+    () => [
+      columnHelper.accessor('itemName', {
+        header: 'Item',
+        cell: (info) => {
+          const row = info.row.original
+          return (
+            <div>
+              <p className="font-medium text-gray-900">{info.getValue()}</p>
+              {row.categoryName && <p className="text-xs text-gray-400">{row.categoryName}</p>}
+            </div>
+          )
+        },
+      }),
+      columnHelper.accessor('sku', { header: 'SKU' }),
+      columnHelper.accessor('currentStock', {
+        header: 'Stock',
+        cell: (info) => {
+          const row = info.row.original
+          return (
+            <span className="font-semibold text-gray-900">
+              {info.getValue()} {row.unit && <span className="text-xs text-gray-400 font-normal">{row.unit}</span>}
+            </span>
+          )
+        },
+      }),
+      columnHelper.accessor('minStockLevel', {
+        header: 'Min Level',
+        cell: (info) => {
+          const row = info.row.original
+          return info.getValue() > 0 ? `${info.getValue()} ${row.unit || ''}` : '-'
+        },
+      }),
+      columnHelper.accessor('unitCost', {
+        header: 'Unit Cost',
+        cell: (info) => `₹${info.getValue().toFixed(2)}`,
+      }),
+      columnHelper.accessor('status', {
+        header: 'Status',
+        cell: (info) => (
+          <span className={stockBadgeClass(info.getValue())}>
+            {info.getValue()}
+          </span>
+        ),
+      }),
+      columnHelper.display({
+        id: 'actions',
+        header: '',
+        cell: () => (
+          <div className="flex items-center justify-end gap-1">
+            <button className="h-7 px-2.5 rounded-md border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-100 transition-all">Adjust</button>
+            <button className="h-7 px-2.5 rounded-md border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-100 transition-all">History</button>
           </div>
-          <button className="btn btn-secondary">
-            <Filter size={16} />
+        ),
+      }),
+    ],
+    [],
+  )
+
+  return (
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Inventory</h1>
+          <p className="text-sm text-gray-500 mt-1">Track stock levels, manage supplies, and receive deliveries.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search inventory..."
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPage(1) }}
+              className="h-9 w-48 rounded-lg border border-gray-200 bg-white pl-9 pr-3 text-sm outline-none focus:border-primary/40 focus:ring-3 focus:ring-primary/10"
+            />
+          </div>
+          <button className="inline-flex items-center gap-2 h-9 px-4 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 transition-all hover:bg-gray-50">
+            <Filter size={15} />
             Filters
           </button>
-          <button className="btn btn-primary">
-            <Plus size={16} />
+          <button className="inline-flex items-center gap-2 h-9 px-4 rounded-lg bg-primary text-sm font-medium text-white transition-all hover:bg-primary/90">
+            <Plus size={15} />
             Add Item
           </button>
         </div>
       </div>
 
       {/* Summary cards */}
-      <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
-        <div className="stat-card" style={{ padding: '16px' }}>
-          <div className="stat-icon info" style={{ width: 40, height: 40 }}><Package size={20} /></div>
-          <div className="stat-info">
-            <div className="stat-label">Total Items</div>
-            <div className="stat-value" style={{ fontSize: 22 }}>48</div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="rounded-xl border border-gray-200 bg-white p-5">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-sm font-medium text-gray-500">Total Items</span>
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500 text-white"><Package size={20} /></div>
           </div>
+          <p className="text-2xl font-bold text-gray-900">{isLoading ? '...' : total}</p>
         </div>
-        <div className="stat-card" style={{ padding: '16px', borderLeft: '4px solid var(--color-error)' }}>
-          <div className="stat-icon" style={{ width: 40, height: 40, background: 'var(--color-error-bg)', color: 'var(--color-error)' }}><AlertTriangle size={20} /></div>
-          <div className="stat-info">
-            <div className="stat-label">Critical Stock</div>
-            <div className="stat-value" style={{ fontSize: 22, color: 'var(--color-error)' }}>1</div>
+        <div className="rounded-xl border border-red-200 bg-white p-5">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-sm font-medium text-red-600">Critical Stock</span>
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500 text-white"><AlertTriangle size={20} /></div>
           </div>
+          <p className="text-2xl font-bold text-red-600">{criticalCount}</p>
         </div>
-        <div className="stat-card" style={{ padding: '16px', borderLeft: '4px solid var(--color-warning)' }}>
-          <div className="stat-icon" style={{ width: 40, height: 40, background: 'var(--color-warning-bg)', color: 'var(--color-warning)' }}><AlertTriangle size={20} /></div>
-          <div className="stat-info">
-            <div className="stat-label">Low Stock</div>
-            <div className="stat-value" style={{ fontSize: 22, color: 'var(--color-warning)' }}>5</div>
+        <div className="rounded-xl border border-amber-200 bg-white p-5">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-sm font-medium text-amber-600">Low Stock</span>
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500 text-white"><AlertTriangle size={20} /></div>
           </div>
+          <p className="text-2xl font-bold text-amber-600">{lowStockCount}</p>
         </div>
-        <div className="stat-card" style={{ padding: '16px' }}>
-          <div className="stat-icon success" style={{ width: 40, height: 40 }}><Package size={20} /></div>
-          <div className="stat-info">
-            <div className="stat-label">In Stock</div>
-            <div className="stat-value" style={{ fontSize: 22 }}>42</div>
+        <div className="rounded-xl border border-gray-200 bg-white p-5">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-sm font-medium text-gray-500">In Stock</span>
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500 text-white"><Package size={20} /></div>
           </div>
+          <p className="text-2xl font-bold text-gray-900">{total - lowStockCount}</p>
         </div>
       </div>
 
-      <div className="section-card">
-        <div className="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Item</th>
-                <th>Category</th>
-                <th>Stock</th>
-                <th>Min Level</th>
-                <th>Status</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {inventory.map((item) => (
-                <tr key={item.name}>
-                  <td style={{ fontWeight: 600 }}>{item.name}</td>
-                  <td>{item.category}</td>
-                  <td>{item.stock} {item.unit}</td>
-                  <td>{item.minLevel} {item.unit}</td>
-                  <td><span className={stockBadge(item.status)}>{item.status}</span></td>
-                  <td>
-                    <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
-                      <button className="btn btn-ghost btn-sm">Edit</button>
-                      <button className="btn btn-primary btn-sm">Order</button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+      {/* Status Filter */}
+      <div className="flex gap-2 flex-wrap">
+        {['', 'active', 'discontinued'].map((s) => (
+          <button
+            key={s}
+            onClick={() => setStatusFilter(s)}
+            className={`px-3 py-1.5 text-sm rounded-full font-medium transition-colors ${
+              statusFilter === s ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            {s ? s.charAt(0).toUpperCase() + s.slice(1) : 'All Status'}
+          </button>
+        ))}
       </div>
+
+      {/* Inventory Table */}
+      <DataTable<InventoryRow>
+        columns={columns}
+        data={inventoryRows}
+        total={total}
+        page={page}
+        pageSize={20}
+        onPageChange={setPage}
+        isLoading={isLoading}
+        emptyMessage="No inventory items found"
+      />
     </div>
   )
 }

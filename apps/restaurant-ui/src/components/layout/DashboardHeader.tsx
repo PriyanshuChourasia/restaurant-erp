@@ -16,7 +16,7 @@ export function DashboardHeader({ children }: DashboardHeaderProps) {
 
   const handleLogout = async () => {
     await logout()
-    navigate({ to: '/login' })
+    navigate({ to: '/' })
   }
 
   return (

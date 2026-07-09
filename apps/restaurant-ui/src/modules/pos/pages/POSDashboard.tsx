@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { Plus, Search, Minus, ShoppingCart, Trash2, CreditCard, UtensilsCrossed, IndianRupee } from 'lucide-react'
+import { Plus, Search, Minus, ShoppingCart, Trash2, CreditCard, UtensilsCrossed, IndianRupee, X, Hash } from 'lucide-react'
 import { getItems } from '@/modules/items/api/items.api'
 import { getCategories } from '@/modules/category/api/category.api'
 import { createInvoice, createKot } from '../api/pos.api'
@@ -15,17 +15,47 @@ interface CartItem {
   quantity: number
 }
 
+const PREDEFINED_TABLES = [
+  'Table 1','Table 2','Table 3','Table 4','Table 5','Table 6','Table 7','Table 8','Table 9','Table 10',
+  'Table 11','Table 12','Table 13','Table 14','Table 15','Takeaway','Dine-in Lounge','Private Room',
+]
+
 export function POSDashboard() {
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [cart, setCart] = useState<CartItem[]>([])
-  const [selectedTable, setSelectedTable] = useState('')
+  const [selectedTables, setSelectedTables] = useState<string[]>([])
+  const [tableInput, setTableInput] = useState('')
+  const tableInputRef = useRef<HTMLInputElement>(null)
   const [customerName, setCustomerName] = useState('')
   const [paymentMethod, setPaymentMethod] = useState('cash')
   const [showSuccess, setShowSuccess] = useState(false)
 
   const { data: itemsData } = useQuery({ queryKey: ['items-pos'], queryFn: () => getItems({ limit: 200 }) })
   const { data: cats } = useQuery({ queryKey: ['categories-pos'], queryFn: () => getCategories({ limit: 100 }) })
+
+  const addTable = useCallback((name: string) => {
+    const trimmed = name.trim()
+    if (!trimmed) return
+    setSelectedTables((prev) => {
+      if (prev.includes(trimmed)) return prev
+      return [...prev, trimmed]
+    })
+    setTableInput('')
+  }, [])
+
+  const removeTable = useCallback((name: string) => {
+    setSelectedTables((prev) => prev.filter((t) => t !== name))
+  }, [])
+
+  const handleTableKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && tableInput) {
+      e.preventDefault()
+      addTable(tableInput)
+    }
+  }
+
+
 
   const filteredItems = (itemsData?.items || []).filter((item) => {
     const matchesCategory = categoryFilter === 'all' || item.categoryId === categoryFilter
@@ -63,7 +93,7 @@ export function POSDashboard() {
   const billMutation = useMutation({
     mutationFn: async () => {
       const invoice = await createInvoice({
-        tableNumber: selectedTable || undefined,
+        tableNumbers: selectedTables.length > 0 ? selectedTables : undefined,
         customerName: customerName || undefined,
         paymentMethod,
         items: cart.map((i) => ({
@@ -76,7 +106,7 @@ export function POSDashboard() {
       if (cart.length > 0) {
         await createKot({
           orderId: invoice.id,
-          tableNumber: selectedTable || undefined,
+          tableNumbers: selectedTables.length > 0 ? selectedTables : undefined,
           station: 'main_kitchen',
           items: cart.map((i) => ({ itemId: i.itemId, itemName: i.name, quantity: i.quantity })),
         })
@@ -140,16 +170,49 @@ export function POSDashboard() {
       <div className="flex w-96 flex-col border-l border-gray-200 bg-white">
         {/* Cart Header */}
         <div className="border-b border-gray-200 p-4 space-y-3">
-          <div className="flex gap-2">
-            <input type="text" placeholder="Table No." value={selectedTable} onChange={(e) => setSelectedTable(e.target.value)}
-              className="flex-1 h-8 rounded-lg border border-gray-300 px-2.5 text-sm" />
-            <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}
-              className="flex-1 h-8 rounded-lg border border-gray-300 px-2.5 text-sm">
-              <option value="cash">Cash</option>
-              <option value="card">Card</option>
-              <option value="upi">UPI</option>
-              <option value="online">Online</option>
-            </select>
+          {/* Multi-Table Selector */}
+          <div className="space-y-2">
+            <div className="flex gap-1.5 flex-wrap">
+              {selectedTables.map((table) => (
+                <span key={table} className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-primary/10 text-primary text-xs font-medium">
+                  <Hash size={10} />
+                  {table}
+                  <button onClick={() => removeTable(table)} className="hover:bg-primary/20 rounded-sm p-0.5 transition-colors">
+                    <X size={10} />
+                  </button>
+                </span>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Hash size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                  ref={tableInputRef}
+                  type="text"
+                  placeholder="Add table..."
+                  value={tableInput}
+                  onChange={(e) => setTableInput(e.target.value)}
+                  onKeyDown={handleTableKeyDown}
+                  className="w-full h-8 rounded-lg border border-gray-300 pl-7 pr-2.5 text-sm outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10"
+                />
+              </div>
+              <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}
+                className="w-28 h-8 rounded-lg border border-gray-300 px-2 text-sm outline-none focus:border-primary/40">
+                <option value="cash">Cash</option>
+                <option value="card">Card</option>
+                <option value="upi">UPI</option>
+                <option value="online">Online</option>
+              </select>
+            </div>
+            {/* Quick table buttons */}
+            <div className="flex gap-1 flex-wrap">
+              {PREDEFINED_TABLES.filter((t) => !selectedTables.includes(t)).slice(0, 10).map((table) => (
+                <button key={table} onClick={() => addTable(table)}
+                  className="px-2 py-0.5 text-[11px] rounded-md border border-gray-200 text-gray-500 hover:border-primary/30 hover:text-primary hover:bg-primary/5 transition-all">
+                  {table}
+                </button>
+              ))}
+            </div>
           </div>
           <input type="text" placeholder="Customer name (optional)" value={customerName} onChange={(e) => setCustomerName(e.target.value)}
             className="w-full h-8 rounded-lg border border-gray-300 px-2.5 text-sm" />

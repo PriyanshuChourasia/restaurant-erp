@@ -87,7 +87,7 @@ export function KotDisplayPage() {
               <div className="bg-gray-900 text-white px-4 py-3 flex items-center justify-between">
                 <div>
                   <span className="font-bold text-lg">{kot.kotNumber}</span>
-                  {kot.tableNumber && <span className="ml-2 text-sm opacity-70">| {kot.tableNumber}</span>}
+                  {kot.tableNumbers && kot.tableNumbers.length > 0 && <span className="ml-2 text-sm opacity-70">| {kot.tableNumbers.join(', ')}</span>}
                 </div>
                 <span className="text-xs bg-white/20 px-2 py-0.5 rounded">{STATION_LABELS[kot.station]}</span>
               </div>

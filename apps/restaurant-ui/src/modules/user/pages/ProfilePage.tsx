@@ -1,30 +1,30 @@
 import { useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { UserCircle, KeyRound } from 'lucide-react'
+import { UserCircle, KeyRound, Loader2 } from 'lucide-react'
 
 import { ProfileForm } from '../components/ProfileForm'
 import { profileFormSchema, passwordChangeSchema } from '../data/schema'
 import { updateProfile, changePassword } from '../data/api'
+import { useAuth } from '@/lib/auth-context'
 import type { ProfileFormData, PasswordChangeData } from '../data/schema'
 
-const defaultValues: ProfileFormData = {
-  name: 'John Doe',
-  email: 'john@restaurant.com',
-  phone: '+1 (555) 000-0000',
-  role: 'admin',
-  department: 'Management',
-  shift: 'morning',
-  bio: 'Restaurant manager with 10+ years of experience.',
-}
-
 export function ProfilePage() {
+  const { user, fetchProfile } = useAuth()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(profileFormSchema),
-    defaultValues: defaultValues as ProfileFormData,
+    defaultValues: {
+      name: user?.name || '',
+      email: user?.email || '',
+      phone: user?.phone || '',
+      role: (user?.role as ProfileFormData['role']) || 'admin',
+      department: 'Management',
+      shift: 'morning',
+      bio: '',
+    },
     mode: 'onBlur',
   })
 
@@ -39,14 +39,26 @@ export function ProfilePage() {
   })
 
   const handleProfileSubmit = async (data: ProfileFormData) => {
+    if (!user) return
     setIsSubmitting(true)
     setSuccessMessage(null)
     try {
-      await updateProfile(data)
+      await updateProfile(user.id, {
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        role: data.role,
+        department: data.department,
+        shift: data.shift,
+        bio: data.bio,
+      })
+      // Refresh profile from backend to get updated data
+      await fetchProfile()
       setSuccessMessage('Profile updated successfully.')
       setTimeout(() => setSuccessMessage(null), 3000)
     } catch {
-      // Will handle errors when connected to backend
+      setSuccessMessage('Failed to update profile. Please try again.')
+      setTimeout(() => setSuccessMessage(null), 3000)
     } finally {
       setIsSubmitting(false)
     }
@@ -66,6 +78,15 @@ export function ProfilePage() {
     }
   }
 
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 size={24} className="animate-spin text-muted-foreground" />
+        <span className="ml-3 text-sm text-muted-foreground">Loading profile...</span>
+      </div>
+    )
+  }
+
   return (
     <div className="mx-auto max-w-3xl space-y-8">
       {/* Page Header */}
@@ -82,6 +103,25 @@ export function ProfilePage() {
           {successMessage}
         </div>
       )}
+
+      {/* Quick Info Card */}
+      <div className="rounded-xl border border-border bg-card p-6 flex items-center gap-4">
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-lg font-bold">
+          {user.name.charAt(0).toUpperCase()}
+        </div>
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">{user.name}</h2>
+          <p className="text-sm text-muted-foreground">{user.email}</p>
+          <div className="flex items-center gap-3 mt-1">
+            <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary capitalize">
+              {user.role}
+            </span>
+            {user.phone && (
+              <span className="text-xs text-muted-foreground">{user.phone}</span>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* Profile section */}
       <div className="space-y-6">

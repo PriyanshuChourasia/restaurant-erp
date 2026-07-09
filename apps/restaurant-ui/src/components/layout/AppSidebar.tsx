@@ -38,7 +38,7 @@ const navSections = [
   {
     title: 'Main',
     links: [
-      { to: '/', label: 'Dashboard', icon: LayoutDashboard },
+      { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     ],
   },
   {
@@ -97,23 +97,23 @@ export function AppSidebar() {
 
   const handleLogout = async () => {
     await logout()
-    navigate({ to: '/login' })
+    navigate({ to: '/' })
   }
 
   return (
     <Sidebar collapsible="icon" variant="sidebar">
       <SidebarHeader className="border-b border-sidebar-border/50 p-4">
-        <div className="flex items-center gap-3">
+        <Link to="/dashboard" className="flex items-center gap-3">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-sm">
-            R
+            C
           </div>
           {!isCollapsed && (
             <div className="flex flex-col">
-              <span className="text-sm font-semibold text-sidebar-foreground">RestaurantERP</span>
+              <span className="text-sm font-semibold text-sidebar-foreground">CodyERP</span>
               <span className="text-[11px] text-sidebar-foreground/50">Management System</span>
             </div>
           )}
-        </div>
+        </Link>
       </SidebarHeader>
 
       <SidebarContent className="p-2">

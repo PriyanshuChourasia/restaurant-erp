@@ -13,7 +13,7 @@ export interface Kot {
   id: string
   kotNumber: string
   orderId: string | null
-  tableNumber: string | null
+  tableNumbers: string[] | null
   status: string
   station: string
   notes: string | null

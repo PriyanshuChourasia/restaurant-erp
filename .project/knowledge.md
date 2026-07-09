@@ -73,7 +73,8 @@ cd apps/restaurant-ui && pnpm build   # Type-check + build
 Files are gitignored except `.env.example` (safe placeholder template):
 
 - `apps/api/.env.development` — real local config, points at a local Postgres
-  database `restaurant_erp_dev` (localhost:5432).
+  database `restaurant_erp` (localhost:5432, user `primesysindia`, trust auth,
+  Homebrew `postgresql@17`). API listens on port **3001** (not 3000 — see gotcha below).
 - `apps/api/.env.production` — placeholder template (`REPLACE_WITH_*` values);
   real prod secrets must come from actual deployment infra, never hardcoded here.
 
@@ -90,9 +91,17 @@ database, not via `tsc`/`eslint`.
 
 ## Frontend auth
 
-- `apps/restaurant-ui/vite.config.ts` proxies `/api/*` to `http://localhost:3000`
+- `apps/restaurant-ui/vite.config.ts` proxies `/api/*` to `http://localhost:3001`
   in dev — required for every relative-path axios call in the app to reach the
-  backend. Vite does not hot-reload this file — restart `pnpm dev` after editing it.
+  backend. Vite *does* auto-restart on `vite.config.ts` changes in practice (contrary
+  to earlier assumption) — but if a stale proxy target is suspected, restart `pnpm dev`.
+- **Gotcha (port 3000 conflict):** an unrelated project on this same machine
+  (`pharmacy-erp-blueprint/doctor-erp`) also runs a NestJS API and can end up
+  listening on `localhost:3000` (bound IPv6-only, `[::1]:3000`). Since `localhost`
+  resolves to IPv6 first on this Mac, requests silently hit the *wrong* backend
+  with no obvious error (e.g., login fails with a message that isn't even in this
+  codebase). This is why the API's dev port was moved to **3001** — check
+  `lsof -nP -iTCP:3000` if API calls ever behave unexplainably again.
 - **AuthContext** (`src/lib/auth-context.tsx`) — React Context wrapping the whole app
   via `AuthProvider` in `main.tsx`. Provides `user`, `login()`, `logout()`, `refreshing`.
 - **AxiosClient** (`src/lib/axios-client.ts`) — configured axios instance with:
@@ -104,6 +113,14 @@ database, not via `tsc`/`eslint`.
   `src/lib/session.ts`; `AuthContext` restores them on mount.
 - **No route-guard/protected-route pattern yet** — any route is reachable without
   signing in.
+
+## Docs
+
+- `.project/docs/` — longer-form standalone documents that don't fit `memory.md`/
+  `knowledge.md`'s short-entry format (e.g., functional specs). First entry:
+  `inventory-management-module-spec.md` — a full business/functional spec (no tech
+  stack) for a 12-sub-module Inventory Management system, considerably broader than
+  what's implemented today.
 
 ## History
 
