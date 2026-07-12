@@ -13,8 +13,7 @@ describe('KotService', () => {
     id: 'kot-1',
     kotNumber: 'KOT-00001',
     orderId: null,
-    tableNumber: null,
-    tableNumbers: null,
+    tableIds: null,
     status: KotStatus.PENDING,
     station: KotStation.MAIN_KITCHEN,
     notes: null,
@@ -108,8 +107,7 @@ describe('KotService', () => {
 
   describe('create', () => {
     const createDto = {
-      orderId: 'inv-1',
-      tableNumbers: ['Table 7'],
+      orderId: 'inv-1',          tableIds: ['Table 7'],
       station: KotStation.MAIN_KITCHEN as KotStation,
       items: [
         { itemId: 'item-1', itemName: 'Butter Chicken', quantity: 2 },
@@ -129,7 +127,7 @@ describe('KotService', () => {
         expect.objectContaining({
           kotNumber: 'KOT-00001',
           orderId: 'inv-1',
-          tableNumbers: ['Table 7'],
+          tableIds: ['Table 7'],
           station: KotStation.MAIN_KITCHEN,
           status: KotStatus.PENDING,
           items: expect.arrayContaining([

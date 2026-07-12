@@ -2,6 +2,8 @@ import {
   Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn,
   ManyToOne, OneToMany, JoinColumn, Index,
 } from 'typeorm';
+import { Customer } from '../../customers/entities/customer.entity';
+import { decimalTransformer } from '../../shared/transformers/decimal.transformer';
 
 export enum InvoiceStatus {
   DRAFT = 'draft',
@@ -37,8 +39,15 @@ export class Invoice {
   @Column({ type: 'varchar', name: 'customer_gstin', length: 20, nullable: true })
   customerGstin!: string | null;
 
-  @Column({ type: 'simple-json', name: 'table_numbers', nullable: true })
-  tableNumbers!: string[] | null;
+  @Column({ name: 'customer_id', type: 'uuid', nullable: true })
+  customerId!: string | null;
+
+  @ManyToOne(() => Customer, { nullable: true })
+  @JoinColumn({ name: 'customer_id' })
+  customer!: Customer | null;
+
+  @Column({ type: 'simple-json', name: 'table_ids', nullable: true })
+  tableIds!: string[] | null;
 
   @Column({ type: 'date', name: 'invoice_date' })
   invoiceDate!: Date;
@@ -57,28 +66,28 @@ export class Invoice {
   })
   paymentMethod!: PaymentMethod;
 
-  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0 })
+  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0 , transformer: decimalTransformer })
   subtotal!: number;
 
-  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0, name: 'cgst_total' })
+  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0, name: 'cgst_total' , transformer: decimalTransformer })
   cgstTotal!: number;
 
-  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0, name: 'sgst_total' })
+  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0, name: 'sgst_total' , transformer: decimalTransformer })
   sgstTotal!: number;
 
-  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0, name: 'igst_total' })
+  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0, name: 'igst_total' , transformer: decimalTransformer })
   igstTotal!: number;
 
-  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0, name: 'tax_total' })
+  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0, name: 'tax_total' , transformer: decimalTransformer })
   taxTotal!: number;
 
-  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0, name: 'discount' })
+  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0, name: 'discount' , transformer: decimalTransformer })
   discount!: number;
 
-  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0, name: 'round_off' })
+  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0, name: 'round_off' , transformer: decimalTransformer })
   roundOff!: number;
 
-  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0, name: 'grand_total' })
+  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0, name: 'grand_total' , transformer: decimalTransformer })
   grandTotal!: number;
 
   @Column({ type: 'text', nullable: true })
@@ -115,24 +124,24 @@ export class InvoiceItem {
   @Column({ length: 20 })
   hsnCode!: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Column({ type: 'decimal', precision: 10, scale: 2 , transformer: decimalTransformer })
   quantity!: number;
 
-  @Column({ type: 'decimal', precision: 12, scale: 2, name: 'unit_price' })
+  @Column({ type: 'decimal', precision: 12, scale: 2, name: 'unit_price' , transformer: decimalTransformer })
   unitPrice!: number;
 
-  @Column({ type: 'decimal', precision: 12, scale: 2, name: 'taxable_value' })
+  @Column({ type: 'decimal', precision: 12, scale: 2, name: 'taxable_value' , transformer: decimalTransformer })
   taxableValue!: number;
 
-  @Column({ type: 'decimal', precision: 5, scale: 2, name: 'gst_rate' })
+  @Column({ type: 'decimal', precision: 5, scale: 2, name: 'gst_rate' , transformer: decimalTransformer })
   gstRate!: number;
 
-  @Column({ type: 'decimal', precision: 12, scale: 2, name: 'cgst_amount' })
+  @Column({ type: 'decimal', precision: 12, scale: 2, name: 'cgst_amount' , transformer: decimalTransformer })
   cgstAmount!: number;
 
-  @Column({ type: 'decimal', precision: 12, scale: 2, name: 'sgst_amount' })
+  @Column({ type: 'decimal', precision: 12, scale: 2, name: 'sgst_amount' , transformer: decimalTransformer })
   sgstAmount!: number;
 
-  @Column({ type: 'decimal', precision: 12, scale: 2, name: 'total_amount' })
+  @Column({ type: 'decimal', precision: 12, scale: 2, name: 'total_amount' , transformer: decimalTransformer })
   totalAmount!: number;
 }

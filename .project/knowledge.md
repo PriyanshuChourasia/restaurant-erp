@@ -17,6 +17,18 @@ a React SPA.
 - `apps/restaurant-ui/` — React SPA (Vite + TanStack Router + Tailwind CSS v4)
 - `packages/` — Shared config packages (ESLint, TypeScript, UI)
 
+## Modules in this repo
+
+### Current modules (`apps/api/src/`):
+
+`auth/`, `users/`, `roles/`, `permissions/`, `category/`, `items/`, `inventory/`, `purchases/`, `suppliers/`, `sales/`, `kot/`, `ledger/`, `customers/`, `price-levels/`, `recipes/`, `seating/`, `reports/`, `shared/`, `database/`
+
+- `customers/` — Customer management with price-level resolution (2026-07-11)
+- `price-levels/` — Price Level management with per-item pricing overrides (2026-07-11)
+- `recipes/` — Recipe Engineering / Bill of Materials: Recipe + RecipeIngredient + ProductionEntry entities, recursive cost computation, sale-time component stock deduction, production batch logging (2026-07-11)
+- `seating/` — Zone + Seat entities for floor-plan management (2026-07-11)
+- `reports/` — Entity-free reporting module: 12 read-only endpoints across sales, inventory, and finance (2026-07-12)
+
 ## Backend (`apps/api/`)
 
 - NestJS 11, TypeORM + PostgreSQL, JWT auth (Passport) + bcrypt
@@ -88,6 +100,15 @@ explicit `@Column({ type: '...' })` — without it, TS's decorator metadata
 erases the union to `Object` and TypeORM throws `DataTypeNotSupportedError` at
 DB-connect time. This only surfaces when actually connecting to a real
 database, not via `tsc`/`eslint`.
+
+**Gotcha**: `pg`/TypeORM returns `decimal`/`numeric` columns as JS **strings**
+at runtime regardless of the TS `number` type on the entity. Every
+`@Column({ type: 'decimal', ... })` in this codebase must set
+`transformer: decimalTransformer` (from
+`apps/api/src/shared/transformers/decimal.transformer.ts`) or consumers get a
+string where a number is expected (e.g. `item.price.toFixed(...)` throwing).
+Like the nullable-column gotcha above, `tsc`/`eslint` can't catch this — only
+hitting a real database surfaces it.
 
 ## Frontend auth
 

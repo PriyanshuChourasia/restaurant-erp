@@ -2,6 +2,7 @@ import {
   Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, Index,
 } from 'typeorm';
 import { Item } from '../../items/entities/item.entity';
+import { decimalTransformer } from '../../shared/transformers/decimal.transformer';
 
 export enum MovementType {
   OPENING_BALANCE = 'opening_balance',
@@ -12,6 +13,8 @@ export enum MovementType {
   WASTAGE = 'wastage',
   TRANSFER_OUT = 'transfer_out',
   TRANSFER_IN = 'transfer_in',
+  PRODUCTION_CONSUMPTION = 'production_consumption',
+  PRODUCTION_YIELD = 'production_in',
 }
 
 @Entity('inventory')
@@ -28,16 +31,16 @@ export class Inventory {
   @JoinColumn({ name: 'item_id' })
   item!: Item;
 
-  @Column({ type: 'decimal', precision: 14, scale: 3, default: 0, name: 'opening_balance' })
+  @Column({ type: 'decimal', precision: 14, scale: 3, default: 0, name: 'opening_balance' , transformer: decimalTransformer })
   openingBalance!: number;
 
-  @Column({ type: 'decimal', precision: 14, scale: 3, default: 0, name: 'current_stock' })
+  @Column({ type: 'decimal', precision: 14, scale: 3, default: 0, name: 'current_stock' , transformer: decimalTransformer })
   currentStock!: number;
 
-  @Column({ type: 'decimal', precision: 14, scale: 3, default: 0, name: 'min_stock_level' })
+  @Column({ type: 'decimal', precision: 14, scale: 3, default: 0, name: 'min_stock_level' , transformer: decimalTransformer })
   minStockLevel!: number;
 
-  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0, name: 'unit_cost' })
+  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0, name: 'unit_cost' , transformer: decimalTransformer })
   unitCost!: number;
 
   @Column({ type: 'varchar', length: 50, default: 'active' })
@@ -63,13 +66,13 @@ export class StockMovement {
   @Column({ type: 'enum', enum: MovementType })
   type!: MovementType;
 
-  @Column({ type: 'decimal', precision: 14, scale: 3 })
+  @Column({ type: 'decimal', precision: 14, scale: 3 , transformer: decimalTransformer })
   quantity!: number;
 
-  @Column({ type: 'decimal', precision: 14, scale: 3, default: 0, name: 'balance_before' })
+  @Column({ type: 'decimal', precision: 14, scale: 3, default: 0, name: 'balance_before' , transformer: decimalTransformer })
   balanceBefore!: number;
 
-  @Column({ type: 'decimal', precision: 14, scale: 3, default: 0, name: 'balance_after' })
+  @Column({ type: 'decimal', precision: 14, scale: 3, default: 0, name: 'balance_after' , transformer: decimalTransformer })
   balanceAfter!: number;
 
   @Column({ type: 'varchar', length: 255, nullable: true })

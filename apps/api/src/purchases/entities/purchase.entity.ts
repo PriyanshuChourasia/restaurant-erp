@@ -3,6 +3,7 @@ import {
   ManyToOne, OneToMany, JoinColumn, Index,
 } from 'typeorm';
 import { Supplier } from '../../suppliers/entities/supplier.entity';
+import { decimalTransformer } from '../../shared/transformers/decimal.transformer';
 
 export enum PurchaseStatus {
   DRAFT = 'draft',
@@ -38,16 +39,16 @@ export class Purchase {
   @Column({ name: 'purchase_date', type: 'date' })
   purchaseDate!: Date;
 
-  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0 })
+  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0 , transformer: decimalTransformer })
   subtotal!: number;
 
-  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0 })
+  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0 , transformer: decimalTransformer })
   discount!: number;
 
-  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0, name: 'tax_amount' })
+  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0, name: 'tax_amount' , transformer: decimalTransformer })
   taxAmount!: number;
 
-  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0, name: 'total_amount' })
+  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0, name: 'total_amount' , transformer: decimalTransformer })
   totalAmount!: number;
 
   @Column({ type: 'text', nullable: true })
@@ -81,15 +82,15 @@ export class PurchaseItem {
   @Column({ name: 'item_id', type: 'uuid' })
   itemId!: string;
 
-  @Column({ type: 'decimal', precision: 12, scale: 2 })
+  @Column({ type: 'decimal', precision: 12, scale: 2 , transformer: decimalTransformer })
   quantity!: number;
 
-  @Column({ type: 'decimal', precision: 12, scale: 2, name: 'unit_price' })
+  @Column({ type: 'decimal', precision: 12, scale: 2, name: 'unit_price' , transformer: decimalTransformer })
   unitPrice!: number;
 
-  @Column({ type: 'decimal', precision: 12, scale: 2, default: 0, name: 'gst_rate' })
+  @Column({ type: 'decimal', precision: 12, scale: 2, default: 0, name: 'gst_rate' , transformer: decimalTransformer })
   gstRate!: number;
 
-  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0, name: 'total_price' })
+  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0, name: 'total_price' , transformer: decimalTransformer })
   totalPrice!: number;
 }

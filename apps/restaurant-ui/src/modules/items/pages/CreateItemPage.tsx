@@ -15,6 +15,12 @@ const GST_RATES = [
 
 const UNITS = ['piece', 'kg', 'gram', 'litre', 'ml', 'dozen', 'plate', 'bowl', 'cup', 'glass', 'bottle', 'box', 'packet']
 
+const PRODUCT_TYPES = [
+  { value: 'finished', label: 'Finished (Menu Item)' },
+  { value: 'semi_finished', label: 'Semi-Finished (Prep Item)' },
+  { value: 'raw', label: 'Raw Material' },
+]
+
 export function CreateItemPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -22,7 +28,7 @@ export function CreateItemPage() {
 
   const [form, setForm] = useState({
     name: '', sku: '', hsnCode: '', price: 0, costPrice: 0,
-    gstRate: 18, unit: 'piece', isVeg: true, isActive: true,
+    gstRate: 18, unit: 'piece', productType: 'finished', isVeg: true, isActive: true,
     categoryId: '', description: '',
   })
 
@@ -73,6 +79,12 @@ export function CreateItemPage() {
             <label className="block text-sm font-medium text-gray-700 mb-1">Unit *</label>
             <select className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })}>
               {UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Product Type *</label>
+            <select className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" value={form.productType} onChange={(e) => setForm({ ...form, productType: e.target.value })}>
+              {PRODUCT_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
             </select>
           </div>
           <div>

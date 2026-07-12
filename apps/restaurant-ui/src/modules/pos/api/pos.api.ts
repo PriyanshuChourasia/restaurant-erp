@@ -2,22 +2,27 @@ import { apiClient } from '@/lib/axios-client'
 
 export interface PosInvoiceItem {
   itemId: string
-  itemName: string
-  hsnCode: string
   quantity: number
-  unitPrice: number
-  gstRate: number
 }
 
 export interface CreateInvoiceRequest {
+  customerId?: string
   customerName?: string
   customerPhone?: string
   customerGstin?: string
-  tableNumbers?: string[]
+  tableIds?: string[]
   paymentMethod?: string
   discount?: number
   notes?: string
   items: PosInvoiceItem[]
+}
+
+export interface CreateKotRequest {
+  orderId?: string
+  tableIds?: string[]
+  station: string
+  notes?: string
+  items: Array<{ itemId: string; itemName: string; quantity: number; instructions?: string }>
 }
 
 export async function createInvoice(payload: CreateInvoiceRequest) {
@@ -25,14 +30,13 @@ export async function createInvoice(payload: CreateInvoiceRequest) {
   return data
 }
 
-export async function createKot(payload: {
-  orderId?: string
-  tableNumbers?: string[]
-  station: string
-  notes?: string
-  items: Array<{ itemId: string; itemName: string; quantity: number; instructions?: string }>
-}) {
+export async function createKot(payload: CreateKotRequest) {
   const { data } = await apiClient.post('/kots', payload)
+  return data
+}
+
+export async function clearInvoiceTables(invoiceId: string) {
+  const { data } = await apiClient.post(`/sales/${invoiceId}/clear-tables`)
   return data
 }
 

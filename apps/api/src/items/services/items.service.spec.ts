@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { ItemsService } from './items.service';
 import { ItemRepository } from '../repositories/item.repository';
-import { Item, GstRate, ItemUnit } from '../entities/item.entity';
+import { Item, GstRate, ItemUnit, ProductType } from '../entities/item.entity';
 
 describe('ItemsService', () => {
   let service: ItemsService;
@@ -18,6 +18,7 @@ describe('ItemsService', () => {
     costPrice: 200,
     gstRate: GstRate.FIVE,
     unit: ItemUnit.BOWL,
+    productType: ProductType.FINISHED,
     isActive: true,
     isVeg: false,
     image: null,
@@ -74,7 +75,7 @@ describe('ItemsService', () => {
     });
 
     it('should pass query params to repository', async () => {
-      repository.findAll.mockResolvedValue({ items: [], total: 0, page: 1, limit: 20 });
+      repository.findAll.mockResolvedValue({ items: [], total: 0 });
 
       await service.findAll({ page: 2, limit: 10, search: 'chicken', categoryId: 'cat-1', isActive: true, isVeg: false });
 
@@ -208,7 +209,7 @@ describe('ItemsService', () => {
 
   describe('restore', () => {
     it('should restore a deleted item', async () => {
-      repository.restore.mockResolvedValue(mockItem);
+      repository.restore.mockResolvedValue(undefined as any);
 
       await service.restore('item-1');
 

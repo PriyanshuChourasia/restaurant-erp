@@ -10,6 +10,7 @@ export interface Item {
   costPrice: number
   gstRate: number
   unit: string
+  productType: string
   isActive: boolean
   isVeg: boolean
   image: string | null
@@ -37,6 +38,7 @@ export interface CreateItemRequest {
   costPrice?: number
   gstRate?: number
   unit?: string
+  productType?: string
   isVeg?: boolean
   isActive?: boolean
 }

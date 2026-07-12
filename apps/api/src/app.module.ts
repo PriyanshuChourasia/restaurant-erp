@@ -16,6 +16,13 @@ import { SalesModule } from './sales/sales.module';
 import { KotModule } from './kot/kot.module';
 import { LedgerModule } from './ledger/ledger.module';
 import { DatabaseModule } from './database/database.module';
+import { PriceLevelsModule } from './price-levels/price-levels.module';
+import { CustomersModule } from './customers/customers.module';
+import { OrganizationModule } from './organization/organization.module';
+import { SeatingModule } from './seating/seating.module';
+import { RecipesModule } from './recipes/recipes.module';
+import { ReservationsModule } from './reservations/reservations.module';
+import { ReportsModule } from './reports/reports.module';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
 import { JwtAuthGuard } from './shared/guards/jwt-auth.guard';
@@ -51,6 +58,13 @@ import { PermissionsGuard } from './shared/guards/permissions.guard';
     KotModule,
     LedgerModule,
     DatabaseModule,
+    PriceLevelsModule,
+    CustomersModule,
+    SeatingModule,
+    OrganizationModule,
+    RecipesModule,
+    ReservationsModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [

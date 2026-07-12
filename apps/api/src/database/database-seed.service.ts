@@ -736,7 +736,7 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
       const invoice = this.invoiceRepo.create({
         invoiceNumber: inv.invoiceNumber,
         customerName: inv.customerName,
-        tableNumbers: inv.table ? [inv.table] : null,
+        tableIds: null,
         invoiceDate: inv.date,
         status: inv.status,
         paymentMethod: inv.payment,
@@ -815,7 +815,7 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
 
       const kot = this.kotRepo.create({
         kotNumber: kotData.kotNumber,
-        tableNumbers: kotData.table ? [kotData.table] : null,
+        tableIds: null,
         station: kotData.station,
         status: kotData.status,
         notes: kotData.notes,
@@ -860,7 +860,7 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
           entryDate,
           type: LedgerEntryType.DEBIT,
           amount: inv.grandTotal,
-          description: `Invoice ${inv.invoiceNumber} - ${inv.tableNumbers?.join(', ') || 'Takeaway'}`,
+          description: `Invoice ${inv.invoiceNumber} - Takeaway`,
           category: LedgerCategory.SALES,
           reference: inv.invoiceNumber,
           balanceAfter: cashOpening + inv.grandTotal,

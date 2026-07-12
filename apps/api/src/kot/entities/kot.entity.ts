@@ -2,6 +2,7 @@ import {
   Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn,
   OneToMany, ManyToOne, JoinColumn, Index,
 } from 'typeorm';
+import { decimalTransformer } from '../../shared/transformers/decimal.transformer';
 
 export enum KotStatus {
   PENDING = 'pending',
@@ -33,8 +34,8 @@ export class Kot {
   @Column({ name: 'order_id', type: 'uuid', nullable: true })
   orderId!: string | null;
 
-  @Column({ type: 'simple-json', name: 'table_numbers', nullable: true })
-  tableNumbers!: string[] | null;
+  @Column({ type: 'simple-json', name: 'table_ids', nullable: true })
+  tableIds!: string[] | null;
 
   @Column({
     type: 'enum',
@@ -93,7 +94,7 @@ export class KotItem {
   @Column({ length: 255 })
   itemName!: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Column({ type: 'decimal', precision: 10, scale: 2 , transformer: decimalTransformer })
   quantity!: number;
 
   @Column({ type: 'text', nullable: true })

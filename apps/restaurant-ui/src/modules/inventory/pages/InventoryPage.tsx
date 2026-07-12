@@ -3,9 +3,13 @@ import { createColumnHelper, type ColumnDef } from '@tanstack/react-table'
 import { Plus, Search, Package, AlertTriangle, Filter } from 'lucide-react'
 import { useInventory, useLowStock } from '../hooks/useInventoryQueries'
 import { DataTable } from '@/components/ui/data-table'
+import { AdjustStockDialog } from '../dialogs/AdjustStockDialog'
+import { StockHistoryDialog } from '../dialogs/StockHistoryDialog'
+import { AddInventoryItemDialog } from '../dialogs/AddInventoryItemDialog'
 
 interface InventoryRow {
   id: string
+  itemId: string
   itemName: string
   categoryName: string | null
   sku: string
@@ -37,6 +41,9 @@ export function InventoryPage() {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
+  const [adjustTarget, setAdjustTarget] = useState<InventoryRow | null>(null)
+  const [historyTarget, setHistoryTarget] = useState<InventoryRow | null>(null)
+  const [showAddItem, setShowAddItem] = useState(false)
 
   const { data, isLoading } = useInventory({ page, limit: 20, search: search || undefined, status: statusFilter || undefined })
   const { data: lowStockData } = useLowStock()
@@ -50,6 +57,7 @@ export function InventoryPage() {
     () =>
       rawItems.map((item: any) => ({
         id: item.id,
+        itemId: item.itemId,
         itemName: item.item?.name || 'Unknown',
         categoryName: item.item?.category?.name || null,
         sku: item.item?.sku || '-',
@@ -110,12 +118,25 @@ export function InventoryPage() {
       columnHelper.display({
         id: 'actions',
         header: '',
-        cell: () => (
-          <div className="flex items-center justify-end gap-1">
-            <button className="h-7 px-2.5 rounded-md border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-100 transition-all">Adjust</button>
-            <button className="h-7 px-2.5 rounded-md border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-100 transition-all">History</button>
-          </div>
-        ),
+        cell: (info) => {
+          const row = info.row.original
+          return (
+            <div className="flex items-center justify-end gap-1">
+              <button
+                onClick={() => setAdjustTarget(row)}
+                className="h-7 px-2.5 rounded-md border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-100 transition-all"
+              >
+                Adjust
+              </button>
+              <button
+                onClick={() => setHistoryTarget(row)}
+                className="h-7 px-2.5 rounded-md border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-100 transition-all"
+              >
+                History
+              </button>
+            </div>
+          )
+        },
       }),
     ],
     [],
@@ -144,7 +165,10 @@ export function InventoryPage() {
             <Filter size={15} />
             Filters
           </button>
-          <button className="inline-flex items-center gap-2 h-9 px-4 rounded-lg bg-primary text-sm font-medium text-white transition-all hover:bg-primary/90">
+          <button
+            onClick={() => setShowAddItem(true)}
+            className="inline-flex items-center gap-2 h-9 px-4 rounded-lg bg-primary text-sm font-medium text-white transition-all hover:bg-primary/90"
+          >
             <Plus size={15} />
             Add Item
           </button>
@@ -209,6 +233,26 @@ export function InventoryPage() {
         isLoading={isLoading}
         emptyMessage="No inventory items found"
       />
+
+      {adjustTarget && (
+        <AdjustStockDialog
+          itemId={adjustTarget.itemId}
+          itemName={adjustTarget.itemName}
+          unit={adjustTarget.unit}
+          onClose={() => setAdjustTarget(null)}
+        />
+      )}
+
+      {historyTarget && (
+        <StockHistoryDialog
+          itemId={historyTarget.itemId}
+          itemName={historyTarget.itemName}
+          unit={historyTarget.unit}
+          onClose={() => setHistoryTarget(null)}
+        />
+      )}
+
+      {showAddItem && <AddInventoryItemDialog onClose={() => setShowAddItem(false)} />}
     </div>
   )
 }

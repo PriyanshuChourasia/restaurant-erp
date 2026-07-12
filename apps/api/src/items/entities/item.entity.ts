@@ -10,6 +10,7 @@ import {
   Index,
 } from 'typeorm';
 import { CategoryEntity } from '../../category/entities/category.entity';
+import { decimalTransformer } from '../../shared/transformers/decimal.transformer';
 
 export enum GstRate {
   NIL = 0,
@@ -35,6 +36,12 @@ export enum ItemUnit {
   PACKET = 'packet',
 }
 
+export enum ProductType {
+  RAW = 'raw',
+  SEMI_FINISHED = 'semi_finished',
+  FINISHED = 'finished',
+}
+
 @Entity('items')
 @Index('idx_item_category', ['categoryId'])
 @Index('idx_item_active', ['isActive'])
@@ -55,10 +62,10 @@ export class Item {
   @Column({ name: 'hsn_code', length: 20 })
   hsnCode!: string;
 
-  @Column({ type: 'decimal', precision: 12, scale: 2 })
+  @Column({ type: 'decimal', precision: 12, scale: 2, transformer: decimalTransformer })
   price!: number;
 
-  @Column({ type: 'decimal', precision: 12, scale: 2, name: 'cost_price', default: 0 })
+  @Column({ type: 'decimal', precision: 12, scale: 2, name: 'cost_price', default: 0, transformer: decimalTransformer })
   costPrice!: number;
 
   @Column({
@@ -74,6 +81,14 @@ export class Item {
     default: ItemUnit.PIECE,
   })
   unit!: ItemUnit;
+
+  @Column({
+    type: 'enum',
+    enum: ProductType,
+    name: 'product_type',
+    default: ProductType.FINISHED,
+  })
+  productType!: ProductType;
 
   @Column({ name: 'is_active', default: true })
   isActive!: boolean;

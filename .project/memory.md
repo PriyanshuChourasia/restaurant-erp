@@ -9,6 +9,254 @@ Newest entries at the top.
 
 ---
 
+## 2026-07-12 — Module 7: Reservations UI wired to backend
+
+- Created complete reservations frontend module: types, API client (8 endpoints),
+  React Query hooks. Rewrote mock-based `ReservationsPage` with live API data.
+- Features: live stat cards (today count, guests expected, tables available, pending),
+  inline create/edit form, real-time search, status filter pills, row actions
+  (confirm, seat with table selector, edit, cancel, delete), weekly calendar view.
+- `tsc --noEmit` passes clean (0 errors).
+- See `.project/tasks/2026-07-12-module-7-reservations-ui.md`.
+
+## 2026-07-12 — Reports Module (backend + frontend)
+
+- Created dedicated `reports/` backend module at `apps/api/src/reports/` (no entities, service + controller only).
+- 12 report endpoints: daily sales, sales summary, by-payment-method, by-category, popular-items, GST, hourly distribution, veg/non-veg, stock status, low stock, balance sheet, P&L.
+- Frontend: full module structure (types, api, hooks, components, pages). 8 report pages + hub page.
+- Route files in `src/routes/reports/` — TanStack Router auto-discovers them.
+- Shared components: `DateRangeFilter` (with presets), `ReportPageHeader`, `KpiCard`, `ReportCard`, `LoadingSkeleton`.
+- `ReportsPage.tsx` is now a hub linking to all sub-reports, no longer inline data fetching.
+- `tsc --noEmit` passes clean in both apps.
+- **Gotcha:** Route files in `src/routes/reports/` need `../../modules/reports/pages/` import path (not `../`).
+- See `.project/tasks/2026-07-12-reports-backend-and-ui.md`.
+
+---
+
+## 2026-07-12 — Module 6: Zone floorplan UI
+
+- Major frontend restructure: replaced Seat auto-grid with real draggable coordinate canvas.
+- Removed `sortOrder` from frontend zone types, form, and card display.
+- Changed route from `/zones/$zoneId/seats` to `/zones/$zoneId`.
+- `FloorPlanView` now uses absolutely-positioned tables at stored `posX`/`posY` with
+  pointer-event drag (no new dependencies).
+- `ZoneFloorPlanPage` replaces `ZoneSeatsPage` with "Add Tables" picker for unassigned tables.
+- `SeatingPanel` updated to use `getZoneTables`/`Table` type, zones sorted by name.
+- Deleted old Seat-specific files: SeatForm, ZoneHeader, SeatBlock, ZoneSeatsPage, old route.
+- Several TS errors found and fixed during implementation.
+- `tsc --noEmit` passes clean for all changed files.
+- See `.project/tasks/2026-07-12-module-6-zone-floorplan-ui.md`.
+
+## 2026-07-12 — Module 5: Table management UI
+
+- Created new `modules/tables/` frontend module: types, API client, CRUD page, route.
+- `TableListPage` has inline form, color-coded status badges, quick status toggle,
+  per-row zone reassign dropdown, edit/delete actions, stats footer.
+- Route file `routes/tables.tsx` auto-discovered by TanStack Router codegen.
+- `tsc --noEmit` passes clean in restaurant-ui (0 errors).
+- See `.project/tasks/2026-07-12-module-5-table-management-ui.md`.
+
+## 2026-07-12 — Module 4: Sales/KOT field rename
+
+- Renamed `seatIds` → `tableIds` across 9 files: sales entity/DTO/service/controller/spec,
+  kot entity/service/spec, database seed service.
+- Renamed `clearSeats()` → `clearTables()` in sales service + controller.
+- Route `/clear-seats` → `/clear-tables`.
+- `database-seed.service.ts` had 2 stale `seatIds: null` references (caught by tsc).
+- `tsc --noEmit` passes clean.
+- See `.project/tasks/2026-07-12-module-4-sales-kot-rename.md`.
+
+## 2026-07-12 — Module 3: Reservation entity backend
+
+- Created complete `apps/api/src/reservations/` module (entity, DTOs, repository,
+  service, controller, module registration).
+- Key features: `status`/`source` enums, lazy-expiry (auto no_show after 15min
+  grace past scheduled window), `checkTableConflict` for POS (module 8),
+  `seat()` action to link table + occupy.
+- FK to `Table` with `onDelete: 'SET NULL'`.
+- Registered in `app.module.ts`.
+- Bugs caught by tsc + code review: route ordering (conflict before :id),
+  missing `await` in `checkTableConflict`, repository date filter typed wrong.
+- `tsc --noEmit` passes clean.
+- See `.project/tasks/2026-07-12-module-3-reservation-entity-backend.md`.
+
+## 2026-07-12 — Module 2: Seat → standalone Table entity
+
+- Complete Seat→Table rename across the entire backend vertical slice:
+  - New `Table` entity with nullable `zoneId` (`onDelete: 'SET NULL'`), `posX`/`posY`
+  - New DTOs, repository (with `findUnassigned`, `updatePosition`, `assignToZone`),
+    service, controller with `/tables` endpoints
+  - Updated `seating.module.ts` (register, export `TablesService`)
+  - Updated `zones.controller.ts`: `getSeats`→`getTables`, `/zones/:id/tables`
+  - Updated `sales.service.ts` + spec: `SeatsService`→`TablesService`
+- Deleted all 7 old Seat files.
+- Per the module spec: did NOT touch Sales/Kot entity field names (`seatIds` —
+  Module 4) or frontend (Modules 5-6).
+- `tsc --noEmit` passes clean.
+- See `.project/tasks/2026-07-12-module-2-seat-to-table-entity.md`.
+
+## 2026-07-12 — Module 1: Zone cleanup — removed sortOrder
+
+- Followed `floorplan/README.md` and `zone-cleanup.md` spec.
+- Removed `Zone.sortOrder` column, `idx_zone_sort` index, DTO field, service
+  assignment, and repository's `sortOrder`-based ordering — replaced with
+  `order: { name: 'ASC' }`.
+- Did NOT touch frontend (handled in Module 6 per plan).
+- `tsc --noEmit` passes clean.
+- See `.project/tasks/2026-07-12-zone-cleanup-remove-sortorder.md`.
+
+## 2026-07-11 — Zone Management UI with 3D seating visualization
+
+- Redesigned zone management with CSS-powered isometric 3D floor plan.
+- New components under `modules/zones/components/`:
+  - `FloorPlanView.tsx` — Perspective grid floor with stats bar, rotate control
+  - `SeatBlock.tsx` — 3D-ish isometric block with top/side faces, status colors,
+    shadows, and hover lift effects
+  - `ZoneHeader.tsx` — Zone detail header with back nav
+  - `SeatForm.tsx` — Add/edit seat form (extracted)
+- Rewritten `ZoneSeatsPage.tsx` — Split layout: 3D floor plan + seat list panel
+- Enhanced `ZoneListPage.tsx` — Visual gradient zone cards with status toggles
+- Applied consistent 55° isometric angle across all transforms.
+- See `.project/tasks/2026-07-11-zone-management-3d.md`.
+
+## 2026-07-11 — Redesigned Settings Page with SOLID principles
+
+- Refactored monolithic `SettingsPage.tsx` into 7 focused component files
+  under `modules/settings/components/`.
+- Architecture follows all 5 SOLID principles in a React context:
+  - **S**: Each component has one reason to change (FormField, PageHeader,
+    SettingsSection, SuccessToast, LoadingState, ErrorState, SectionHeader).
+  - **O**: New sections/fields can be added without modifying existing components
+    (composition via children + uniform prop interfaces).
+  - **L**: FormField, NumberField, TextAreaField share a common prop interface
+    and are interchangeable.
+  - **I**: Each component has minimal, focused props (no monolithic interfaces).
+  - **D**: SettingsPage composes via hooks and props, knows nothing about APIs.
+- Created `useOrganizationSettings` hook to own form state + save lifecycle,
+  separating data concerns from presentation.
+- Fixed initial state to use typed `DEFAULT_FORM` constant instead of cast.
+- See `.project/tasks/2026-07-11-settings-page-solid.md`.
+
+## 2026-07-11 — Built Company Settings feature (backend + frontend)
+
+- Created new `OrganizationModule` with entity, service (singleton pattern),
+  controller (GET/PUT), and proper DTO validation.
+- Entity has all fields: restaurantName, tagline, address, city/state/pincode,
+  phone/email/website, gstin, fssaiLicense, currency, timezone, tax settings,
+  business hours (simple-json), invoice footer.
+- Applied `decimalTransformer` to decimal columns per project conventions.
+- On startup, auto-creates default org record if none exists.
+- Frontend: `SettingsPage.tsx` rewritten to use live API data via React Query,
+  with proper form, loading state, error state, and success toast.
+- Registered in sidebar (already existed as `/settings` route).
+- See `.project/tasks/2026-07-11-company-settings.md`.
+
+## 2026-07-11 — Recipe Engineering + Zone/Seat Admin Pages
+
+- **Task 3 (Recipe Engineering) fully implemented:** Backend module (`apps/api/src/recipes/`) with `Recipe`, `RecipeIngredient`, `ProductionEntry` entities; service with `computeCost` (recursive with circular-reference guard), `deductOnSale` (recipe-based stock deduction at sale time), `createProductionEntry` (transactional raw-material deduction + yield stock addition); controller with REST routes. Registered in `app.module.ts`.
+- **Item entity updated:** Added `productType` column (enum: `raw`, `semi_finished`, `finished`, default `finished`). Added to `CreateItemDto` and both frontend forms.
+- **Inventory enum updated:** Added `PRODUCTION_CONSUMPTION` and `PRODUCTION_YIELD` movement types.
+- **SalesService updated:** After saving an invoice, calls `recipesService.deductOnSale()` for each item. Falls back to direct deduction if no recipe exists. `SalesModule` now imports `RecipesModule` and registers Inventory/StockMovement repos.
+- **Frontend recipes module:** Types, API client, TanStack Query hooks, `RecipeEditor` component (embedded in Item edit page's "Recipe / BOM" tab), `KitchenPrepPage` standalone page.
+- **Zone/Seat admin pages:** `ZoneListPage` (CRUD + toggle active), `ZoneSeatsPage` (seat grid with status management), routes at `/zones` and `/zones/$zoneId/seats`.
+- **Sidebar updated:** "Kitchen Prep" under Inventory, "Zones & Seating" under Operations.
+- **Test specs fixed:** All 4 pre-existing type errors in `items.service.spec.ts`, `kot.service.spec.ts`, `sales.service.spec.ts` resolved. `sales.service.spec.ts` updated with mocks for new dependencies (PriceLevelsService, SeatsService, CustomersService, RecipesService).
+- 0 TypeScript errors in both apps.
+- **Deferred:** Unit tests for recipes service, e2e tests for recipes API (need proper integration test setup with mocked dependencies).
+- See `.project/tasks/2026-07-11-recipe-engineering-and-zones-admin.md`.
+
+## 2026-07-11 — Fixed 500 on customer save: union-type + recipes module build
+
+- POS customer creation returned 500 because `Customer.entity.ts` had
+  `@Column({ length: 255, nullable: true })` on `email`/`gstin` without
+  `type: 'varchar'` — TypeORM inferred `Object` from `string | null` union,
+  which postgres rejects (`DataTypeNotSupportedError`). Same class of bug
+  as the earlier nullable-column gotcha documented in `knowledge.md`.
+- Also fixed pre-existing build errors in the `recipes` module:
+  - `recipes.module.ts` used wrong import paths (`../entities/recipe.entity`
+    instead of `./entities/recipe.entity`, etc.) — all 5 "cannot find module"
+    errors fixed.
+  - `ProductionEntry` entity was imported as a separate file but was defined
+    inside `recipe.entity.ts` — extracted into
+    `recipes/entities/production-entry.entity.ts`.
+  - `IProductionEntryRepository.findByItem` return type was missing `page`
+    and `limit` that the implementation returns — added them.
+- Verified: `npx nest build` now passes clean (only pre-existing test spec
+  errors remain).
+- See `.project/tasks/2026-07-11-customer-save-500-fix.md`.
+
+## 2026-07-11 — POS Screen Fix + Customer/Zones Frontend + Seating Panel
+
+- **Problem:** POS dashboard was broken — it sent `tableNumbers` + `unitPrice` in the billing payload, but the backend now expects `seatIds` + no `unitPrice` (server-side price resolution). `CreateInvoiceDto` with `class-validator` would reject the old payload format.
+- **Fixed `pos.api.ts`:** Dropped `tableNumbers`, `unitPrice`, `itemName`, `hsnCode`, `gstRate` from invoice items. Added `customerId`, `seatIds`, `clearInvoiceSeats()`. New `CreateKotRequest` interface uses `seatIds` instead of `tableNumbers`.
+- **Created customers frontend module:** types, API client (`searchCustomers`, CRUD), TanStack Query hooks, `CustomerCombobox` component with inline add (no page navigation).
+- **Created zones frontend module:** types, API client (`getZones`, `getZoneSeats`, seat CRUD/status), TanStack Query hooks, `SeatingPanel` component for POS (zone tabs, seat grid with status colors/category icons, multi-select).
+- **Updated `POSDashboard.tsx`:** Replaced old `PREDEFINED_TABLES`/`selectedTables`/`tableInput` with `SeatingPanel`. Replaced plain `customerName` text input with `CustomerCombobox`. Fixed billing payload — sends only `itemId` + `quantity`, no `unitPrice`. Added "Clear seats" action in success message.
+- **Not done:** Recipe Engineering (Task 3). Customer/Zones admin CRUD pages (out of POS scope).
+- 0 new TypeScript errors in both apps (API: only 4 pre-existing test spec errors).
+- See `.project/tasks/2026-07-11-pos-screen-fix.md`.
+
+## 2026-07-11 — Price Level Management + Customer Module (Task 1 + partial Task 2)
+
+- **Task 1 — Price Level Management:** Full implementation (backend + frontend).
+  - Backend: `PriceLevel` + `ItemPriceLevel` entities, DTOs, repositories, service with transactional `setDefault()`/`createWithDefault()`/`updateWithDefault()`, REST controller at `price-levels` with CRUD + action routes + pricing grid + effective-price-lookup.
+  - All money columns use the existing `decimalTransformer`.
+  - Frontend: Types, Zod schema, API client, TanStack Query hooks, 3 pages (list, form, pricing grid), 4 file-based routes, sidebar nav entry under "Products".
+  - Registered `PriceLevelsModule` in `app.module.ts`, exports `PriceLevelsService` for future Sales/POS integration.
+- **Task 2 (partial) — Customer API backend:** `Customer` entity, DTOs, repository with ILIKE search for POS type-ahead, service with price-level resolution logic (explicit > type-match-by-code > default fallback), REST controller at `customers` with CRUD + search + restore.
+  - Registered `CustomersModule` in `app.module.ts`.
+- **Not done:** Zone/Seat entities + API, CustomerCombobox frontend, SeatingPanel, POSDashboard.tsx integration, Sales CreateInvoiceDto validation + server-side price resolution, Recipe Engineering (Task 3).
+- **Gotcha:** TypeORM `find({ where: { deletedAt: null } })` does NOT accept `null` for Date columns — must use `IsNull()`. Had to fix this in `PriceLevelsService.getPricingGrid()`.
+- All new TypeScript errors: 0. Pre-existing test spec errors: 4 (unchanged).
+- See `.project/tasks/2026-07-11-price-levels-and-customers.md`.
+
+## 2026-07-09 — Wired up dead Inventory action buttons (Add Item / Adjust / History)
+
+- `InventoryPage.tsx`'s "Add Item", "Adjust", and "History" buttons were plain
+  `<button>`s with no `onClick` — clicking them did nothing at all (found by
+  driving `/inventory` in a real browser, not by reading code). The backend API
+  and the frontend `inventory.api.ts`/`useInventoryQueries.ts` hooks already
+  existed and worked fine — only the dialogs to invoke them were never built.
+- Added `modules/inventory/components/InventoryModal.tsx` (reusable centered
+  modal, same dialog conventions as `OrdersPage.tsx`'s drawer) and three
+  dialogs in `modules/inventory/dialogs/`: `AdjustStockDialog`,
+  `StockHistoryDialog`, `AddInventoryItemDialog`. Verified live: stock updates
+  after Adjust, History shows the movement, Add Item search-and-select works.
+- `InventoryRow` only carried the inventory record's own `id`; had to add
+  `itemId` to it since every mutation (`adjustStock`, `setOpeningBalance`,
+  `getStockMovements`) is keyed by the underlying item id, not the inventory
+  record id.
+- Not done: the "Filters" button next to search is still unwired (lower
+  priority — search + status pills already cover what's filterable
+  server-side); no UI to edit `minStockLevel` after creation (backend always
+  sets it to 0 on first opening-balance save, no update endpoint exists).
+- See `.project/tasks/2026-07-09-fix-inventory-actions.md`.
+
+## 2026-07-09 — Fixed POS Terminal crash (decimal-as-string + wrong axios instance)
+
+- Found by actually driving the running app in headless Chromium (login → `/pos`),
+  not by reading code — the error boundary was swallowing a real crash.
+- **New systemic gotcha, same family as the earlier nullable-column one**: pg/TypeORM
+  returns `decimal`/`numeric` columns as JS **strings**, but every entity in this repo
+  typed them as `number` with no transformer. `Item.price.toFixed()` in
+  `POSDashboard.tsx` crashed the whole page. Fixed with a shared
+  `apps/api/src/shared/transformers/decimal.transformer.ts` (`ValueTransformer`,
+  `parseFloat` on read) applied to every `@Column({ type: 'decimal' })` in
+  `item`, `sales`, `purchase`, `ledger`, `inventory`, `kot` entities. Any *new*
+  decimal column must add `transformer: decimalTransformer` or it'll silently
+  regress to a string at runtime — `tsc` can't catch this, only hitting the real
+  DB does (same class of blind spot as the nullable-column bug above).
+- Second, unrelated bug: `apps/restaurant-ui/src/modules/category/api/category.api.ts`
+  imported raw `axios` instead of the app's `apiClient` (`src/lib/axios-client.ts`),
+  so it never got the auth token header → `/api/categories` always 401'd. Every other
+  `*.api.ts` module already used `apiClient`; this was the one file that didn't.
+- Not done (found, out of scope): `apps/api` `tsc --noEmit` has 4 pre-existing type
+  errors — `kot.service.spec.ts`/`sales.service.spec.ts` still reference a singular
+  `tableNumber` field that was renamed to `tableNumbers` (array) at some earlier
+  point; `items.service.spec.ts` has 2 unrelated stale-type errors. Tests still pass
+  (ts-jest doesn't hard-fail on type errors) but the specs should be updated.
+- See `.project/tasks/2026-07-09-fix-pos-terminal-crash.md`.
+
 ## 2026-07-09 — Inventory Management Module functional spec written
 
 - Full business/functional spec (no tech stack) for a 12-sub-module Inventory Management

@@ -10,7 +10,7 @@ import {
   IsUUID,
   Length,
 } from 'class-validator';
-import { GstRate, ItemUnit } from '../entities/item.entity';
+import { GstRate, ItemUnit, ProductType } from '../entities/item.entity';
 
 export class CreateItemDto {
   @IsString()
@@ -48,6 +48,10 @@ export class CreateItemDto {
   @IsEnum(ItemUnit)
   @IsOptional()
   unit?: ItemUnit;
+
+  @IsEnum(ProductType)
+  @IsOptional()
+  productType?: ProductType;
 
   @IsBoolean()
   @IsOptional()

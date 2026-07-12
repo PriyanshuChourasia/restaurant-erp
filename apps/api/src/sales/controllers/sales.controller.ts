@@ -1,5 +1,6 @@
-import { Controller, Get, Post, Patch, Body, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, Query, ValidationPipe } from '@nestjs/common';
 import { SalesService } from '../services/sales.service';
+import { CreateInvoiceDto } from '../dto/create-invoice.dto';
 import { InvoiceStatus } from '../entities/sales.entity';
 
 @Controller('sales')
@@ -39,12 +40,17 @@ export class SalesController {
   }
 
   @Post()
-  create(@Body() dto: any) {
+  create(@Body(new ValidationPipe({ transform: true })) dto: CreateInvoiceDto) {
     return this.service.create(dto);
   }
 
   @Patch(':id/status')
   updateStatus(@Param('id') id: string, @Body('status') status: InvoiceStatus) {
     return this.service.updateStatus(id, status);
+  }
+
+  @Post(':id/clear-tables')
+  clearTables(@Param('id') id: string) {
+    return this.service.clearTables(id);
   }
 }

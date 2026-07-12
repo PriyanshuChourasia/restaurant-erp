@@ -60,7 +60,7 @@ export class InventoryService {
     if (!inv) throw new NotFoundException(`Inventory not found for item ${itemId}`);
 
     const balanceBefore = inv.currentStock;
-    const isOut = [MovementType.SALE_OUT, MovementType.ADJUSTMENT_OUT, MovementType.WASTAGE, MovementType.TRANSFER_OUT].includes(type);
+    const isOut = [MovementType.SALE_OUT, MovementType.ADJUSTMENT_OUT, MovementType.WASTAGE, MovementType.TRANSFER_OUT, MovementType.PRODUCTION_CONSUMPTION].includes(type);
     const balanceAfter = isOut ? balanceBefore - quantity : balanceBefore + quantity;
     if (isOut && balanceAfter < 0) throw new BadRequestException('Insufficient stock');
 

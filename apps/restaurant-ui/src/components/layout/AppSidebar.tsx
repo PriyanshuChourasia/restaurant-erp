@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
   LayoutDashboard,
   UtensilsCrossed,
@@ -15,6 +16,15 @@ import {
   BookOpen,
   TrendingUp,
   LogOut,
+  DollarSign,
+  Armchair,
+  Play,
+  ChevronDown,
+  BarChart3,
+  CreditCard,
+  Layers,
+  FileText,
+  AlertTriangle,
 } from 'lucide-react'
 import { Link, useLocation, useNavigate } from '@tanstack/react-router'
 import { useAuth } from '@/lib/auth-context'
@@ -30,6 +40,9 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
   SidebarSeparator,
   useSidebar,
 } from '@/components/ui/sidebar'
@@ -55,6 +68,7 @@ const navSections = [
       { to: '/items', label: 'Items', icon: Tag },
       { to: '/menu', label: 'Menu', icon: UtensilsCrossed },
       { to: '/categories', label: 'Categories', icon: BookOpen },
+      { to: '/price-levels', label: 'Price Levels', icon: DollarSign },
     ],
   },
   {
@@ -62,6 +76,7 @@ const navSections = [
     links: [
       { to: '/inventory', label: 'Stock', icon: Package },
       { to: '/purchases', label: 'Purchases', icon: ClipboardList },
+      { to: '/kitchen-prep', label: 'Kitchen Prep', icon: Play },
     ],
   },
   {
@@ -69,13 +84,29 @@ const navSections = [
     links: [
       { to: '/sales', label: 'Sales', icon: Receipt },
       { to: '/ledger', label: 'Ledger', icon: BookOpen },
-      { to: '/reports', label: 'Reports', icon: TrendingUp },
+    ],
+  },
+  {
+    title: 'Reports & Analytics',
+    links: [
+      { to: '/reports', label: 'All Reports', icon: TrendingUp },
+    ],
+    subLinks: [
+      { to: '/reports/sales', label: 'Sales Summary', icon: BarChart3 },
+      { to: '/reports/payment-methods', label: 'Payment Methods', icon: CreditCard },
+      { to: '/reports/categories', label: 'By Category', icon: Layers },
+      { to: '/reports/popular-items', label: 'Popular Items', icon: UtensilsCrossed },
+      { to: '/reports/gst', label: 'GST Report', icon: FileText },
+      { to: '/reports/stock', label: 'Stock Status', icon: Package },
+      { to: '/reports/low-stock', label: 'Low Stock', icon: AlertTriangle },
+      { to: '/reports/profit-loss', label: 'Profit & Loss', icon: TrendingUp },
     ],
   },
   {
     title: 'Operations',
     links: [
       { to: '/staff', label: 'Staff', icon: Users },
+      { to: '/zones', label: 'Zones & Seating', icon: Armchair },
       { to: '/reservations', label: 'Reservations', icon: CalendarDays },
     ],
   },
@@ -94,6 +125,9 @@ export function AppSidebar() {
   const { state } = useSidebar()
   const { user, logout } = useAuth()
   const isCollapsed = state === 'collapsed'
+  const [reportsOpen, setReportsOpen] = useState(true)
+
+  const isReportsActive = location.pathname.startsWith('/reports')
 
   const handleLogout = async () => {
     await logout()
@@ -125,8 +159,51 @@ export function AppSidebar() {
             <SidebarGroupContent>
               <SidebarMenu>
                 {section.links.map((link) => {
-                  const isActive = location.pathname === link.to
+                  const isActive = location.pathname === link.to || (section.title === 'Reports & Analytics' && link.to === '/reports' && isReportsActive)
                   const Icon = link.icon
+                  const hasSubLinks = 'subLinks' in section && section.subLinks && section.title === 'Reports & Analytics'
+
+                  if (hasSubLinks && link.to === '/reports') {
+                    return (
+                      <SidebarMenuItem key={link.to}>
+                        <SidebarMenuButton
+                          isActive={isActive}
+                          tooltip={link.label}
+                          onClick={() => setReportsOpen(!reportsOpen)}
+                          className="w-full justify-between"
+                        >
+                          <span className="flex items-center gap-2">
+                            <Icon size={18} />
+                            <span>{link.label}</span>
+                          </span>
+                          <ChevronDown
+                            size={14}
+                            className={`transition-transform duration-200 text-sidebar-foreground/50 ${reportsOpen ? 'rotate-180' : ''}`}
+                          />
+                        </SidebarMenuButton>
+                        {reportsOpen && !isCollapsed && (
+                          <SidebarMenuSub>
+                            {(section as any).subLinks.map((sub: any) => {
+                              const SubIcon = sub.icon
+                              const isSubActive = location.pathname === sub.to
+                              return (
+                                <SidebarMenuItem key={sub.to}>
+                                  <SidebarMenuSubButton
+                                    isActive={isSubActive}
+                                    render={<Link to={sub.to} />}
+                                  >
+                                    <SubIcon size={14} />
+                                    <span>{sub.label}</span>
+                                  </SidebarMenuSubButton>
+                                </SidebarMenuItem>
+                              )
+                            })}
+                          </SidebarMenuSub>
+                        )}
+                      </SidebarMenuItem>
+                    )
+                  }
+
                   return (
                     <SidebarMenuItem key={link.to}>
                       <SidebarMenuButton

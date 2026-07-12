@@ -1,121 +1,99 @@
-import { Save, Store, Globe, Bell, Shield, DollarSign, Clock, Printer } from 'lucide-react'
-import '../../../styles/global.css'
+import {
+  Store, Globe, MapPin, Phone, Mail, FileText, Hash,
+  IndianRupee, DollarSign, Clock,
+} from 'lucide-react'
 
-const settingsSections = [
-  {
-    title: 'Restaurant Info',
-    icon: Store,
-    fields: [
-      { label: 'Restaurant Name', value: 'Bella Napoli' },
-      { label: 'Address', value: '123 Main Street, New York, NY 10001' },
-      { label: 'Phone', value: '+1 (555) 000-0000' },
-      { label: 'Email', value: 'contact@bellanapoli.com' },
-    ],
-  },
-  {
-    title: 'Business Hours',
-    icon: Clock,
-    fields: [
-      { label: 'Monday - Friday', value: '11:00 AM - 10:00 PM' },
-      { label: 'Saturday', value: '10:00 AM - 11:00 PM' },
-      { label: 'Sunday', value: '10:00 AM - 9:00 PM' },
-    ],
-  },
-  {
-    title: 'Tax & Currency',
-    icon: DollarSign,
-    fields: [
-      { label: 'Currency', value: 'USD ($)' },
-      { label: 'Tax Rate', value: '8.875%' },
-      { label: 'Service Charge', value: '0%' },
-    ],
-  },
-]
+import { useOrganizationSettings } from '../hooks/useOrganizationSettings'
+import { PageHeader } from '../components/PageHeader'
+import { SettingsSection } from '../components/SettingsSection'
+import { FormField, NumberField, TextAreaField } from '../components/FormField'
+import { LoadingState } from '../components/LoadingState'
+import { ErrorState } from '../components/ErrorState'
+import { SuccessToast } from '../components/SuccessToast'
 
+/**
+ * Settings page — pure composition layer.
+ *
+ * SOLID applied:
+ * - Single Responsibility: ONLY composes child components; no state, no API.
+ * - Open/Closed: New sections can be added without modifying existing ones.
+ * - Dependency Inversion: All data/logic injected via the hook; UI is a pure render tree.
+ */
 export function SettingsPage() {
+  const {
+    form,
+    saved,
+    isLoading,
+    isSaving,
+    error,
+    handleChange,
+    handleNumericChange,
+    handleSave,
+  } = useOrganizationSettings()
+
+  if (isLoading) return <LoadingState />
+  if (error) return <ErrorState message="Failed to load settings. Make sure the server is running." />
+
   return (
-    <div>
-      <div className="page-header">
-        <div>
-          <div className="page-title">Settings</div>
-          <div className="page-subtitle">Manage your restaurant's configuration and preferences.</div>
-        </div>
-        <div className="page-header-actions">
-          <button className="btn btn-primary">
-            <Save size={16} />
-            Save Changes
-          </button>
-        </div>
-      </div>
+    <div className="max-w-4xl mx-auto">
+      <PageHeader
+        title="Company Settings"
+        subtitle="Manage your restaurant's profile and preferences."
+        isSaving={isSaving}
+        onSave={handleSave}
+      />
 
-      {/* Quick settings toggles */}
-      <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
-        {[
-          { label: 'Online Orders', icon: Globe, color: 'success', enabled: true },
-          { label: 'Push Notifications', icon: Bell, color: 'info', enabled: true },
-          { label: 'Auto-Print Receipts', icon: Printer, color: 'warning', enabled: false },
-          { label: 'Two-Factor Auth', icon: Shield, color: 'primary', enabled: true },
-        ].map((setting) => (
-          <div key={setting.label} className="stat-card" style={{ padding: '16px', cursor: 'pointer' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div className={`stat-icon ${setting.color}`} style={{ width: 36, height: 36 }}><setting.icon size={18} /></div>
-                <div className="stat-info">
-                  <div className="stat-label" style={{ marginBottom: 0 }}>{setting.label}</div>
-                </div>
-              </div>
-              <div style={{
-                width: 44, height: 24, borderRadius: 12,
-                background: setting.enabled ? 'var(--color-primary)' : 'var(--color-gray-300)',
-                position: 'relative', transition: 'background var(--transition-fast)',
-              }}>
-                <div style={{
-                  width: 20, height: 20, borderRadius: '50%', background: 'white',
-                  position: 'absolute', top: 2,
-                  left: setting.enabled ? 22 : 2,
-                  transition: 'left var(--transition-fast)',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-                }} />
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+      {saved && <SuccessToast message="Settings saved successfully!" />}
 
-      {/* Settings sections */}
-      {settingsSections.map((section) => (
-        <div key={section.title} className="section-card">
-          <div className="card-header">
-            <div className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <section.icon size={18} style={{ color: 'var(--color-primary)' }} />
-              {section.title}
+      <div className="space-y-6">
+        {/* ── Restaurant Info ─────────────────────────────────── */}
+        <SettingsSection icon={Store} title="Restaurant Info">
+          <div className="grid grid-cols-2 gap-4">
+            <FormField label="Restaurant Name" value={form.restaurantName} onChange={(v) => handleChange('restaurantName', v)} icon={Store} />
+            <FormField label="Tagline" value={form.tagline} onChange={(v) => handleChange('tagline', v)} />
+            <div className="col-span-2">
+              <FormField label="Address" value={form.address} onChange={(v) => handleChange('address', v)} icon={MapPin} />
             </div>
+            <FormField label="City" value={form.city} onChange={(v) => handleChange('city', v)} />
+            <FormField label="State" value={form.state} onChange={(v) => handleChange('state', v)} />
+            <FormField label="Pincode" value={form.pincode} onChange={(v) => handleChange('pincode', v)} />
+            <FormField label="Phone" value={form.phone} onChange={(v) => handleChange('phone', v)} icon={Phone} />
+            <FormField label="Email" value={form.email} onChange={(v) => handleChange('email', v)} icon={Mail} />
+            <FormField label="Website" value={form.website} onChange={(v) => handleChange('website', v)} icon={Globe} />
           </div>
-          <div className="card-body">
-            {section.fields.map((field) => (
-              <div key={field.label} style={{
-                display: 'flex', alignItems: 'center', padding: '12px 0',
-                borderBottom: '1px solid var(--color-gray-100)',
-              }}>
-                <div style={{ width: 200, fontSize: 14, fontWeight: 500, color: 'var(--color-gray-600)' }}>
-                  {field.label}
-                </div>
-                <input
-                  type="text"
-                  defaultValue={field.value}
-                  style={{
-                    flex: 1, padding: '8px 12px', border: '1px solid var(--color-gray-300)',
-                    borderRadius: 'var(--radius-md)', fontSize: 14, color: 'var(--color-gray-900)',
-                    outline: 'none', transition: 'border-color var(--transition-fast)',
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = 'var(--color-primary)'}
-                  onBlur={(e) => e.target.style.borderColor = 'var(--color-gray-300)'}
-                />
-              </div>
-            ))}
+        </SettingsSection>
+
+        {/* ── Tax & License ───────────────────────────────────── */}
+        <SettingsSection icon={FileText} title="Tax & License">
+          <div className="grid grid-cols-2 gap-4">
+            <FormField label="GSTIN" value={form.gstin} onChange={(v) => handleChange('gstin', v)} icon={Hash} />
+            <FormField label="FSSAI License" value={form.fssaiLicense} onChange={(v) => handleChange('fssaiLicense', v)} />
+            <FormField label="Tax Label (e.g. GST, VAT)" value={form.taxLabel} onChange={(v) => handleChange('taxLabel', v)} />
+            <NumberField label="Default Tax Rate (%)" value={form.defaultTaxRate} onChange={(v) => handleNumericChange('defaultTaxRate', v)} min={0} max={100} step={0.01} />
+            <NumberField label="Service Charge (%)" value={form.serviceChargePercent} onChange={(v) => handleNumericChange('serviceChargePercent', v)} min={0} max={100} step={0.01} />
           </div>
-        </div>
-      ))}
+        </SettingsSection>
+
+        {/* ── Currency & Regional ─────────────────────────────── */}
+        <SettingsSection icon={IndianRupee} title="Currency & Regional">
+          <div className="grid grid-cols-2 gap-4">
+            <FormField label="Currency Code" value={form.currency} onChange={(v) => handleChange('currency', v)} icon={DollarSign} />
+            <FormField label="Currency Symbol" value={form.currencySymbol} onChange={(v) => handleChange('currencySymbol', v)} icon={IndianRupee} />
+            <FormField label="Timezone" value={form.timezone} onChange={(v) => handleChange('timezone', v)} icon={Clock} />
+          </div>
+        </SettingsSection>
+
+        {/* ── Invoice Settings ────────────────────────────────── */}
+        <SettingsSection icon={FileText} title="Invoice Settings">
+          <TextAreaField
+            label="Invoice Footer Message"
+            value={form.invoiceFooter}
+            onChange={(v) => handleChange('invoiceFooter', v)}
+            rows={3}
+            placeholder="Thank you! Please visit again."
+          />
+        </SettingsSection>
+      </div>
     </div>
   )
 }

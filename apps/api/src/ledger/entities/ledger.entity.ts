@@ -1,6 +1,7 @@
 import {
   Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, Index,
 } from 'typeorm';
+import { decimalTransformer } from '../../shared/transformers/decimal.transformer';
 
 export enum LedgerEntryType {
   CREDIT = 'credit',
@@ -27,10 +28,10 @@ export class LedgerAccount {
   @Column({ type: 'text', nullable: true })
   description!: string | null;
 
-  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0, name: 'opening_balance' })
+  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0, name: 'opening_balance' , transformer: decimalTransformer })
   openingBalance!: number;
 
-  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0, name: 'current_balance' })
+  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0, name: 'current_balance' , transformer: decimalTransformer })
   currentBalance!: number;
 
   @Column({ type: 'varchar', name: 'financial_year', length: 20, nullable: true })
@@ -65,7 +66,7 @@ export class LedgerEntry {
   })
   type!: LedgerEntryType;
 
-  @Column({ type: 'decimal', precision: 14, scale: 2 })
+  @Column({ type: 'decimal', precision: 14, scale: 2 , transformer: decimalTransformer })
   amount!: number;
 
   @Column({ type: 'text', nullable: true })
@@ -81,7 +82,7 @@ export class LedgerEntry {
   @Column({ type: 'varchar', length: 255, nullable: true })
   reference!: string | null;
 
-  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0, name: 'balance_after' })
+  @Column({ type: 'decimal', precision: 14, scale: 2, default: 0, name: 'balance_after' , transformer: decimalTransformer })
   balanceAfter!: number;
 
   @Column({ name: 'created_by', type: 'uuid', nullable: true })

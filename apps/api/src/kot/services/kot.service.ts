@@ -30,7 +30,7 @@ export class KotService {
 
   async create(dto: {
     orderId?: string;
-    tableNumbers?: string[];
+    tableIds?: string[];
     station: KotStation;
     notes?: string;
     items: Array<{ itemId: string; itemName: string; quantity: number; instructions?: string }>;
@@ -39,7 +39,7 @@ export class KotService {
     const kot = this.repo.create({
       kotNumber: `KOT-${String(count + 1).padStart(5, '0')}`,
       orderId: dto.orderId || null,
-      tableNumbers: dto.tableNumbers && dto.tableNumbers.length > 0 ? dto.tableNumbers : null,
+      tableIds: dto.tableIds && dto.tableIds.length > 0 ? dto.tableIds : null,
       station: dto.station,
       notes: dto.notes || null,
       status: KotStatus.PENDING,

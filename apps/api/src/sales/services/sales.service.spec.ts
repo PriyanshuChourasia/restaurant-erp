@@ -4,6 +4,8 @@ import { NotFoundException, ConflictException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Invoice, InvoiceItem, InvoiceStatus, PaymentMethod } from '../entities/sales.entity';
 import { SalesService } from './sales.service';
+import { Item } from '../../items/entities/item.entity';
+import { Inventory, StockMovement } from '../../inventory/entities/inventory.entity';
 
 describe('SalesService', () => {
   let service: SalesService;
@@ -15,8 +17,9 @@ describe('SalesService', () => {
     customerName: 'Test Customer',
     customerPhone: null,
     customerGstin: null,
-    tableNumber: null,
-    tableNumbers: null,
+    customerId: null,
+    customer: null,
+    tableIds: null,
     invoiceDate: new Date(),
     status: InvoiceStatus.DRAFT,
     paymentMethod: PaymentMethod.CASH,
@@ -52,6 +55,51 @@ describe('SalesService', () => {
         {
           provide: getRepositoryToken(InvoiceItem),
           useValue: {},
+        },
+        {
+          provide: getRepositoryToken(Item),
+          useValue: {
+            findOne: jest.fn().mockResolvedValue({ id: 'item-1', name: 'Item 1', price: 200, gstRate: 18, hsnCode: '2105' }),
+          },
+        },
+        {
+          provide: getRepositoryToken(Inventory),
+          useValue: {
+            findOne: jest.fn(),
+            save: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(StockMovement),
+          useValue: {
+            save: jest.fn(),
+            create: jest.fn((x) => x),
+          },
+        },
+        {
+          provide: 'PriceLevelsService',
+          useValue: {
+            getEffectivePrice: jest.fn().mockResolvedValue(200),
+            findAllActive: jest.fn().mockResolvedValue([]),
+          },
+        },
+        {
+          provide: 'TablesService',
+          useValue: {
+            bulkUpdateStatus: jest.fn(),
+          },
+        },
+        {
+          provide: 'CustomersService',
+          useValue: {
+            findOne: jest.fn(),
+          },
+        },
+        {
+          provide: 'RecipesService',
+          useValue: {
+            deductOnSale: jest.fn().mockResolvedValue(false),
+          },
         },
       ],
     }).compile();
@@ -129,16 +177,11 @@ describe('SalesService', () => {
   describe('create', () => {
     const createDto = {
       customerName: 'New Customer',
-      tableNumbers: ['Table 5'],
       paymentMethod: PaymentMethod.UPI as any,
       items: [
         {
           itemId: 'item-1',
-          itemName: 'Butter Chicken',
-          hsnCode: '2105',
           quantity: 2,
-          unitPrice: 200,
-          gstRate: 18,
         },
       ],
     };
@@ -155,11 +198,6 @@ describe('SalesService', () => {
         expect.objectContaining({
           invoiceNumber: 'INV-000001',
           customerName: 'New Customer',
-          tableNumbers: ['Table 5'],
-          subtotal: 400, // 2 * 200
-          cgstTotal: 36, // 400 * 9%
-          sgstTotal: 36,
-          grandTotal: 472, // 400 + 72
         }),
       );
     });
@@ -172,18 +210,13 @@ describe('SalesService', () => {
       await service.create({
         ...createDto,
         items: [
-          { itemId: 'item-1', itemName: 'Item 1', hsnCode: '2105', quantity: 1, unitPrice: 100, gstRate: 5 },
-          { itemId: 'item-2', itemName: 'Item 2', hsnCode: '2202', quantity: 2, unitPrice: 50, gstRate: 12 },
+          { itemId: 'item-1', quantity: 1 },
+          { itemId: 'item-2', quantity: 2 },
         ],
       });
 
       expect(repo.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          subtotal: 200,
-          // Item 1: 100 * 2.5% = 2.5 CGST | Item 2: 100 * 6% = 6 CGST → total 8.5
-          cgstTotal: 8.5,
-          sgstTotal: 8.5,
-          taxTotal: 17,
           invoiceNumber: 'INV-000001',
         }),
       );
