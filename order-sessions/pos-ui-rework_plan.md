@@ -26,6 +26,40 @@ cart. Rework this into a session-first flow:
 5. "Settle Bill" replaces the rest of `billMutation` — calls
    `POST /order-sessions/:id/settle`, shows the resulting invoice/receipt,
    returns to table selection.
+6. **Ready-to-serve alerts + mark served.** Confirmed nowhere in this
+   codebase today: nothing ever sets `KotStatus.SERVED`/`Kot.servedAt`
+   (`../kot/kot-lifecycle_plan.md`'s elapsed-time badge and
+   `../kot/inventory-timing_plan.md`'s "deduct at served" option both
+   reference `servedAt`, but no UI action writes it), and
+   `KotService.getActiveKots` only returns `pending`/`preparing`
+   statuses — the moment a KOT flips to `ready`, it vanishes from
+   `/kot`'s board with no screen surfacing "this table's food is ready
+   to go out" to whoever's actually running food, and no way to record
+   that it was delivered. This is a front-of-house gap, not a kitchen
+   one, so it belongs on the session/running-bill panel a waiter is
+   already looking at (module 3), not on the kitchen board.
+   - The running-bill panel polls (or, once available, subscribes to)
+     KOT status for the session's own KOTs and shows a distinct
+     "Ready — take to table" badge per round the moment its KOT hits
+     `ready`, plus a toast/sound the first time a session the current
+     user has open goes ready (session-scoped, so a waiter isn't pinged
+     about every table in the restaurant — see Files below).
+   - A "Mark Served" action per ready round calls the existing
+     `PATCH /kots/:id/status` with `status: 'served'` (already sets
+     `servedAt` in `KotService.updateStatus` — no backend change needed
+     for the basic case). This does **not** settle the bill or free the
+     table — that's still module 4's `settle()`, a separate, later
+     action; a table can have food served and still be sitting there
+     eating before anyone asks for the check.
+
+## Ready-alert scope note
+
+Only the in-app case above is in scope here. A customer-facing alert
+(SMS/a public display) would need an SMS provider or a kiosk-mode public
+route, neither of which exists in this codebase today (no provider
+config/API keys anywhere in `apps/api`) — that's a separate, later
+feature with its own provider-selection decision, not part of this
+module.
 
 ## Files
 
@@ -53,6 +87,22 @@ cart. Rework this into a session-first flow:
   `apps/restaurant-ui/src/modules/pos/api/pos.api.ts` — remove
   `createKot` from the POS API surface per
   `../kot/session-linkage_plan.md`.
+- **New** `apps/restaurant-ui/src/components/notifications/ToastProvider.tsx` —
+  a small global toast context (no new dependency; this repo has zero
+  toast libraries installed today — confirmed in
+  `apps/restaurant-ui/package.json`). Generalizes the existing
+  page-local `modules/settings/components/SuccessToast.tsx` visual
+  language (rounded card, icon, fade-in) into a fixed-position stack any
+  page can push to via `useToast().show(...)`, since the ready-alert
+  needs to fire regardless of which screen is currently open, not just
+  from whichever component made the state change. Mount it once at the
+  app root/layout.
+- Running-bill panel component (module 3's frontend piece) — polls the
+  session's KOT status on the same cadence as `KotDisplayPage.tsx`'s
+  existing `refetchInterval: 10000`; on a `preparing`→`ready` transition
+  it hasn't already alerted on this session, calls
+  `useToast().show(...)` and renders the "Ready — take to table" badge
+  + "Mark Served" button described above.
 
 ## Verification
 
@@ -68,3 +118,11 @@ cart. Rework this into a session-first flow:
   table — confirm the open session and its rounds-so-far are correctly
   resumed rather than lost (this is the core reason the session state
   needs to be server-persisted, not just React state).
+- Ready-alert/mark-served: from `/kot`, mark a session's KOT ready (or
+  "Mark All Ready"). Within one poll cycle (~10s), confirm the
+  running-bill panel shows the "Ready — take to table" badge and a
+  toast fires — even if the POS screen showing that panel isn't the one
+  that changed the KOT's status. Click "Mark Served" — confirm
+  `Kot.servedAt` is set (check via `GET /kots/:id`) and the table is
+  **not** freed and the session is **not** closed (that only happens at
+  `settle()`).

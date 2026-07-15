@@ -1,5 +1,13 @@
 import { apiClient } from '@/lib/axios-client'
 
+export interface UnitBrief {
+  id: string
+  code: string
+  name: string
+  unitType: string
+  isBaseUnit: boolean
+}
+
 export interface Item {
   id: string
   name: string
@@ -9,7 +17,13 @@ export interface Item {
   price: number
   costPrice: number
   gstRate: number
-  unit: string
+  itemType: 'goods' | 'service'
+  isTaxable: boolean
+  cessPercent: number
+  reverseCharge: boolean
+  unitId: string
+  unit: UnitBrief
+  purchaseUnitId: string | null
   productType: string
   isActive: boolean
   isVeg: boolean
@@ -37,7 +51,12 @@ export interface CreateItemRequest {
   description?: string
   costPrice?: number
   gstRate?: number
-  unit?: string
+  itemType?: 'goods' | 'service'
+  isTaxable?: boolean
+  cessPercent?: number
+  reverseCharge?: boolean
+  unitId: string
+  purchaseUnitId?: string
   productType?: string
   isVeg?: boolean
   isActive?: boolean

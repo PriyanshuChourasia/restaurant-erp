@@ -251,7 +251,7 @@ createdb restaurant_erp_dev
 pnpm dev
 ```
 
-The API server will start on `http://localhost:3000` and the UI on `http://localhost:5173`.
+The API server will start on `http://localhost:4210` and the UI on `http://localhost:5173`.
 
 ### Demo Login
 

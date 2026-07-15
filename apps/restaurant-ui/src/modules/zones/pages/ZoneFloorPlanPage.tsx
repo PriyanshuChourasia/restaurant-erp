@@ -19,6 +19,12 @@ const TABLE_STATUSES = [
   { value: 'occupied', label: 'Occupied', color: 'bg-red-100 text-red-700' },
 ]
 
+const statusSortRank: Record<string, number> = {
+  available: 0,
+  booked: 1,
+  occupied: 2,
+}
+
 export function ZoneFloorPlanPage() {
   const { zoneId } = useParams({ from: '/zones/$zoneId' })
   const navigate = useNavigate()
@@ -233,7 +239,11 @@ export function ZoneFloorPlanPage() {
           <div className="divide-y divide-gray-100">
             {(tables || [])
               .filter((t) => t.isActive)
-              .sort((a, b) => a.label.localeCompare(b.label, undefined, { numeric: true }))
+              .sort((a, b) => {
+                const rankDiff = (statusSortRank[a.status] ?? 0) - (statusSortRank[b.status] ?? 0)
+                if (rankDiff !== 0) return rankDiff
+                return a.label.localeCompare(b.label, undefined, { numeric: true })
+              })
               .map((table) => {
                 const isSelected = selectedTableIds.includes(table.id)
                 return (

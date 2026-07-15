@@ -10,13 +10,25 @@ export class ZoneRepository {
     private readonly repo: Repository<Zone>,
   ) {}
 
-  async findAll(includeInactive = false): Promise<Zone[]> {
+  async findAll(includeInactive = false, floor?: number): Promise<Zone[]> {
     const where: any = { deletedAt: IsNull() };
     if (!includeInactive) where.isActive = true;
+    if (floor !== undefined) where.floor = floor;
     return this.repo.find({
       where,
-      order: { name: 'ASC' },
+      order: { floor: 'ASC', name: 'ASC' },
     });
+  }
+
+  async findFloors(): Promise<number[]> {
+    const result = await this.repo
+      .createQueryBuilder('zone')
+      .select('DISTINCT zone.floor', 'floor')
+      .where('zone.deletedAt IS NULL')
+      .andWhere('zone.isActive = true')
+      .orderBy('zone.floor', 'ASC')
+      .getRawMany();
+    return result.map((r: { floor: number }) => r.floor);
   }
 
   async findById(id: string): Promise<Zone | null> {

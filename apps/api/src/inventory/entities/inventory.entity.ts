@@ -1,7 +1,9 @@
 import {
-  Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, Index,
+  Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn,
+  ManyToOne, JoinColumn, Index, Unique,
 } from 'typeorm';
 import { Item } from '../../items/entities/item.entity';
+import { StorageUnit } from './storage-unit.entity';
 import { decimalTransformer } from '../../shared/transformers/decimal.transformer';
 
 export enum MovementType {
@@ -18,8 +20,10 @@ export enum MovementType {
 }
 
 @Entity('inventory')
-@Index('idx_inventory_item', ['itemId'])
+@Index('idx_inventory_item', ['itemId', 'storageUnitId'])
+@Index('idx_inventory_storage_unit', ['storageUnitId'])
 @Index('idx_inventory_status', ['status'])
+@Unique(['itemId', 'storageUnitId'])
 export class Inventory {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
@@ -30,6 +34,13 @@ export class Inventory {
   @ManyToOne(() => Item)
   @JoinColumn({ name: 'item_id' })
   item!: Item;
+
+  @Column({ name: 'storage_unit_id', type: 'uuid' })
+  storageUnitId!: string;
+
+  @ManyToOne(() => StorageUnit)
+  @JoinColumn({ name: 'storage_unit_id' })
+  storageUnit!: StorageUnit;
 
   @Column({ type: 'decimal', precision: 14, scale: 3, default: 0, name: 'opening_balance' , transformer: decimalTransformer })
   openingBalance!: number;
@@ -54,7 +65,8 @@ export class Inventory {
 }
 
 @Entity('stock_movements')
-@Index('idx_stock_movement_item', ['itemId'])
+@Index('idx_stock_movement_item', ['itemId', 'storageUnitId'])
+@Index('idx_stock_movement_storage', ['storageUnitId'])
 @Index('idx_stock_movement_date', ['createdAt'])
 export class StockMovement {
   @PrimaryGeneratedColumn('uuid')
@@ -62,6 +74,13 @@ export class StockMovement {
 
   @Column({ name: 'item_id', type: 'uuid' })
   itemId!: string;
+
+  @Column({ name: 'storage_unit_id', type: 'uuid' })
+  storageUnitId!: string;
+
+  @ManyToOne(() => StorageUnit)
+  @JoinColumn({ name: 'storage_unit_id' })
+  storageUnit!: StorageUnit;
 
   @Column({ type: 'enum', enum: MovementType })
   type!: MovementType;
@@ -75,11 +94,17 @@ export class StockMovement {
   @Column({ type: 'decimal', precision: 14, scale: 3, default: 0, name: 'balance_after' , transformer: decimalTransformer })
   balanceAfter!: number;
 
+  @Column({ name: 'transfer_group_id', type: 'uuid', nullable: true })
+  transferGroupId!: string | null;
+
   @Column({ type: 'varchar', length: 255, nullable: true })
   reference!: string | null;
 
   @Column({ type: 'text', nullable: true })
   notes!: string | null;
+
+  @Column({ name: 'batch_id', type: 'uuid', nullable: true })
+  batchId!: string | null;
 
   @Column({ name: 'created_by', type: 'uuid', nullable: true })
   createdBy!: string | null;

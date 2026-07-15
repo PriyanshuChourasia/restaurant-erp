@@ -10,6 +10,7 @@ import {
   Index,
 } from 'typeorm';
 import { CategoryEntity } from '../../category/entities/category.entity';
+import { Unit } from '../../units/entities/unit.entity';
 import { decimalTransformer } from '../../shared/transformers/decimal.transformer';
 
 export enum GstRate {
@@ -18,6 +19,11 @@ export enum GstRate {
   TWELVE = 12,
   EIGHTEEN = 18,
   TWENTY_EIGHT = 28,
+}
+
+export enum ItemType {
+  GOODS = 'goods',
+  SERVICE = 'service',
 }
 
 export enum ItemUnit {
@@ -35,6 +41,9 @@ export enum ItemUnit {
   BOX = 'box',
   PACKET = 'packet',
 }
+
+// Kept as string constants for backward compatibility during migration;
+// new code should reference Unit entities from the 'units' table instead.
 
 export enum ProductType {
   RAW = 'raw',
@@ -77,10 +86,37 @@ export class Item {
 
   @Column({
     type: 'enum',
-    enum: ItemUnit,
-    default: ItemUnit.PIECE,
+    enum: ItemType,
+    name: 'item_type',
+    default: ItemType.GOODS,
   })
-  unit!: ItemUnit;
+  itemType!: ItemType;
+
+  @Column({ name: 'is_taxable', default: true })
+  isTaxable!: boolean;
+
+  @Column({ type: 'decimal', precision: 5, scale: 2, name: 'cess_percent', default: 0, transformer: decimalTransformer })
+  cessPercent!: number;
+
+  @Column({ name: 'reverse_charge', default: false })
+  reverseCharge!: boolean;
+
+  @Column({ name: 'unit_id', type: 'uuid' })
+  unitId!: string;
+
+  @ManyToOne(() => Unit)
+  @JoinColumn({ name: 'unit_id' })
+  unit!: Unit;
+
+  @Column({ name: 'purchase_unit_id', type: 'uuid', nullable: true })
+  purchaseUnitId!: string | null;
+
+  @ManyToOne(() => Unit, { nullable: true })
+  @JoinColumn({ name: 'purchase_unit_id' })
+  purchaseUnit!: Unit | null;
+
+  @Column({ name: 'shelf_life_days', type: 'int', nullable: true })
+  shelfLifeDays!: number | null;
 
   @Column({
     type: 'enum',

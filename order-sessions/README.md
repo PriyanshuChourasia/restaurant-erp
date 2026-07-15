@@ -62,7 +62,9 @@ an actual `Invoice` (today's model, unchanged) at final settlement.
    one session. → **[`running-bill_plan.md`](./running-bill_plan.md)**
 4. Finalize a session into the real `Invoice` at checkout time. → **[`settlement_plan.md`](./settlement_plan.md)**
 5. Rework the POS UI around "open a session" / "send a round" / "settle"
-   instead of one atomic checkout button. → **[`pos-ui-rework_plan.md`](./pos-ui-rework_plan.md)**
+   instead of one atomic checkout button, and give front-of-house staff
+   a ready-to-serve alert + a way to record that food actually reached
+   the table. → **[`pos-ui-rework_plan.md`](./pos-ui-rework_plan.md)**
 
 This folder is a prerequisite for
 [`../kot/session-linkage_plan.md`](../kot/session-linkage_plan.md) — that
@@ -78,7 +80,7 @@ here) is done.
 | 2 | [`add-round_plan.md`](./add-round_plan.md) | 1 | "Send to kitchen" appends a round to an open session and creates KOTs for just the new items, without billing |
 | 3 | [`running-bill_plan.md`](./running-bill_plan.md) | 1, 2 | Live running-bill preview; merge/split tables within a session |
 | 4 | [`settlement_plan.md`](./settlement_plan.md) | 1, 2, 3 | Finalize an open session into a real `Invoice`, close the session, free the table(s) |
-| 5 | [`pos-ui-rework_plan.md`](./pos-ui-rework_plan.md) | 1–4 | POS screen rework: table pick opens/resumes a session; distinct "Send to Kitchen" vs "Settle Bill" actions replace the single `billMutation` |
+| 5 | [`pos-ui-rework_plan.md`](./pos-ui-rework_plan.md) | 1–4 | POS screen rework: table pick opens/resumes a session; distinct "Send to Kitchen" vs "Settle Bill" actions replace the single `billMutation`; running-bill panel alerts staff when a round's KOT goes `ready` and lets them mark it `served` |
 
 ## Worked example (referenced from every module)
 

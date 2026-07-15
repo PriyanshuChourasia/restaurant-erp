@@ -1,12 +1,22 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Search } from 'lucide-react'
+import { Search, CheckCircle, Calendar } from 'lucide-react'
 import { InventoryModal } from '../components/InventoryModal'
 import { useSetOpeningBalance } from '../hooks/useInventoryQueries'
 import { getItems, type Item } from '@/modules/items/api/items.api'
+import { getOpeningStock } from '../api/inventory.api'
 
 interface AddInventoryItemDialogProps {
   onClose: () => void
+}
+
+function formatDate(dateStr: string): string {
+  const d = new Date(dateStr)
+  return d.toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })
+}
+
+function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(amount)
 }
 
 export function AddInventoryItemDialog({ onClose }: AddInventoryItemDialogProps) {
@@ -22,6 +32,15 @@ export function AddInventoryItemDialog({ onClose }: AddInventoryItemDialogProps)
     enabled: !selectedItem,
   })
   const items = data?.items || []
+
+  // Check if opening stock already declared for selected item
+  const { data: openingStockInfo, isLoading: checkingOpening } = useQuery({
+    queryKey: ['opening-stock', selectedItem?.id],
+    queryFn: () => getOpeningStock(selectedItem!.id),
+    enabled: !!selectedItem,
+  })
+
+  const isAlreadyOpened = !!openingStockInfo
 
   const setOpeningBalance = useSetOpeningBalance()
 
@@ -80,7 +99,7 @@ export function AddInventoryItemDialog({ onClose }: AddInventoryItemDialogProps)
                 >
                   <div>
                     <p className="text-sm font-medium text-gray-900">{item.name}</p>
-                    <p className="text-xs text-gray-400">{item.sku} · {item.unit}</p>
+                    <p className="text-xs text-gray-400">{item.sku} · {item.unit?.code || item.unit?.name || ''}</p>
                   </div>
                   <p className="text-sm text-gray-500">₹{item.price.toFixed(2)}</p>
                 </button>
@@ -88,12 +107,73 @@ export function AddInventoryItemDialog({ onClose }: AddInventoryItemDialogProps)
             )}
           </div>
         </div>
+      ) : checkingOpening ? (
+        <div className="flex items-center justify-center py-8">
+          <p className="text-sm text-gray-400">Checking opening stock status...</p>
+        </div>
+      ) : isAlreadyOpened ? (
+        /* ── Read-only "already opened" summary ─────────────── */
+        <div className="space-y-4">
+          <div className="flex items-center justify-between rounded-lg border border-green-200 bg-green-50 px-3 py-2.5">
+            <div>
+              <p className="text-sm font-medium text-gray-900">{selectedItem.name}</p>
+              <p className="text-xs text-gray-400">{selectedItem.sku} · {selectedItem.unit?.code || selectedItem.unit?.name || ''}</p>
+            </div>
+            <button type="button" onClick={() => setSelectedItem(null)} className="text-xs font-medium text-primary hover:underline">
+              Change
+            </button>
+          </div>
+
+          <div className="rounded-lg border border-green-200 bg-green-50/50 p-4 space-y-3">
+            <div className="flex items-center gap-2 text-green-700">
+              <CheckCircle size={16} />
+              <span className="text-sm font-medium">Opening Stock Already Declared</span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="text-xs text-gray-500 mb-0.5">Opened On</p>
+                <div className="flex items-center gap-1.5 text-gray-700">
+                  <Calendar size={14} />
+                  <span>{formatDate(openingStockInfo.asOfDate)}</span>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 mb-0.5">Opening Quantity</p>
+                <p className="font-semibold text-gray-900">{openingStockInfo.quantity}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 mb-0.5">Unit Cost</p>
+                <p className="font-semibold text-gray-900">{formatCurrency(openingStockInfo.unitCost)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 mb-0.5">Current Stock</p>
+                <p className="font-semibold text-gray-900">{openingStockInfo.currentStock}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+            <p className="text-xs text-amber-700">
+              To adjust stock levels, use the <strong>Adjust Stock</strong> action instead.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-full h-9 rounded-lg bg-gray-100 text-sm font-medium text-gray-600 hover:bg-gray-200 transition-all"
+          >
+            Close
+          </button>
+        </div>
       ) : (
+        /* ── Editable opening balance form ──────────────────── */
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5">
             <div>
               <p className="text-sm font-medium text-gray-900">{selectedItem.name}</p>
-              <p className="text-xs text-gray-400">{selectedItem.sku} · {selectedItem.unit}</p>
+              <p className="text-xs text-gray-400">{selectedItem.sku} · {selectedItem.unit?.code || selectedItem.unit?.name || ''}</p>
             </div>
             <button type="button" onClick={() => setSelectedItem(null)} className="text-xs font-medium text-primary hover:underline">
               Change
@@ -101,7 +181,7 @@ export function AddInventoryItemDialog({ onClose }: AddInventoryItemDialogProps)
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1.5">Opening Quantity ({selectedItem.unit})</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1.5">Opening Quantity ({selectedItem.unit?.code || selectedItem.unit?.name || ''})</label>
             <input
               type="number"
               min="0"

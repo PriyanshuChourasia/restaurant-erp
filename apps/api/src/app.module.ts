@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -15,6 +16,7 @@ import { SuppliersModule } from './suppliers/suppliers.module';
 import { SalesModule } from './sales/sales.module';
 import { KotModule } from './kot/kot.module';
 import { LedgerModule } from './ledger/ledger.module';
+import { VouchersModule } from './vouchers/vouchers.module';
 import { DatabaseModule } from './database/database.module';
 import { PriceLevelsModule } from './price-levels/price-levels.module';
 import { CustomersModule } from './customers/customers.module';
@@ -23,6 +25,9 @@ import { SeatingModule } from './seating/seating.module';
 import { RecipesModule } from './recipes/recipes.module';
 import { ReservationsModule } from './reservations/reservations.module';
 import { ReportsModule } from './reports/reports.module';
+import { DashboardModule } from './dashboard/dashboard.module';
+import { UnitsModule } from './units/units.module';
+import { ItemSuppliersModule } from './item-suppliers/item-suppliers.module';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
 import { JwtAuthGuard } from './shared/guards/jwt-auth.guard';
@@ -31,6 +36,7 @@ import { PermissionsGuard } from './shared/guards/permissions.guard';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
@@ -57,6 +63,7 @@ import { PermissionsGuard } from './shared/guards/permissions.guard';
     SalesModule,
     KotModule,
     LedgerModule,
+    VouchersModule,
     DatabaseModule,
     PriceLevelsModule,
     CustomersModule,
@@ -65,6 +72,9 @@ import { PermissionsGuard } from './shared/guards/permissions.guard';
     RecipesModule,
     ReservationsModule,
     ReportsModule,
+    DashboardModule,
+    UnitsModule,
+    ItemSuppliersModule,
   ],
   controllers: [AppController],
   providers: [

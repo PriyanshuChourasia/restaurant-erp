@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
 import { Outlet, Link } from '@tanstack/react-router'
-import { ArrowLeft, Monitor } from 'lucide-react'
+import { Home, Monitor } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 interface POSLayoutProps {
@@ -12,8 +12,14 @@ export function POSLayout({ children }: POSLayoutProps) {
     <div className="flex h-screen flex-col bg-background">
       {/* POS header */}
       <header className="flex h-14 items-center gap-3 border-b border-border bg-card px-4">
-        <Button variant="ghost" size="icon" className="text-muted-foreground" render={<Link to="/" />}>
-          <ArrowLeft size={18} />
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-muted-foreground"
+          title="Exit to Dashboard"
+          render={<Link to="/" />}
+        >
+          <Home size={18} />
         </Button>
         <div className="flex items-center gap-2">
           <Monitor size={20} className="text-primary" />

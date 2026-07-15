@@ -18,6 +18,8 @@ interface ItemRow {
   categoryName: string | null
   isVeg: boolean
   isActive: boolean
+  unitCode: string
+  unitName: string
 }
 
 const columnHelper = createColumnHelper<ItemRow>()
@@ -73,6 +75,8 @@ export function ItemListPage() {
           categoryName: item.categoryName,
           isVeg: item.isVeg,
           isActive: item.isActive,
+          unitCode: item.unit?.code || '',
+          unitName: item.unit?.name || item.unit?.code || '',
         })),
     [items, gstFilter],
   )
@@ -122,6 +126,18 @@ export function ItemListPage() {
       columnHelper.accessor('gstRate', {
         header: 'GST',
         cell: (info) => <span className="bg-purple-50 text-purple-700 px-2 py-0.5 rounded text-xs font-medium">GST {info.getValue()}%</span>,
+      }),
+      columnHelper.accessor('unitCode', {
+        header: 'Unit',
+        cell: (info) => {
+          const row = info.row.original
+          return (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gray-50 border border-gray-200 text-xs font-medium text-gray-600">
+              {row.unitName}
+              <span className="text-gray-400">({row.unitCode})</span>
+            </span>
+          )
+        },
       }),
       columnHelper.accessor('categoryName', {
         header: 'Category',

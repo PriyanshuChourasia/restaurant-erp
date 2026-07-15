@@ -16,4 +16,5 @@ export enum PermissionModule {
   SALES = 'sales',
   KOT = 'kot',
   LEDGER = 'ledger',
+  VOUCHERS = 'vouchers',
 }

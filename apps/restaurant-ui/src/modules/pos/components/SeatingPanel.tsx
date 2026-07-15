@@ -1,7 +1,7 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback } from 'react'
 import { useQuery, useQueries } from '@tanstack/react-query'
 import { Hash, Users, Monitor, Armchair, AlertCircle, Clock, CalendarDays } from 'lucide-react'
-import { getZones, getZoneTables } from '@/modules/zones/api/zone.api'
+import { getZones, getZoneTables, getAllTables } from '@/modules/zones/api/zone.api'
 import { getTableConflict } from '@/modules/reservations/api/reservations.api'
 import type { Zone } from '@/modules/zones/types/zone.types'
 import type { Table } from '@/modules/tables/types/table.types'
@@ -24,9 +24,16 @@ const categoryIcons: Record<string, typeof Hash> = {
   flexible: Armchair,
 }
 
+const statusSortRank: Record<string, number> = {
+  available: 0,
+  booked: 1,
+  occupied: 2,
+}
+
+const ALL_ZONES = 'all'
+
 export function SeatingPanel({ selectedTableIds, onTableToggle }: SeatingPanelProps) {
-  const [activeZoneId, setActiveZoneId] = useState<string | null>(null)
-  const pendingConfirmRef = useRef<((confirmed: boolean) => void) | null>(null)
+  const [activeZoneId, setActiveZoneId] = useState<string>(ALL_ZONES)
 
   const { data: zones } = useQuery({
     queryKey: ['zones-for-pos'],
@@ -35,8 +42,7 @@ export function SeatingPanel({ selectedTableIds, onTableToggle }: SeatingPanelPr
 
   const { data: tables } = useQuery({
     queryKey: ['zone-tables-for-pos', activeZoneId],
-    queryFn: () => getZoneTables(activeZoneId!),
-    enabled: !!activeZoneId,
+    queryFn: () => (activeZoneId === ALL_ZONES ? getAllTables() : getZoneTables(activeZoneId)),
   })
 
   // Fetch conflicts for all tables in the active zone in parallel
@@ -47,7 +53,6 @@ export function SeatingPanel({ selectedTableIds, onTableToggle }: SeatingPanelPr
         queryKey: ['table-conflict', table.id],
         queryFn: () => getTableConflict(table.id, 120),
         staleTime: 30_000, // Refetch every 30 seconds
-        enabled: !!activeZoneId,
       })),
   })
 
@@ -66,10 +71,9 @@ export function SeatingPanel({ selectedTableIds, onTableToggle }: SeatingPanelPr
     .filter((z: Zone) => z.isActive)
     .sort((a: Zone, b: Zone) => a.name.localeCompare(b.name))
 
-  // Auto-select first zone
-  if (!activeZoneId && sortedZones.length > 0 && activeZoneId !== sortedZones[0].id) {
-    setActiveZoneId(sortedZones[0].id)
-  }
+  const zoneNameById = new Map<string, string>(
+    (zones || []).map((z: Zone) => [z.id, z.name]),
+  )
 
   const handleTableClick = useCallback(
     (table: Table) => {
@@ -107,6 +111,16 @@ export function SeatingPanel({ selectedTableIds, onTableToggle }: SeatingPanelPr
       {/* Zone tabs */}
       {sortedZones.length > 0 && (
         <div className="flex gap-1 overflow-x-auto pb-1">
+          <button
+            onClick={() => setActiveZoneId(ALL_ZONES)}
+            className={`shrink-0 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+              activeZoneId === ALL_ZONES
+                ? 'bg-primary text-white'
+                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+            }`}
+          >
+            All
+          </button>
           {sortedZones.map((zone: Zone) => (
             <button
               key={zone.id}
@@ -152,7 +166,11 @@ export function SeatingPanel({ selectedTableIds, onTableToggle }: SeatingPanelPr
         <div className="flex gap-1.5 flex-wrap">
           {tables
             .filter((t: Table) => t.isActive)
-            .sort((a: Table, b: Table) => a.label.localeCompare(b.label, undefined, { numeric: true }))
+            .sort((a: Table, b: Table) => {
+              const rankDiff = (statusSortRank[a.status] ?? 0) - (statusSortRank[b.status] ?? 0)
+              if (rankDiff !== 0) return rankDiff
+              return a.label.localeCompare(b.label, undefined, { numeric: true })
+            })
             .map((table: Table) => {
               const isSelected = selectedTableIds.includes(table.id)
               const conflict = conflictMap.get(table.id)
@@ -192,6 +210,9 @@ export function SeatingPanel({ selectedTableIds, onTableToggle }: SeatingPanelPr
                       <AlertCircle size={10} className="text-amber-500" />
                     )}
                   </div>
+                  {activeZoneId === ALL_ZONES && table.zoneId && zoneNameById.get(table.zoneId) && (
+                    <span className="block text-[9px] opacity-60">{zoneNameById.get(table.zoneId)}</span>
+                  )}
                   {/* Reservation info sub-line */}
                   {hasConflict && (
                     <span className="block text-[9px] opacity-70 mt-0.5 flex items-center gap-1">

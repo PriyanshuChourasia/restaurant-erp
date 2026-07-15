@@ -12,7 +12,13 @@ exclusion) depend on
 [`../order-sessions/settlement_plan.md`](../order-sessions/settlement_plan.md)
 respectively — land the basic mechanism early, wire each integration in
 as its dependency becomes available, rather than blocking cancellation
-entirely on the whole rest of the folder.
+entirely on the whole rest of the folder. If
+[`kot-merge-plan.md`](./kot-merge-plan.md) (module 12) lands, it adds a
+`MERGED` status to `KotStatus` — this module's "already finished, can't
+cancel" lock-point check needs to reject `merged` KOTs the same way it
+already rejects `served` ones (a merged-away source has no items left on
+it to cancel; the target KOT it merged into is the one to act on
+instead).
 
 ## What
 
@@ -72,7 +78,10 @@ one-paragraph treatment covered:
     `cancelReason`, `cancelledBy`, and cancels all non-served items in
     it. Reject if the KOT is already fully `served` (can't cancel a
     finished ticket — that's a wastage/return concern, handled by
-    `../inventory/`, not a KOT concern).
+    `../inventory/`, not a KOT concern), already `cancelled`, or already
+    `merged` (module 12) — name which of the three in the rejection
+    message rather than one generic "can't cancel" error, so staff know
+    why the button didn't work.
   - New `cancelKotItem(kotId, itemId, reason, userId)` — sets that item's
     status to `CANCELLED` + reason + canceller, then re-runs the existing
     auto-rollup logic from `updateItemStatus` (extract the rollup into a

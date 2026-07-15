@@ -30,6 +30,10 @@
 **Filters:** Customer type, price level, activity status, spend range
 **Grouping:** By type, by price level, by spend tier
 
+**Why It Is Needed:** A complete view of every customer — who they are, how much they spend, how often they visit, and when they were last in. Enables segmentation (high-value, regular, at-risk, inactive) for targeted marketing. Answers: Who are our best customers? Who haven't visited in a while and needs a re-engagement offer?
+
+**Business Area Reviewed:** Customer base management and segmentation. Reviews customer demographics, visit patterns, and spending levels. Used by owner and marketing manager for customer segmentation, loyalty program targeting, and personalized marketing campaigns.
+
 ---
 
 ## RPT-C02: Customer Revenue Analysis
@@ -48,6 +52,10 @@
 **Visualization:** Pareto chart (80/20 analysis) + trend
 **Filters:** Date range, customer type, minimum spend
 **Insight:** Identify top revenue-generating customers
+
+**Why It Is Needed:** In most restaurants, 20% of customers generate 80% of revenue. This report identifies that top 20% — the VIPs who should receive special treatment, personalized offers, and priority reservations. Losing a top-5% customer can significantly impact revenue. Answers: Who are our highest-spending customers? Which customers should we prioritize for retention?
+
+**Business Area Reviewed:** Customer revenue concentration and VIP identification. Reviews revenue contribution by customer to find the most valuable patrons. Used by owner and manager for VIP customer management, personalized service, and retention strategies.
 
 ---
 
@@ -69,6 +77,10 @@
 **Filters:** Date range, loyalty tier, churn risk level
 **Insight:** Customer retention, loyalty program design
 
+**Why It Is Needed:** Acquiring a new customer costs 5-7x more than retaining an existing one. This report measures retention rate and identifies customers at risk of churning (not visited in 30+ days). The RFM score helps classify customers into loyalty tiers for targeted retention programs. Answers: Are customers coming back? Who is about to churn and needs a win-back offer?
+
+**Business Area Reviewed:** Customer retention and loyalty measurement. Reviews visit frequency, recency, and monetary value (RFM) to score and segment customers. Used by owner and marketing manager for loyalty program design, churn prevention campaigns, and retention strategy.
+
 ---
 
 ## RPT-C04: New vs Returning Customers
@@ -87,6 +99,10 @@
 **Visualization:** Stacked bar chart + retention funnel
 **Filters:** Date range, granularity
 **Insight:** Customer acquisition vs retention effectiveness
+
+**Why It Is Needed:** A healthy restaurant needs both new and returning customers. If the ratio skews too heavily toward new customers, it means retention is poor. If there are no new customers, the restaurant isn't growing. Answers: Are we attracting new customers? Are we retaining existing ones? Is our growth driven by new customers or repeat business?
+
+**Business Area Reviewed:** Customer acquisition vs. retention balance. Reviews the proportion and revenue contribution of new vs. returning customers. Used by owner and marketing manager to evaluate marketing effectiveness and customer satisfaction — are first-time visitors coming back?
 
 ---
 
@@ -107,6 +123,10 @@
 **Filters:** Date range
 **Insight:** Tailor offerings per customer segment
 
+**Why It Is Needed:** Different customer types behave differently. Corporate customers may prefer credit and order catering; staff may get discounts; regulars may have loyalty expectations. Understanding each segment's behavior helps tailor service and pricing. Answers: How do our customer segments differ in spending and behavior? Should we offer corporate accounts special pricing?
+
+**Business Area Reviewed:** Customer segment behavior analysis. Reviews differences in ordering, payment, and spending across customer types (regular, corporate, staff). Used by owner and manager for segment-specific pricing strategy, service customization, and targeted promotions.
+
 ---
 
 ## RPT-C06: Customer Lifetime Value (CLV)
@@ -125,6 +145,10 @@
 **Visualization:** CLV distribution histogram + top customers table
 **Filters:** CLV segment, tenure range
 **Insight:** Customer value prioritization, marketing ROI
+
+**Why It Is Needed:** CLV answers: how much is a customer worth over their entire relationship with the restaurant? This helps decide how much to spend on acquiring new customers and retaining existing ones. A customer worth ₹1L/year justifies a ₹5K birthday dinner voucher. Answers: What is the long-term value of our customers? How much should we invest in customer acquisition and retention?
+
+**Business Area Reviewed:** Customer long-term value and ROI analysis. Reviews each customer's total spend over their relationship with the restaurant. Used by owner and marketing manager for acquisition cost budgeting, retention spend decisions, and customer tier prioritization.
 
 ---
 
@@ -145,6 +169,10 @@
 **Filters:** Customer, date range
 **Insight:** Personalized recommendations, upselling
 
+**Why It Is Needed:** For high-value customers, knowing their preferences enables personalized service. If a regular always orders butter chicken and garlic naan, the server can anticipate the order. Also enables targeted offers — "your favorite dish is back!" Answers: What does each customer like to order? How can we personalize their experience?
+
+**Business Area Reviewed:** Customer preference tracking and personalization. Reviews individual customer ordering patterns, favorite items, and visit timing. Used by manager and servers for personalized service, upsell recommendations, and creating a VIP experience for regular customers.
+
 ---
 
 ## RPT-C08: Walk-in vs Registered Customers
@@ -162,6 +190,10 @@
 **Visualization:** Comparison cards + trend line
 **Filters:** Date range
 **Insight:** Registration conversion, walk-in revenue impact
+
+**Why It Is Needed:** Many restaurant customers are walk-ins who never get registered in the system. This report quantifies that ratio and shows the untapped opportunity. Walk-ins cannot be marketed to, sent offers, or tracked for loyalty. Answers: How many of our customers are anonymous walk-ins vs. identified registered customers? What is the opportunity cost of not capturing their data?
+
+**Business Area Reviewed:** Customer data capture rate and CRM opportunity. Reviews the split between identified (registered) and anonymous (walk-in) customers. Used by owner and marketing manager to evaluate CRM adoption, plan customer registration drives, and quantify marketing-reachable customer base.
 
 ---
 

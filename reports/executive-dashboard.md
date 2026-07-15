@@ -38,6 +38,10 @@ All modules — aggregated cross-functional data for C-level decision making.
 **Filters:** Period (today/this week/this month/this quarter/this year), comparison (vs last period, vs last year)
 **Refresh:** Auto-refresh every 5 minutes
 
+**Why It Is Needed:** The single screen that tells the owner everything they need to know about the business in 10 seconds. No digging through multiple reports — key metrics for revenue, profit, operations, customers, and inventory are all in one place. Answers: Is the business healthy overall? Which area needs my attention right now?
+
+**Business Area Reviewed:** Overall business performance across all dimensions. Reviews financial, operational, customer, and inventory KPIs on a single screen. Used by owner and CEO for daily pulse check, identifying issues early, and strategic decision-making.
+
 ---
 
 ## RPT-E02: Profitability Analysis by Dimension
@@ -55,6 +59,10 @@ All modules — aggregated cross-functional data for C-level decision making.
 **Visualization:** Multi-tab report with drill-down per dimension
 **Filters:** Period, comparison period, dimension selector
 **Insight:** Where is the restaurant most/least profitable?
+
+**Why It Is Needed:** Not all revenue is good revenue. Some menu items, customer segments, or time slots may be unprofitable. This report slices profitability across every dimension imaginable to pinpoint exactly where profit is made and lost. Answers: Which menu categories are most profitable? Are corporate customers more profitable than walk-ins? Is happy hour actually profitable after discounts?
+
+**Business Area Reviewed:** Multi-dimensional profit analysis. Reviews profitability across menu, customer segments, zones, time periods, and payment methods. Used by owner and manager for strategic decisions — which items to promote, which customer segments to target, which time slots to optimize.
 
 ---
 
@@ -85,6 +93,10 @@ All modules — aggregated cross-functional data for C-level decision making.
 **Filters:** Period
 **Insight:** At-a-glance business health
 
+**Why It Is Needed:** The one-number answer to "how is my restaurant doing?" Converts dozens of metrics into a single, weighted health score. The radar chart immediately shows which area is weakest (e.g., operations score low → look at kitchen throughput). Answers: What is our overall business health score? Which of the four pillars (financial, operations, customers, compliance) needs improvement?
+
+**Business Area Reviewed:** Composite business health assessment. Reviews a weighted score across financial, operational, customer, and compliance dimensions. Used by owner and investor for quick health assessment, identifying weak areas, and tracking improvement over time.
+
 ---
 
 ## RPT-E04: Trend Analysis & Forecasting
@@ -104,6 +116,10 @@ All modules — aggregated cross-functional data for C-level decision making.
 **Filters:** Metric selector, forecast horizon
 **Insight:** Growth trajectory, seasonal planning
 
+**Why It Is Needed:** The past tells you what happened; the forecast tells you what's coming. Enables proactive decision-making — if the forecast shows a revenue dip next quarter, you can plan promotions now. If food costs are projected to rise, you can adjust menu prices ahead of time. Answers: Where is the business headed? What should we prepare for in the coming months?
+
+**Business Area Reviewed:** Business trajectory and forward planning. Reviews historical trends and projects future performance for key metrics. Used by owner for proactive strategy — seasonal planning, budget preparation, and early warning for potential downturns.
+
 ---
 
 ## RPT-E05: Comparative Analysis Report
@@ -121,6 +137,10 @@ All modules — aggregated cross-functional data for C-level decision making.
 **Visualization:** Side-by-side comparison bars + delta indicators
 **Filters:** Comparison type, periods, dimensions
 **Insight:** Relative performance, improvement tracking
+
+**Why It Is Needed:** A number in isolation means nothing. Revenue of ₹5L — is that good? Only compared to last month, last year, or a target. This report provides the context needed to evaluate performance. Answers: Are we improving? How do different areas of the business compare? How do we stack up against our targets?
+
+**Business Area Reviewed:** Contextual performance evaluation. Reviews current performance against historical periods, targets, and cross-business comparisons. Used by owner to track progress, evaluate strategy effectiveness, and benchmark performance.
 
 ---
 

@@ -17,6 +17,14 @@ export enum LedgerCategory {
   MISCELLANEOUS = 'miscellaneous',
 }
 
+export enum AccountType {
+  ASSET = 'asset',
+  LIABILITY = 'liability',
+  EQUITY = 'equity',
+  REVENUE = 'revenue',
+  EXPENSE = 'expense',
+}
+
 @Entity('ledger_accounts')
 export class LedgerAccount {
   @PrimaryGeneratedColumn('uuid')
@@ -24,6 +32,12 @@ export class LedgerAccount {
 
   @Column({ length: 255 })
   name!: string;
+
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  code!: string | null;
+
+  @Column({ type: 'enum', enum: AccountType, name: 'account_type' })
+  accountType!: AccountType;
 
   @Column({ type: 'text', nullable: true })
   description!: string | null;
@@ -84,6 +98,9 @@ export class LedgerEntry {
 
   @Column({ type: 'decimal', precision: 14, scale: 2, default: 0, name: 'balance_after' , transformer: decimalTransformer })
   balanceAfter!: number;
+
+  @Column({ name: 'journal_entry_id', type: 'uuid', nullable: true })
+  journalEntryId!: string | null;
 
   @Column({ name: 'created_by', type: 'uuid', nullable: true })
   createdBy!: string | null;

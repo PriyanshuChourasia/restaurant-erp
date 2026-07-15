@@ -6,6 +6,14 @@ import {
   setOpeningBalance,
   adjustStock,
   getStockMovements,
+  createStockCount,
+  submitStockCountLines,
+  completeStockCount,
+  getStockCounts,
+  getStockCount,
+  getAllBatches,
+  getItemBatches,
+  getNearExpiryBatches,
 } from '../api/inventory.api'
 
 export const inventoryKeys = {
@@ -67,6 +75,98 @@ export function useAdjustStock() {
     mutationFn: ({ itemId, type, quantity, notes, reference }: { itemId: string; type: string; quantity: number; notes?: string; reference?: string }) =>
       adjustStock(itemId, type, quantity, notes, reference),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: inventoryKeys.all })
+    },
+  })
+}
+
+// ── Stock Count hooks (Module 7) ───────────────────────────────────
+
+export const stockCountKeys = {
+  all: ['stock-counts'] as const,
+  lists: () => [...stockCountKeys.all, 'list'] as const,
+  list: (params?: Record<string, unknown>) => [...stockCountKeys.lists(), params] as const,
+  details: () => [...stockCountKeys.all, 'detail'] as const,
+  detail: (id: string) => [...stockCountKeys.details(), id] as const,
+}
+
+export function useStockCounts(params?: { page?: number; limit?: number; storageUnitId?: string }) {
+  return useQuery({
+    queryKey: stockCountKeys.list(params),
+    queryFn: () => getStockCounts(params),
+  })
+}
+
+export function useStockCount(id: string) {
+  return useQuery({
+    queryKey: stockCountKeys.detail(id),
+    queryFn: () => getStockCount(id),
+    enabled: !!id,
+  })
+}
+
+export function useCreateStockCount() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ storageUnitId, itemIds, notes }: { storageUnitId: string; itemIds: string[]; notes?: string }) =>
+      createStockCount(storageUnitId, itemIds, notes),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: stockCountKeys.all })
+      queryClient.invalidateQueries({ queryKey: inventoryKeys.all })
+    },
+  })
+}
+
+export function useSubmitStockCountLines() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ stockCountId, lines }: { stockCountId: string; lines: { lineId: string; countedQuantity: number; notes?: string }[] }) =>
+      submitStockCountLines(stockCountId, lines),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: stockCountKeys.detail(variables.stockCountId) })
+      queryClient.invalidateQueries({ queryKey: stockCountKeys.all })
+    },
+  })
+}
+
+// ── Batch Tracking hooks ───────────────────────────────────────────
+
+export const batchKeys = {
+  all: ['batches'] as const,
+  lists: () => [...batchKeys.all, 'list'] as const,
+  list: (params?: Record<string, unknown>) => [...batchKeys.lists(), params] as const,
+  nearExpiry: () => [...batchKeys.all, 'near-expiry'] as const,
+  byItem: (itemId: string) => [...batchKeys.all, 'item', itemId] as const,
+}
+
+export function useAllBatches() {
+  return useQuery({
+    queryKey: batchKeys.list(),
+    queryFn: () => getAllBatches(),
+  })
+}
+
+export function useItemBatches(itemId: string, status?: string) {
+  return useQuery({
+    queryKey: batchKeys.byItem(itemId),
+    queryFn: () => getItemBatches(itemId, status),
+    enabled: !!itemId,
+  })
+}
+
+export function useNearExpiryBatches(days = 7) {
+  return useQuery({
+    queryKey: batchKeys.nearExpiry(),
+    queryFn: () => getNearExpiryBatches(days),
+  })
+}
+
+export function useCompleteStockCount() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (stockCountId: string) => completeStockCount(stockCountId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: stockCountKeys.all })
       queryClient.invalidateQueries({ queryKey: inventoryKeys.all })
     },
   })

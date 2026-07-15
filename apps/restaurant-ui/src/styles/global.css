@@ -78,6 +78,28 @@ body {
   font-family: var(--font-sans);
 }
 
+/* ─── Receipt Print ────────────────────────────────────────────── */
+
+@media print {
+  /* ReceiptDialog is portaled to document.body (a sibling of #root), so hiding the
+     app root and un-styling the dialog's own overlay/card is enough — no need to
+     hide/reveal individual elements or fight the app layout's height/overflow. */
+  #root {
+    display: none !important;
+  }
+  .receipt-dialog-overlay {
+    position: static !important;
+    background: none !important;
+    backdrop-filter: none !important;
+  }
+  .receipt-dialog-card {
+    max-height: none !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+}
+
 /* ─── Hero Section Animations ─────────────────────────────────── */
 
 @keyframes hero-fade-in {

@@ -1,7 +1,9 @@
 import { Controller, Get, Post, Patch, Body, Param, Query, ValidationPipe } from '@nestjs/common';
 import { SalesService } from '../services/sales.service';
 import { CreateInvoiceDto } from '../dto/create-invoice.dto';
+import { CreateCreditNoteDto } from '../dto/create-credit-note.dto';
 import { InvoiceStatus } from '../entities/sales.entity';
+import { Permissions } from '../../shared/decorators/permissions.decorator';
 
 @Controller('sales')
 export class SalesController {
@@ -52,5 +54,26 @@ export class SalesController {
   @Post(':id/clear-tables')
   clearTables(@Param('id') id: string) {
     return this.service.clearTables(id);
+  }
+
+  @Post(':id/cancel')
+  @Permissions('sales.cancel')
+  cancel(@Param('id') id: string) {
+    return this.service.cancel(id);
+  }
+
+  @Post(':id/credit-notes')
+  @Permissions('sales.credit-note')
+  createCreditNote(
+    @Param('id') id: string,
+    @Body(new ValidationPipe({ transform: true })) dto: CreateCreditNoteDto,
+  ) {
+    return this.service.createCreditNote(id, dto);
+  }
+
+  @Get(':id/credit-notes')
+  @Permissions('sales.read')
+  getCreditNotes(@Param('id') id: string) {
+    return this.service.findCreditNotesByInvoice(id);
   }
 }

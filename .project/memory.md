@@ -9,6 +9,157 @@ Newest entries at the top.
 
 ---
 
+## 2026-07-15 — Credit Note feature (post-serve bill correction)
+
+- New `SalesService.createCreditNote()` — the answer to "customer wants to change a meal after billing": reverses specific line items' revenue/tax (not the whole invoice), optional per-line stock restore, optional same-flow replacement item charge. Reuses the Journal/Voucher engine built earlier today (posts a reversing entry crediting whichever account the original sale debited). See `.project/tasks/2026-07-15-credit-note-feature.md`.
+- **Gotcha:** this app is on `@tanstack/react-query` v5 — `useQuery`'s `onSuccess`/`onError` callbacks were removed in v5 and silently no-op if used. Use `useEffect` on the query result instead when you need a side effect on first load.
+- Confirmed the print-fix pattern from earlier today (portal any print-from-a-modal dialog to `document.body`) is the right general approach — no issues reusing it.
+
+---
+
+## 2026-07-15 — Print fix (portal pattern) + all payment methods exposed
+
+- **Gotcha (feedback-worthy):** a screen-only modal dialog that must ALSO be printable should be rendered via `createPortal(..., document.body)`, not left nested in the normal component tree. Nesting it means print CSS has to fight the ancestor app layout's `overflow`/`max-height`/`position` (its wrappers still occupy layout space even when `visibility:hidden`, since only `display:none` truly removes layout) — portaling to `document.body` sidesteps all of that: print CSS becomes just `#root { display: none }` + minimal un-styling of the dialog's own wrapper. `ReceiptDialog.tsx` now does this; use the same pattern for any future print-from-a-modal feature.
+- **Gotcha:** Tailwind's `print:hidden` utility is `display:none` — putting it on an ancestor of content you still want to print (rather than on the specific screen-only chrome like header buttons) silently kills the whole subtree. This caused the print bug reported right after the receipt dialog shipped.
+- `ChargeModal.tsx` now exposes all 5 backend `PaymentMethod` values (cash/card/upi/online/credit) as selectable buttons — previously only Card/UPI were clickable even though Cash was the (unreachable) default and Online/Credit existed in the backend enum untouched.
+- See `.project/tasks/2026-07-15-print-fix-and-payment-methods.md`.
+
+---
+
+## 2026-07-15 — Voucher/Journal double-entry accounting + invoice cancellation built
+
+- Built a real double-entry layer: `LedgerAccount.accountType` (asset/liability/equity/revenue/expense) fixes `LedgerService.addEntry`'s balance formula (previously always `+` on credit/`-` on debit regardless of account type — flagged the session before). New `JournalEntry`/`JournalService.post()` (atomic, `sum(debit)===sum(credit)` enforced) + `JournalService.reverse()`. New `apps/api/src/vouchers/` module (Payment/Receipt/Journal vouchers) on top of it.
+- POS Charge (`SalesService.create()`) now actually posts accounting — auto-creates a Receipt Voucher for cash/card/upi/online, or a bare Journal Entry (Debit Accounts Receivable) for credit sales. This closes the gap noted earlier today.
+- New `SalesService.cancel()` (`POST /sales/:id/cancel`) reverses stock (new `RecipesService.reverseOnSale`), releases tables, cancels linked KOTs (new `KotService.findByOrderId`), and reverses the posted journal entry/voucher — all guarded against double-cancel.
+- **Gotcha hit:** adding a NOT NULL column (`account_type`) to the already-seeded, non-empty `ledger_accounts` table crashed the running API on `synchronize: true` (Postgres refuses that ALTER without a default on non-empty tables). Fixed by hand via `psql`: create the enum, backfill by account name, then `SET NOT NULL`. **If any future change adds a non-nullable column to an entity backing an already-seeded table, expect this same crash** — either give it a default, make it nullable, or backfill via `psql` before restarting.
+- **Gotcha:** any code path that does `movementRepo.create({...})` on `StockMovement` MUST set `storageUnitId` — it's NOT NULL since inventory became storage-unit-scoped. `SalesService.create()` and `RecipesService.deductOnSale()` were both missing it, so **every POS Charge silently 500'd**. Fixed both.
+- Added `ReceiptDialog` (POS) so Charge shows/prints an actual invoice, and reused it in `SalesPage.tsx`'s "View" button. Added a "Cancel" button on `SalesPage.tsx`. New `/vouchers` page (list + Payment/Receipt/Journal forms).
+- Verified end-to-end via curl (ledger balances move correctly in both directions, reversal restores exact baseline, double-cancel 400s) and Playwright (voucher creation, sales view/cancel, zero console/network errors). See `.project/tasks/2026-07-15-voucher-accounting-and-invoice-cancellation.md` and `.project/tasks/2026-07-15-pos-charge-invoice-receipt-fix.md`.
+
+---
+
+## 2026-07-13 — FormattedQuantity integrated into POS + Purchases
+
+- **POS Dashboard:** Cart items show unit codes with quantities via `FormattedQuantity` (e.g., "2 bowl"). Price shown as `₹349.00 /bowl`. Menu cards display unit code next to GST.
+- **PurchaseDetailDialog (new):** Full purchase order view with item-level formatted quantities, unit prices, GST rates, totals. Fetches `GET /purchases/:id` which now loads `items.item.unit` relations.
+- **Purchases Page:** Items column shows Package icon with count. "View" button now wired to detail dialog (was a dead placeholder).
+- **Backend fix:** `findById` in `purchases.service.ts` loads `{ items: { item: { unit: true } } }` for item names and unit codes.
+- Full typecheck passes clean (0 new errors).
+- See `.project/tasks/2026-07-13-pos-purchases-formatted-quantity.md`.
+
+## 2026-07-13 — Fixed 17 report hardcoded values per feeback.md audit
+
+- Fixed all 17 hardcoded/stub values in `reports.service.ts` identified by the `reports/feeback.md` audit: RPT-I09 (wired real StockCountService data), RPT-O02 (set `kot.preparedBy` in `kot.service.ts`), RPT-R02 (real `durationMinutes` from reservations), RPT-K06 (`throughputRate` = orders per hour), RPT-I05 (`wastageRate` from wastage/total revenue), RPT-F04 (`totalItc` from purchase items), RPT-F07 (real `paid` via ITC), RPT-F08 (real `openingBalance` from prior entries), RPT-C05 (real `avgAov`), RPT-C07 (real `preferredTime` from order hours), RPT-P06 (real `preferredSupplier` from purchase history), RPT-O03 (real `tablesActive`), RPT-O04 (real `reservations`/`noShows` + `wowChange`), RPT-O05 (real `currentStaff` from user count), RPT-O06 (real `creditOutstanding`), RPT-E01 (real `wastePercent`), RPT-E03 (real `customerScore`/`complianceScore`).
+- Also fixed RPT-E05 (Avg Order Value `change`/`direction` computed from real data).
+- **RPT-I09 was NOT_READY → now READY** (was the single easiest fix per the audit). All other fixed reports were PARTIAL → READY.
+- Rebuilt `SalesSummaryPage.tsx` with richer visualizations (KPIs, daily trend, today's summary, payment breakdown, period stats).
+- Remaining systemic gaps from feeback.md: sales→ledger writes, received-date tracking, reservation no-show cron, reason/cancelled-by columns, shift/attendance entity.
+- See `.project/tasks/2026-07-13-fix-report-hardcoded-values.md`.
+
+## 2026-07-13 — Backend format-quantity endpoint
+
+- **Created `shared/utils/format-quantity.ts`:** Pure backend utility mirroring the frontend's `formatQuantity`, `compactQuantity`, `toLargerUnit` with 5 hardcoded hierarchies (gram↔kg, ml↔L, piece↔dozen, packet↔carton, bottle↔case). No DB dependency.
+- **Created `units/dto/format-quantity.dto.ts`:** `FormatQuantityDto`, `FormatQuantityItemDto`, `FormatQuantityBatchDto` with proper `@ValidateNested` for batch request validation.
+- **Updated `units.service.ts`:** Added 4 methods: `formatQuantity`, `compactQuantity`, `toLargerUnit`, `formatQuantityBatch`.
+- **Updated `units.controller.ts`:** `GET /units/format` (single quantity — returns formatted/compact/numeric variants) + `POST /units/format-batch` (bulk formatting for reports).
+- **Updated `units.api.ts` (frontend):** Added `formatQuantityApi()` and `formatQuantityBatchApi()` with full TypeScript types.
+- Full typecheck passes clean (only pre-existing `items.service.spec.ts` errors remain).
+- See `.project/tasks/2026-07-13-backend-format-quantity-endpoint.md`.
+
+## 2026-07-13 — Multi-unit display helpers (format quantity as "3 kg 400 g")
+
+- **Created `lib/format-quantity.ts`:** Pure utility with `formatQuantity()` ("3 kg 400 g"), `compactQuantity()` ("3.4 kg"), `toLargerUnit()` ("{ value: 3.4, unit: 'kg' }"). Handles gram↔kg (×1000), ml↔L (×1000), piece↔dozen (×12) hierarchies. Falls back to plain "{qty} {unit}" for non-hierarchy units (bowl, plate, cup, etc.).
+- **Created `components/ui/FormattedQuantity.tsx`:** React component with three variants (`full`, `compact`, `numeric`) plus `QuantityRange` sub-component for "current / max" display.
+- **Updated pages:** `InventoryPage` (stock column + min level), `BatchesPage` (batch remaining + total), `ViewBatchesDialog` (batch quantities), `StockStatusPage` (opening/current/min columns), `LowStockPage` (current/min/deficit columns) — all now show human-readable multi-unit quantities.
+- Full typecheck passes clean.
+- See `.project/tasks/2026-07-13-multi-unit-display-helpers.md`.
+
+## 2026-07-13 — Taxability flags + ItemType added to Item entity
+
+- **Entity:** Added `ItemType` enum (`goods`/`service`), `isTaxable` (default true), `cessPercent` (decimal 5,2), `reverseCharge` (default false). Fixed duplicate `GstRate` enum definition.
+- **DTOs:** Added `create-item.dto.ts` validations: `@IsEnum(ItemType)`, `@IsBoolean()` for `isTaxable`/`reverseCharge`, `@IsNumber() @Min(0) @Max(100)` for `cessPercent`. Added missing `@Max` import.
+- **Response DTO:** `item-response.dto.ts` now exposes `itemType`, `isTaxable`, `cessPercent`, `reverseCharge`.
+- **Frontend types:** Added all new fields to `Item` and `CreateItemRequest` interfaces.
+- **CreateItemPage:** Added `itemType` select (Goods/Service) and Taxability Settings section with `isTaxable` toggle, `reverseCharge` checkbox, `cessPercent` input + GST-exempt warning.
+- **EditItemPage:** Added Taxability Settings section (same as create form).
+- **Seed data:** `DemoItemDef` interface uses `ItemType` enum; `seedItems` propagates all new fields.
+- Full typecheck passes clean (0 errors from new code).
+- See `.project/tasks/2026-07-13-taxability-flags-item-type.md`.
+
+## 2026-07-13 — Item-Supplier linking table (backend + frontend + seed)
+
+- **New backend module `item-suppliers/`:** Entity with itemId, supplierId, supplierSku, unitPrice, unitId, leadTimeDays, isPreferred, minOrderQty, lastPurchaseDate/Price, notes, soft delete. Unique constraint on (itemId, supplierId).
+- **REST API:** `GET /item-suppliers/item/:itemId`, `GET /item-suppliers/supplier/:supplierId`, `POST`, `PATCH/:id`, `DELETE/:id`, `POST set-preferred/:itemId/:supplierId`.
+- **Seed:** 12 realistic item-supplier links (Butter Chicken→Spice World + Fresh Foods, etc.).
+- **Frontend module `item-suppliers/`:** Types, API functions, React Query hooks (useItemSuppliers, useCreateItemSupplier, useUpdateItemSupplier, useDeleteItemSupplier, useSetPreferredSupplier).
+- **ItemSuppliersDialog:** Full CRUD UI shown as a card section in EditItemPage's new Suppliers tab. Features: supplier selector (with already-linked guard), unit price + price unit dropdown, lead time, min order qty, preferred flag toggle, edit/delete/preferred actions, supplier contact info display.
+- **EditItemPage:** Added "Suppliers" tab alongside existing Details and Recipe/BOM tabs.
+- Full typecheck passes clean (0 errors in new code, only pre-existing test spec errors in backend).
+- See `.project/tasks/2026-07-13-item-supplier-linking.md`.
+
+## 2026-07-13 — Batch Tracking UI built for inventory module
+
+- **Backend:** Added `getAllBatches()` service method and `GET /inventory/batches/all` endpoint returning all batches with item/category/storageUnit relations.
+- **Frontend batch tracking module:** Added `StockBatch` type, batch API functions (`getAllBatches`, `getItemBatches`, `getNearExpiryBatches`), React Query hooks (`useAllBatches`, `useItemBatches`, `useNearExpiryBatches`).
+- **BatchesPage** (`/inventory/batches`): Full page with KPI cards (total/active/expiring/exhausted), near-expiry alert section (critical ≤7 days + warning ≤30 days), status filter tabs, expandable batch list grouped by item.
+- **ViewBatchesDialog**: Per-item batch dialog accessible from InventoryPage's row actions.
+- **Sidebar:** Added "Batches" link (Layers icon) under Inventory section.
+- Full typecheck passes clean; route tree auto-generated.
+- See `.project/tasks/2026-07-13-batch-tracking-ui.md`.
+
+## 2026-07-13 — Seed data for all remaining modules
+
+- Added **7 new seed methods** to `database-seed.service.ts`: `seedSecondStorageUnit`, `seedBatches`, `seedCustomers`, `seedPriceLevels`, `seedRecipes`, `seedReservations`, `seedStockCounts`.
+- Added **9 new repo injections** and **entity imports** for StockBatch, StockCount, StockCountLine, Customer, PriceLevel, ItemPriceLevel, Recipe, RecipeIngredient, Reservation.
+- **Critical fix in `database.module.ts`:** Added the 9 missing entity registrations to `TypeOrmModule.forFeature()` — without these, server fails on startup with DI errors.
+- Verified: all seed counts match expectations (customers: 5, price_levels: 3, item_price_levels: 30, recipes: 5, reservations: 5, stock_batches: 4, stock_counts: 1, storage_units: 2).
+- See `.project/tasks/2026-07-13-seed-remaining-modules.md`.
+
+
+- Implemented all 55 remaining report endpoints across 8 categories (Inventory 8, Financial 6, Kitchen 7, Customer 8, Reservation 6, Procurement 7, Operations 8, Executive 5).
+- Updated `reports.module.ts` with new TypeORM repos: Kot, KotItem, Reservation, Customer, Table, Zone, Supplier, User, Organization.
+- Added 55 service methods to `reports.service.ts` and 55 controller endpoints to `reports.controller.ts`.
+- All 71 report endpoints now serve live data (12 Sales + 10 Inventory + 8 Financial + 7 Kitchen + 8 Customer + 6 Reservation + 7 Procurement + 8 Operations + 5 Executive).
+- `tsc` passes clean for all reports code (0 new errors).
+- See `.project/tasks/2026-07-12-report-backend-endpoints.md`.
+
+## 2026-07-12 — SOLID report UI framework (all 55 remaining reports)
+
+- Built a SOLID-principled reusable report UI framework: `ReportConfig` types, `ReportPageLayout`/`ReportKpiGrid`/`ReportDataTable` framework components, `useGenericReport` hook, `GenericReportPage` with dynamic `$reportId` route.
+- Created 8 declarative config files with all 55 reports across Inventory, Financial, Kitchen, Customer, Reservation, Procurement, Operations, Executive categories.
+- Rewrote `ReportsPage.tsx` hub to group all 69 reports by category with proper links.
+- **Key architectural decision**: Reports are now declarative config objects rather than individual page components. Adding a new report = adding a config entry, no new component/route needed.
+- `tsc` passes clean for all new code (3 pre-existing errors unchanged).
+- Backend endpoints for most reports still need implementation.
+- See `.project/tasks/2026-07-12-solid-report-ui-framework.md`.
+
+## 2026-07-12 — Sales reports S07-S08-S10-S11 (4 missing reports)
+
+- Implemented 4 missing Sales & Revenue reports: RPT-S07 (Weekly/Monthly Trends), RPT-S08 (Discount Analysis), RPT-S10 (Invoice-Level Drill-Down), RPT-S11 (Cancelled & Voided Transactions).
+- Backend: 4 service methods + 4 controller endpoints. Frontend: types, API functions, React Query hooks, 4 page components, 4 route files, hub page links.
+- Total report endpoints now 16 (up from 12). All 12 Sales reports complete.
+- `tsc` passes clean for all new code (pre-existing errors in database-seed.service.ts, unit-conversion.repository.ts, DashboardPage, ZoneListPage unchanged).
+- Fixed a duplicate `upTo5Percent` key bug in Discount Analysis service method.
+- See `.project/tasks/2026-07-12-sales-reports-s07-s08-s10-s11.md`.
+
+## 2026-07-12 — Module 9: Nav & routing (all 9 modules complete 🎉)
+
+- Added `{ to: '/tables', label: 'Tables', icon: Table }` to the Operations section
+  in `AppSidebar.tsx`, before the Zones link, making Module 5's page reachable.
+- `routeTree.gen.ts` auto-regenerates on next dev server start.
+- All 9 floorplan modules are now implemented.
+- `tsc --noEmit` passes clean for the change.
+- See `.project/tasks/2026-07-12-module-9-nav-routing.md`.
+
+## 2026-07-12 — Module 8: POS conflict warning
+
+- SeatingPanel now fetches reservation conflicts in parallel via `useQueries` for all
+  tables in the active zone. Shows conflict badge with guest/time info, confirm dialog
+  on double-booking click via `window.confirm()`.
+- Completed `seatIds`→`tableIds` rename in POS module (api + dashboard).
+- `tsc --noEmit` passes clean for all changed files.
+- See `.project/tasks/2026-07-12-module-8-pos-conflict-warning.md`.
+
 ## 2026-07-12 — Module 7: Reservations UI wired to backend
 
 - Created complete reservations frontend module: types, API client (8 endpoints),

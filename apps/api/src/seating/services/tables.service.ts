@@ -68,4 +68,13 @@ export class TablesService {
     await this.findOne(id);
     await this.tableRepo.softDelete(id);
   }
+
+  async getSummary(): Promise<{ totalTables: number; activeTables: number; occupiedTables: number }> {
+    const all = await this.tableRepo.findAll();
+    return {
+      totalTables: all.length,
+      activeTables: all.filter((t) => t.status === 'occupied').length,
+      occupiedTables: all.filter((t) => t.status === 'occupied').length,
+    };
+  }
 }

@@ -1,7 +1,7 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { LedgerAccount, LedgerEntry, LedgerEntryType, LedgerCategory } from '../entities/ledger.entity';
+import { EntityManager, Repository } from 'typeorm';
+import { AccountType, LedgerAccount, LedgerEntry, LedgerEntryType, LedgerCategory } from '../entities/ledger.entity';
 
 @Injectable()
 export class LedgerService {
@@ -16,15 +16,24 @@ export class LedgerService {
     return this.accountRepo.find({ where: { isActive: true }, order: { name: 'ASC' } });
   }
 
-  async getAccount(id: string) {
-    const account = await this.accountRepo.findOne({ where: { id } });
+  async getAccount(id: string, manager?: EntityManager) {
+    const accountRepo = manager ? manager.getRepository(LedgerAccount) : this.accountRepo;
+    const account = await accountRepo.findOne({ where: { id } });
     if (!account) throw new NotFoundException('Account not found');
     return account;
   }
 
-  async createAccount(dto: { name: string; description?: string; openingBalance?: number; financialYear?: string }) {
+  async getAccountByName(name: string): Promise<LedgerAccount> {
+    const account = await this.accountRepo.findOne({ where: { name } });
+    if (!account) throw new NotFoundException(`Ledger account "${name}" not found`);
+    return account;
+  }
+
+  async createAccount(dto: { name: string; accountType: AccountType; code?: string; description?: string; openingBalance?: number; financialYear?: string }) {
     const account = this.accountRepo.create({
       name: dto.name,
+      accountType: dto.accountType,
+      code: dto.code || null,
       description: dto.description || null,
       openingBalance: dto.openingBalance || 0,
       currentBalance: dto.openingBalance || 0,
@@ -50,17 +59,23 @@ export class LedgerService {
     reference?: string;
     entryDate?: string;
     createdBy?: string;
-  }) {
-    const account = await this.getAccount(dto.accountId);
-    const balanceAfter = dto.type === LedgerEntryType.CREDIT
+    journalEntryId?: string;
+  }, manager?: EntityManager) {
+    const accountRepo = manager ? manager.getRepository(LedgerAccount) : this.accountRepo;
+    const entryRepo = manager ? manager.getRepository(LedgerEntry) : this.entryRepo;
+
+    const account = await this.getAccount(dto.accountId, manager);
+
+    // Debit-normal accounts (asset/expense) increase on DEBIT and decrease on CREDIT.
+    // Credit-normal accounts (liability/equity/revenue) do the opposite.
+    const isDebitNormal = account.accountType === AccountType.ASSET || account.accountType === AccountType.EXPENSE;
+    const isDebit = dto.type === LedgerEntryType.DEBIT;
+    const increases = isDebitNormal ? isDebit : !isDebit;
+    const balanceAfter = increases
       ? account.currentBalance + dto.amount
       : account.currentBalance - dto.amount;
 
-    if (dto.type === LedgerEntryType.DEBIT && balanceAfter < 0) {
-      throw new BadRequestException('Insufficient balance');
-    }
-
-    const entry = this.entryRepo.create({
+    const entry = entryRepo.create({
       accountId: dto.accountId,
       type: dto.type,
       amount: dto.amount,
@@ -69,12 +84,13 @@ export class LedgerService {
       reference: dto.reference || null,
       entryDate: dto.entryDate ? new Date(dto.entryDate) : new Date(),
       balanceAfter,
+      journalEntryId: dto.journalEntryId || null,
       createdBy: dto.createdBy || null,
     });
-    await this.entryRepo.save(entry);
+    await entryRepo.save(entry);
 
     account.currentBalance = balanceAfter;
-    await this.accountRepo.save(account);
+    await accountRepo.save(account);
     return entry;
   }
 

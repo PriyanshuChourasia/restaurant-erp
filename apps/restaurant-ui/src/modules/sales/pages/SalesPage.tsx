@@ -1,9 +1,11 @@
 import { useState, useMemo } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { createColumnHelper, type ColumnDef } from '@tanstack/react-table'
-import { Search, Receipt, IndianRupee, Eye } from 'lucide-react'
+import { Search, Receipt, IndianRupee, Eye, Ban, FileMinus } from 'lucide-react'
 import { apiClient } from '@/lib/axios-client'
 import { DataTable } from '@/components/ui/data-table'
+import { ReceiptDialog } from '@/modules/pos/components/ReceiptDialog'
+import { CreditNoteDialog } from '../dialogs/CreditNoteDialog'
 
 interface Invoice {
   id: string
@@ -32,6 +34,9 @@ const statusBadgeClass = (status: string) => {
 export function SalesPage() {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
+  const [viewInvoiceId, setViewInvoiceId] = useState<string | null>(null)
+  const [creditNoteInvoiceId, setCreditNoteInvoiceId] = useState<string | null>(null)
+  const queryClient = useQueryClient()
 
   const { data, isLoading } = useQuery({
     queryKey: ['sales', page, search],
@@ -41,6 +46,14 @@ export function SalesPage() {
   const { data: daily } = useQuery({
     queryKey: ['sales-daily'],
     queryFn: () => apiClient.get('/sales/daily').then(r => r.data),
+  })
+
+  const cancelMutation = useMutation({
+    mutationFn: (id: string) => apiClient.post(`/sales/${id}/cancel`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sales'] })
+      queryClient.invalidateQueries({ queryKey: ['sales-daily'] })
+    },
   })
 
   const invoices: Invoice[] = data?.data || []
@@ -95,15 +108,44 @@ export function SalesPage() {
       columnHelper.display({
         id: 'actions',
         header: '',
-        cell: () => (
-          <button className="inline-flex items-center gap-1 h-7 px-2.5 rounded-md border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-100 transition-all">
-            <Eye size={12} />
-            View
-          </button>
-        ),
+        cell: (info) => {
+          const row = info.row.original
+          const canCancel = row.status !== 'cancelled' && row.status !== 'completed'
+          const canCreditNote = row.status !== 'cancelled'
+          return (
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setViewInvoiceId(row.id)}
+                className="inline-flex items-center gap-1 h-7 px-2.5 rounded-md border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-100 transition-all"
+              >
+                <Eye size={12} />
+                View
+              </button>
+              {canCreditNote && (
+                <button
+                  onClick={() => setCreditNoteInvoiceId(row.id)}
+                  className="inline-flex items-center gap-1 h-7 px-2.5 rounded-md border border-gray-200 text-xs font-medium text-gray-600 hover:bg-amber-50 hover:text-amber-700 hover:border-amber-200 transition-all"
+                >
+                  <FileMinus size={12} />
+                  Credit Note
+                </button>
+              )}
+              {canCancel && (
+                <button
+                  onClick={() => window.confirm(`Cancel invoice ${row.invoiceNumber}? This restores stock, releases tables, and reverses the posted accounting.`) && cancelMutation.mutate(row.id)}
+                  disabled={cancelMutation.isPending}
+                  className="inline-flex items-center gap-1 h-7 px-2.5 rounded-md border border-gray-200 text-xs font-medium text-gray-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all disabled:opacity-50"
+                >
+                  <Ban size={12} />
+                  Cancel
+                </button>
+              )}
+            </div>
+          )
+        },
       }),
     ],
-    [],
+    [cancelMutation],
   )
 
   return (
@@ -174,6 +216,20 @@ export function SalesPage() {
         isLoading={isLoading}
         emptyMessage="No sales yet"
       />
+
+      {viewInvoiceId && (
+        <ReceiptDialog
+          invoiceId={viewInvoiceId}
+          onClose={() => setViewInvoiceId(null)}
+        />
+      )}
+
+      {creditNoteInvoiceId && (
+        <CreditNoteDialog
+          invoiceId={creditNoteInvoiceId}
+          onClose={() => setCreditNoteInvoiceId(null)}
+        />
+      )}
     </div>
   )
 }

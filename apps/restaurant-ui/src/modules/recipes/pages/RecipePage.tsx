@@ -1,11 +1,10 @@
 import { useState } from 'react'
 import { Save, Trash2, Plus, Calculator, Loader2, FlaskConical } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
+import { apiClient } from '@/lib/axios-client'
 import { getItems } from '@/modules/items/api/items.api'
 import { useRecipe, useRecipeCost, useUpsertRecipe, useDeleteRecipe, usePersistRecipeCost } from '../hooks/useRecipeQueries'
 import type { RecipeIngredient } from '../types/recipe.types'
-
-const UNITS = ['piece', 'kg', 'gram', 'litre', 'ml', 'dozen', 'plate', 'bowl', 'cup', 'glass', 'bottle', 'box', 'packet']
 
 interface RecipeEditorProps {
   itemId: string
@@ -18,6 +17,12 @@ export function RecipeEditor({ itemId }: RecipeEditorProps) {
     queryKey: ['items-list'],
     queryFn: () => getItems({ limit: 500 }),
   })
+
+  const { data: units } = useQuery({
+    queryKey: ['units'],
+    queryFn: () => apiClient.get('/units').then(r => r.data),
+  })
+  const unitList: Array<{ id: string; code: string; name: string }> = Array.isArray(units) ? units : []
 
   const upsertMutation = useUpsertRecipe()
   const deleteMutation = useDeleteRecipe()
@@ -169,7 +174,7 @@ export function RecipeEditor({ itemId }: RecipeEditorProps) {
                 value={yieldUnit}
                 onChange={(e) => setYieldUnit(e.target.value)}
               >
-                {UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
+                {unitList.map((u) => <option key={u.id} value={u.code}>{u.name} ({u.code})</option>)}
               </select>
             </div>
           </div>
@@ -218,7 +223,7 @@ export function RecipeEditor({ itemId }: RecipeEditorProps) {
                       value={ing.unit}
                       onChange={(e) => updateIngredient(idx, 'unit', e.target.value)}
                     >
-                      {UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
+                      {unitList.map((u) => <option key={u.id} value={u.code}>{u.name} ({u.code})</option>)}
                     </select>
                   </div>
                   <button

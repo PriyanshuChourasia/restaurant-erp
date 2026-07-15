@@ -28,11 +28,16 @@ export class KotService {
     return kot;
   }
 
+  async findByOrderId(orderId: string) {
+    return this.repo.find({ where: { orderId } });
+  }
+
   async create(dto: {
     orderId?: string;
     tableIds?: string[];
     station: KotStation;
     notes?: string;
+    preparedBy?: string;
     items: Array<{ itemId: string; itemName: string; quantity: number; instructions?: string }>;
   }) {
     const count = await this.repo.count();
@@ -42,6 +47,7 @@ export class KotService {
       tableIds: dto.tableIds && dto.tableIds.length > 0 ? dto.tableIds : null,
       station: dto.station,
       notes: dto.notes || null,
+      preparedBy: dto.preparedBy || null,
       status: KotStatus.PENDING,
       items: dto.items.map((i) => ({
         itemId: i.itemId,
@@ -54,17 +60,20 @@ export class KotService {
     return this.repo.save(kot);
   }
 
-  async updateStatus(id: string, status: KotStatus) {
+  async updateStatus(id: string, status: KotStatus, preparedBy?: string) {
     const kot = await this.findById(id);
     const updates: Partial<Kot> = { status };
-    if (status === KotStatus.PREPARING) updates.startedAt = new Date();
+    if (status === KotStatus.PREPARING) {
+      updates.startedAt = new Date();
+      if (preparedBy) updates.preparedBy = preparedBy;
+    }
     if (status === KotStatus.READY) updates.completedAt = new Date();
     if (status === KotStatus.SERVED) updates.servedAt = new Date();
     await this.repo.update(id, updates);
     return this.findById(id);
   }
 
-  async updateItemStatus(kotId: string, itemId: string, status: KotStatus) {
+  async updateItemStatus(kotId: string, itemId: string, status: KotStatus, preparedBy?: string) {
     const kot = await this.findById(kotId);
     const item = kot.items.find((i) => i.id === itemId);
     if (!item) throw new NotFoundException('KOT item not found');
@@ -75,8 +84,11 @@ export class KotService {
     const allDone = kot.items.every((i) => [KotStatus.READY, KotStatus.SERVED].includes(i.status as KotStatus));
     const anyStarted = kot.items.some((i) => i.status !== KotStatus.PENDING);
     if (allDone) await this.repo.update(kotId, { status: KotStatus.READY, completedAt: new Date() });
-    else if (anyStarted) await this.repo.update(kotId, { status: KotStatus.PREPARING, startedAt: new Date() });
-
+    else if (anyStarted) {
+      const updates: Partial<Kot> = { status: KotStatus.PREPARING, startedAt: new Date() };
+      if (preparedBy) updates.preparedBy = preparedBy;
+      await this.repo.update(kotId, updates);
+    }
     return this.findById(kotId);
   }
 

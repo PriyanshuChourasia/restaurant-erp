@@ -29,6 +29,9 @@ COPY --from=builder /app/node_modules ./node_modules
 
 EXPOSE 3000
 
-ENV NODE_ENV=production
+# NODE_ENV=development enables TypeORM schema sync + auto-seed on startup
+# (DatabaseSeedService.onApplicationBootstrap), since this project has no
+# migrations yet. Override to "production" once migrations exist.
+ENV NODE_ENV=development
 
 CMD ["node", "dist/main.js"]

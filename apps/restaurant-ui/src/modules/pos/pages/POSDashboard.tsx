@@ -9,8 +9,11 @@ import { getCategories } from '@/modules/category/api/category.api'
 
 import { CustomerCombobox } from '@/modules/customers/components/CustomerCombobox'
 import { SeatingPanel } from '@/modules/pos/components/SeatingPanel'
-import { createInvoice, createKot, clearInvoiceTables } from '../api/pos.api'
+import { ChargeModal } from '@/modules/pos/components/ChargeModal'
+import { ReceiptDialog } from '@/modules/pos/components/ReceiptDialog'
+import { createInvoice, createKot } from '../api/pos.api'
 import type { CustomerSearchResult } from '@/modules/customers/types/customer.types'
+import { FormattedQuantity } from '@/components/ui/FormattedQuantity'
 
 interface CartItem {
   id: string
@@ -20,6 +23,7 @@ interface CartItem {
   price: number
   gstRate: number
   quantity: number
+  unitCode: string
 }
 
 export function POSDashboard() {
@@ -28,9 +32,8 @@ export function POSDashboard() {
   const [cart, setCart] = useState<CartItem[]>([])
   const [selectedTableIds, setSelectedTableIds] = useState<string[]>([])
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerSearchResult | null>(null)
-  const [paymentMethod, setPaymentMethod] = useState('cash')
-  const [showSuccess, setShowSuccess] = useState(false)
-  const [lastInvoiceId, setLastInvoiceId] = useState<string | null>(null)
+  const [showChargeModal, setShowChargeModal] = useState(false)
+  const [receiptInvoiceId, setReceiptInvoiceId] = useState<string | null>(null)
 
   const { data: itemsData } = useQuery({
     queryKey: ['items-pos'],
@@ -65,6 +68,7 @@ export function POSDashboard() {
           price: item.price,
           gstRate: item.gstRate,
           quantity: 1,
+          unitCode: item.unit?.code || '',
         },
       ]
     })
@@ -105,7 +109,7 @@ export function POSDashboard() {
   const finalTotal = Math.round(grandTotal)
 
   const billMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (paymentMethod: string) => {
       const invoice = await createInvoice({
         customerId: selectedCustomer?.id ?? undefined,
         tableIds: selectedTableIds.length > 0 ? selectedTableIds : undefined,
@@ -133,11 +137,10 @@ export function POSDashboard() {
       return invoice
     },
     onSuccess: (invoice) => {
-      setShowSuccess(true)
-      setLastInvoiceId(invoice.id)
+      setShowChargeModal(false)
+      setReceiptInvoiceId(invoice.id)
       setCart([])
       setSelectedTableIds([])
-      setTimeout(() => setShowSuccess(false), 4000)
     },
   })
 
@@ -212,7 +215,7 @@ export function POSDashboard() {
                   </p>
                 </div>
                 <p className="text-xs text-gray-400">
-                  GST {item.gstRate}% | {item.hsnCode}
+                  GST {item.gstRate}%{item.unit?.code ? ` | ${item.unit.code}` : ''} | {item.hsnCode}
                 </p>
               </button>
             ))}
@@ -246,20 +249,6 @@ export function POSDashboard() {
               onTableToggle={handleTableToggle}
             />
           </div>
-
-          {/* Payment method */}
-          <div className="flex gap-2">
-            <select
-              value={paymentMethod}
-              onChange={(e) => setPaymentMethod(e.target.value)}
-              className="flex-1 h-8 rounded-lg border border-gray-300 px-2 text-sm outline-none focus:border-primary/40"
-            >
-              <option value="cash">Cash</option>
-              <option value="card">Card</option>
-              <option value="upi">UPI</option>
-              <option value="online">Online</option>
-            </select>
-          </div>
         </div>
 
         {/* Cart Items */}
@@ -282,7 +271,7 @@ export function POSDashboard() {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 truncate">{item.name}</p>
                   <p className="text-xs text-gray-400">
-                    ₹{item.price.toFixed(2)} each
+                    ₹{item.price.toFixed(2)} {item.unitCode ? `/${item.unitCode}` : 'each'}
                   </p>
                 </div>
                 <div className="flex items-center gap-1">
@@ -292,8 +281,8 @@ export function POSDashboard() {
                   >
                     <Minus size={14} />
                   </button>
-                  <span className="w-6 text-center text-sm font-medium text-gray-900">
-                    {item.quantity}
+                  <span className="min-w-[2.5rem] text-center text-sm font-medium text-gray-900">
+                    <FormattedQuantity quantity={item.quantity} unit={item.unitCode} variant="full" />
                   </span>
                   <button
                     onClick={() => updateQty(item.itemId, 1)}
@@ -338,39 +327,36 @@ export function POSDashboard() {
             </span>
           </div>
 
-          {showSuccess && (
-            <div className="bg-green-50 border border-green-200 text-green-700 text-sm p-3 rounded-lg text-center font-medium">
-              ✓ Invoice created & KOT sent to kitchen!
-              {lastInvoiceId && selectedTableIds.length > 0 && (
-                <button
-                  onClick={() => {
-                    clearInvoiceTables(lastInvoiceId)
-                    setSelectedTableIds([])
-                  }}
-                  className="block mx-auto mt-1 text-xs text-gray-500 underline hover:text-gray-700"
-                >
-                  Clear tables
-                </button>
-              )}
-            </div>
-          )}
-
           <button
             disabled={cart.length === 0 || billMutation.isPending}
-            onClick={() => billMutation.mutate()}
+            onClick={() => setShowChargeModal(true)}
             className="flex w-full h-10 items-center justify-center gap-2 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {billMutation.isPending ? (
-              <span className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
-            ) : (
-              <>
-                <CreditCard size={18} />
-                Charge ₹{finalTotal.toFixed(2)}
-              </>
-            )}
+            <CreditCard size={18} />
+            Charge ₹{finalTotal.toFixed(2)}
           </button>
         </div>
       </div>
+
+      <ChargeModal
+        open={showChargeModal}
+        onClose={() => setShowChargeModal(false)}
+        onConfirm={(method) => billMutation.mutate(method)}
+        cart={cart}
+        subtotal={subtotal}
+        cgstTotal={cgstTotal}
+        sgstTotal={sgstTotal}
+        roundOff={roundOff}
+        finalTotal={finalTotal}
+        isPending={billMutation.isPending}
+      />
+
+      {receiptInvoiceId && (
+        <ReceiptDialog
+          invoiceId={receiptInvoiceId}
+          onClose={() => setReceiptInvoiceId(null)}
+        />
+      )}
     </div>
   )
 }

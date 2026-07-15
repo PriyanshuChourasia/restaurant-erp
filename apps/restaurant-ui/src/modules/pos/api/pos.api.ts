@@ -40,6 +40,11 @@ export async function clearInvoiceTables(invoiceId: string) {
   return data
 }
 
+export async function getInvoice(invoiceId: string) {
+  const { data } = await apiClient.get(`/sales/${invoiceId}`)
+  return data
+}
+
 export async function getDailySales(date?: string) {
   const { data } = await apiClient.get('/sales/daily', { params: date ? { date } : {} })
   return data

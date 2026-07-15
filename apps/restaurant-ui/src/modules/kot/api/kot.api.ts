@@ -1,28 +1,5 @@
 import { apiClient } from '@/lib/axios-client'
-
-export interface KotItem {
-  id: string
-  itemId: string
-  itemName: string
-  quantity: number
-  instructions: string | null
-  status: string
-}
-
-export interface Kot {
-  id: string
-  kotNumber: string
-  orderId: string | null
-  tableNumbers: string[] | null
-  status: string
-  station: string
-  notes: string | null
-  items: KotItem[]
-  createdAt: string
-  startedAt: string | null
-  completedAt: string | null
-  servedAt: string | null
-}
+import type { Kot, CreateKotPayload, KotListResponse } from '../types'
 
 export async function getActiveKots(station?: string) {
   const { data } = await apiClient.get<Kot[]>('/kots/active', { params: station ? { station } : {} })
@@ -30,21 +7,26 @@ export async function getActiveKots(station?: string) {
 }
 
 export async function getAllKots(params?: { page?: number; limit?: number; status?: string; station?: string }) {
-  const { data } = await apiClient.get('/kots', { params })
+  const { data } = await apiClient.get<KotListResponse>('/kots', { params })
   return data
 }
 
-export async function createKot(payload: any) {
-  const { data } = await apiClient.post('/kots', payload)
+export async function getKotById(id: string) {
+  const { data } = await apiClient.get<Kot>(`/kots/${id}`)
   return data
 }
 
-export async function updateKotStatus(id: string, status: string) {
-  const { data } = await apiClient.patch(`/kots/${id}/status`, { status })
+export async function createKot(payload: CreateKotPayload) {
+  const { data } = await apiClient.post<Kot>('/kots', payload)
   return data
 }
 
-export async function updateKotItemStatus(kotId: string, itemId: string, status: string) {
-  const { data } = await apiClient.patch(`/kots/${kotId}/items/${itemId}/status`, { status })
+export async function updateKotStatus(id: string, status: string, preparedBy?: string) {
+  const { data } = await apiClient.patch<Kot>(`/kots/${id}/status`, { status, preparedBy })
+  return data
+}
+
+export async function updateKotItemStatus(kotId: string, itemId: string, status: string, preparedBy?: string) {
+  const { data } = await apiClient.patch<Kot>(`/kots/${kotId}/items/${itemId}/status`, { status, preparedBy })
   return data
 }

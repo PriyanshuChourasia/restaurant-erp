@@ -6,6 +6,7 @@ export interface Zone {
   id: string
   name: string
   description: string | null
+  floor: number
   isActive: boolean
   createdAt: string
   updatedAt: string
@@ -14,6 +15,7 @@ export interface Zone {
 export interface CreateZoneRequest {
   name: string
   description?: string
+  floor?: number
   isActive?: boolean
 }
 

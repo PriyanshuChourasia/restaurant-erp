@@ -69,6 +69,11 @@ today (confirmed by grep — `KotItem` has no update path besides
     badge).
   - Visual marker (e.g. a small "+" tag) on `isAddendum` items so kitchen
     staff can tell "this was added after the ticket printed" at a glance.
+    If [`kot-merge-plan.md`](./kot-merge-plan.md) (module 12) lands, an
+    item can carry both this addendum tag and that module's
+    `mergedFromKotNumber` provenance caption at once (an addendum item on
+    a KOT that later gets merged) — render both, don't let one badge
+    replace the other.
   - Inline quantity/instructions edit controls on `pending` items only
     (disabled once `preparing`+, matching the backend guard).
 - `apps/restaurant-ui/src/modules/kot/api/kot.api.ts` — corresponding

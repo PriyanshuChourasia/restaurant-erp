@@ -1,8 +1,11 @@
-# Module 2: Purchases → Inventory wiring (GRN posts stock)
+# Module 4: Purchases → Inventory wiring (GRN posts stock)
 
-See [`README.md`](./README.md) for full background/goal. Depends on:
-[`units_plan.md`](./units_plan.md) (module 1) for unit conversion when
-`purchaseUnit !== unit`.
+See [`README.md`](./README.md) for full background/goal and
+[`data-model_plan.md`](./data-model_plan.md) for the underlying schema.
+Depends on: [`units_plan.md`](./units_plan.md) (module 1) for unit
+conversion when `purchaseUnit !== unit`, and
+[`storage-units_plan.md`](./storage-units_plan.md) (module 2) — receipts
+post stock at a specific storage unit, not implicitly "the item's stock".
 
 ## What
 
@@ -24,8 +27,8 @@ Add a real goods-receipt step that:
    new_avg_cost = (existing_qty * existing_avg_cost + received_qty * received_unit_cost)
                   / (existing_qty + received_qty)
    ```
-4. Runs steps 1–3 (plus batch creation in module 4, ledger posting in
-   module 3) inside one `DataSource.transaction`, following the exact
+4. Runs steps 1–3 (plus batch creation in module 6, ledger posting in
+   module 5) inside one `DataSource.transaction`, following the exact
    pattern already used in `RecipesService.createProductionEntry`
    (`apps/api/src/recipes/services/recipes.service.ts:170-234`).
 
@@ -41,9 +44,11 @@ Add a real goods-receipt step that:
       `CANCELLED`.
     - For each `PurchaseItem`, convert `quantity` from the item's
       `purchaseUnit` to `unit` via `UnitsService.convert`.
-    - Call a new `InventoryService.postPurchaseReceipt(itemId, convertedQty, unitPrice)`
+    - Call a new `InventoryService.postPurchaseReceipt(itemId, storageUnitId, convertedQty, unitPrice)`
       (see below) instead of the generic `adjustStock` (which doesn't
-      touch `unitCost`).
+      touch `unitCost`). `storageUnitId` defaults to
+      `StorageUnitsService.findDefault().id` unless the purchase specifies
+      a receiving location (module 2).
     - Set `status = RECEIVED`.
     - Wrap in `this.dataSource.transaction(...)`.
   - Inject `UnitsService`, `InventoryService`, `DataSource`.
@@ -55,15 +60,16 @@ Add a real goods-receipt step that:
   when the target status is `RECEIVED` — pick whichever keeps one code
   path; don't let both exist and diverge).
 - `apps/api/src/inventory/services/inventory.service.ts` — new method
-  `postPurchaseReceipt(itemId, quantity, unitCost)`:
-  - Load or create the `Inventory` row (mirror the existing
-    `setOpeningBalance` create-if-missing pattern at
-    `inventory.service.ts:38-55`).
-  - Compute the weighted average per the formula above.
+  `postPurchaseReceipt(itemId, storageUnitId, quantity, unitCost)`:
+  - Load or create the `Inventory` row for that `(itemId, storageUnitId)`
+    pair (mirror the existing `setOpeningBalance`/`declareOpeningStock`
+    create-if-missing pattern).
+  - Compute the weighted average per the formula above (scoped to that
+    storage unit's existing quantity/cost, not the item's global total).
   - Update `currentStock += quantity`, `unitCost = newAvgCost`.
   - Save, then create the `StockMovement` (`type: PURCHASE_IN`,
-    `reference: purchase.purchaseNumber`).
-  - Return the updated `Inventory` row (callers in module 3/4 need it for
+    `storageUnitId`, `reference: purchase.purchaseNumber`).
+  - Return the updated `Inventory` row (callers in modules 5/6 need it for
     ledger posting / batch creation amounts).
 - `apps/api/src/purchases/purchases.module.ts` — import `InventoryModule`
   and `UnitsModule` (mirrors how `SalesModule` already imports

@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from '@tanstack/react-router'
-import { ArrowLeft, Save, Tag, Loader2, FlaskConical } from 'lucide-react'
+import { ArrowLeft, Save, Tag, Loader2, FlaskConical, Building2, IndianRupee, AlertTriangle } from 'lucide-react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { apiClient } from '@/lib/axios-client'
 import { getItem, updateItem } from '../api/items.api'
 import { getCategories } from '@/modules/category/api/category.api'
 import { RecipeEditor } from '@/modules/recipes/pages/RecipePage'
+import { ItemSuppliersDialog } from '@/modules/item-suppliers/components/ItemSuppliersDialog'
 
 const GST_RATES = [
   { value: 0, label: 'GST 0% (Nil)' },
@@ -14,7 +16,10 @@ const GST_RATES = [
   { value: 28, label: 'GST 28%' },
 ]
 
-const UNITS = ['piece', 'kg', 'gram', 'litre', 'ml', 'dozen', 'plate', 'bowl', 'cup', 'glass', 'bottle', 'box', 'packet']
+const ITEM_TYPES = [
+  { value: 'goods', label: 'Goods (Physical Product)' },
+  { value: 'service', label: 'Service' },
+]
 
 const PRODUCT_TYPES = [
   { value: 'finished', label: 'Finished (Menu Item)' },
@@ -30,7 +35,11 @@ export function EditItemPage({ itemId }: EditItemPageProps) {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { data: cats } = useQuery({ queryKey: ['categories-tree'], queryFn: () => getCategories({ limit: 100 }) })
-  const [activeTab, setActiveTab] = useState<'details' | 'recipe'>('details')
+  const { data: units } = useQuery({
+    queryKey: ['units'],
+    queryFn: () => apiClient.get('/units').then(r => r.data),
+  })
+  const [activeTab, setActiveTab] = useState<'details' | 'recipe' | 'suppliers'>('details')
 
   const { data: item, isLoading: itemLoading } = useQuery({
     queryKey: ['item', itemId],
@@ -40,7 +49,8 @@ export function EditItemPage({ itemId }: EditItemPageProps) {
 
   const [form, setForm] = useState({
     name: '', sku: '', hsnCode: '', price: 0, costPrice: 0,
-    gstRate: 18, unit: 'piece', productType: 'finished', isVeg: true, isActive: true,
+    gstRate: 18, itemType: 'goods', isTaxable: true, cessPercent: 0, reverseCharge: false,
+    unitId: '', purchaseUnitId: '', productType: 'finished', isVeg: true, isActive: true,
     categoryId: '', description: '',
   })
 
@@ -54,7 +64,12 @@ export function EditItemPage({ itemId }: EditItemPageProps) {
       price: item.price,
       costPrice: item.costPrice || 0,
       gstRate: item.gstRate,
-      unit: item.unit || 'piece',
+      itemType: item.itemType || 'goods',
+      isTaxable: item.isTaxable !== false,
+      cessPercent: item.cessPercent || 0,
+      reverseCharge: item.reverseCharge || false,
+      unitId: item.unitId || item.unit?.id || '',
+      purchaseUnitId: item.purchaseUnitId || '',
       productType: item.productType || 'finished',
       isVeg: item.isVeg,
       isActive: item.isActive,
@@ -63,12 +78,17 @@ export function EditItemPage({ itemId }: EditItemPageProps) {
     })
   }, [item])
 
+  const unitList = Array.isArray(units) ? units : []
+
   const mutation = useMutation({
     mutationFn: () => updateItem(itemId, {
       ...form,
       price: Number(form.price),
       costPrice: Number(form.costPrice),
+      unitId: form.unitId,
+      purchaseUnitId: form.purchaseUnitId || undefined,
       categoryId: form.categoryId || undefined,
+      itemType: (form.itemType || 'goods') as 'goods' | 'service',
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['items'] })
@@ -128,6 +148,17 @@ export function EditItemPage({ itemId }: EditItemPageProps) {
           <FlaskConical size={14} className="inline mr-1" />
           Recipe / BOM
         </button>
+        <button
+          onClick={() => setActiveTab('suppliers')}
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+            activeTab === 'suppliers'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          <Building2 size={14} className="inline mr-1" />
+          Suppliers
+        </button>
       </div>
 
       {activeTab === 'details' && (
@@ -160,9 +191,22 @@ export function EditItemPage({ itemId }: EditItemPageProps) {
               </select>
             </div>
             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Item Type</label>
+              <select className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" value={form.itemType} onChange={(e) => setForm({ ...form, itemType: e.target.value })}>
+                {ITEM_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+              </select>
+            </div>
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Unit *</label>
-              <select className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })}>
-                {UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
+              <select className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" value={form.unitId} onChange={(e) => setForm({ ...form, unitId: e.target.value })} required>
+                <option value="">Select a unit...</option>
+                {unitList.length > 0 ? (
+                  unitList.map((u: any) => (
+                    <option key={u.id} value={u.id}>{u.name} ({u.code})</option>
+                  ))
+                ) : (
+                  <option value="">Loading units...</option>
+                )}
               </select>
             </div>
             <div>
@@ -195,6 +239,52 @@ export function EditItemPage({ itemId }: EditItemPageProps) {
             <textarea className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
           </div>
 
+          {/* Taxability Section */}
+          <div className="bg-white rounded-xl p-4 border border-gray-200">
+            <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+              <IndianRupee size={14} className="text-gray-400" />
+              Taxability Settings
+            </h4>
+            <div className="flex flex-wrap gap-6">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.isTaxable}
+                  onChange={(e) => setForm({ ...form, isTaxable: e.target.checked })}
+                  className="w-4 h-4 accent-primary"
+                />
+                <span className="text-sm text-gray-700">Taxable</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.reverseCharge}
+                  onChange={(e) => setForm({ ...form, reverseCharge: e.target.checked })}
+                  className="w-4 h-4 accent-orange-500"
+                />
+                <span className="text-sm text-gray-700">Reverse Charge</span>
+              </label>
+              <div className="flex items-center gap-2">
+                <label className="text-sm text-gray-700 whitespace-nowrap">Cess (%)</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  className="w-20 rounded-lg border border-gray-300 px-3 py-1.5 text-sm"
+                  value={form.cessPercent}
+                  onChange={(e) => setForm({ ...form, cessPercent: Number(e.target.value) })}
+                />
+              </div>
+            </div>
+            {!form.isTaxable && (
+              <p className="text-xs text-amber-600 mt-2 flex items-center gap-1">
+                <AlertTriangle size={12} />
+                This item will be treated as GST-exempt. No tax will be applied.
+              </p>
+            )}
+          </div>
+
           {/* GST Preview */}
           {form.price > 0 && (
             <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
@@ -220,6 +310,12 @@ export function EditItemPage({ itemId }: EditItemPageProps) {
       {activeTab === 'recipe' && (
         <div className="bg-white rounded-lg border border-gray-200 p-5">
           <RecipeEditor itemId={itemId} />
+        </div>
+      )}
+
+      {activeTab === 'suppliers' && (
+        <div className="bg-white rounded-lg border border-gray-200 p-5">
+          <ItemSuppliersDialog itemId={itemId} itemName={item.name} onClose={() => setActiveTab('details')} />
         </div>
       )}
     </div>

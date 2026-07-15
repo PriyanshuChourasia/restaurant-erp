@@ -265,7 +265,7 @@ export class PriceLevelsService {
         sku: item.sku,
         hsnCode: item.hsnCode,
         gstRate: item.gstRate,
-        unit: item.unit,
+        unit: item.unit?.code || item.unitId,
         categoryId: item.categoryId,
         categoryName: item.category?.name ?? null,
         basePrice: item.price,

@@ -1,8 +1,11 @@
-# Module 6: Physical stock count / reconciliation
+# Module 8: Physical stock count / reconciliation
 
-See [`README.md`](./README.md) for full background/goal. Depends on:
-[`ledger-integration_plan.md`](./ledger-integration_plan.md) (module 3) —
-variances post through the same `adjustment_in/out` → ledger path.
+See [`README.md`](./README.md) for full background/goal and
+[`data-model_plan.md`](./data-model_plan.md) for the underlying schema.
+Depends on: [`ledger-integration_plan.md`](./ledger-integration_plan.md)
+(module 5) — variances post through the same `adjustment_in/out` → ledger
+path. Counts are per storage unit (module 2) — a physical count only ever
+covers stock a person can see in one location.
 
 ## What
 
@@ -21,6 +24,7 @@ don't invent a parallel stock-mutation path.
   @Entity('stock_counts')
   export class StockCount {
     id: string;
+    storageUnitId: string;    // FK -> storage_units.id — a count covers one physical location
     countDate: Date;
     status: 'draft' | 'completed';
     createdBy: string | null;
@@ -31,25 +35,26 @@ don't invent a parallel stock-mutation path.
     id: string;
     stockCountId: string;
     itemId: string;
-    systemQuantity: number;   // Inventory.currentStock snapshot when the line is added
+    systemQuantity: number;   // Inventory.currentStock snapshot for (itemId, stockCount.storageUnitId) when the line is added
     countedQuantity: number | null;  // null until physically counted
     variance: number | null;         // countedQuantity - systemQuantity, computed on complete
   }
   ```
 - **New** `apps/api/src/inventory/services/stock-count.service.ts` —
   `StockCountService`:
-  - `create(itemIds: string[], userId?: string)` — new `draft`
-    `StockCount`, one `StockCountLine` per item with `systemQuantity`
-    snapshotted from current `Inventory.currentStock`.
+  - `create(storageUnitId: string, itemIds: string[], userId?: string)` —
+    new `draft` `StockCount` for that storage unit, one `StockCountLine`
+    per item with `systemQuantity` snapshotted from
+    `Inventory.currentStock` for `(itemId, storageUnitId)`.
   - `submitCounts(stockCountId, lines: { lineId, countedQuantity }[])` —
     fills in `countedQuantity` on each line, computes `variance`. Doesn't
     post adjustments yet (allows re-counting before finalizing).
   - `complete(stockCountId)` — for each line with non-zero `variance`,
-    call `InventoryService.adjustStock(itemId, variance > 0 ?
-    ADJUSTMENT_IN : ADJUSTMENT_OUT, Math.abs(variance), ..., reference:
-    'STOCKCOUNT-' + stockCountId)`. Sets `status: 'completed'`. Reject
-    completing an already-completed count (idempotency, same concern as
-    module 2's purchase receipt).
+    call `InventoryService.adjustStock(itemId, stockCount.storageUnitId,
+    variance > 0 ? ADJUSTMENT_IN : ADJUSTMENT_OUT, Math.abs(variance), ...,
+    reference: 'STOCKCOUNT-' + stockCountId)`. Sets `status: 'completed'`.
+    Reject completing an already-completed count (idempotency, same
+    concern as module 4's purchase receipt).
 - **New** `apps/api/src/inventory/controllers/stock-count.controller.ts` —
   `POST /inventory/stock-counts`, `POST
   /inventory/stock-counts/:id/submit`, `POST
@@ -71,7 +76,7 @@ don't invent a parallel stock-mutation path.
   under-count and over-count, complete it — confirm `adjustment_out`
   posts for the short item and `adjustment_in` for the over-count item,
   each with the `STOCKCOUNT-<id>` reference, and both flow through to the
-  Stock Adjustment ledger account (module 3).
+  Stock Adjustment ledger account (module 5).
 - Confirm completing the same count twice is rejected.
 - Manual walkthrough: `/inventory` → new stock-count entry point → full
   count → completed → `GET /inventory/:itemId/movements` shows the

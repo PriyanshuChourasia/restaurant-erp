@@ -29,6 +29,10 @@
 **Filters:** Date range, supplier, status
 **Insight:** Procurement pipeline visibility
 
+**Why It Is Needed:** Gives a bird's-eye view of all purchasing activity. Shows how many purchase orders are pending, how much inventory is on its way, and total spend on procurement. Answers: What is our total procurement spend? How many outstanding orders are yet to be delivered?
+
+**Business Area Reviewed:** Procurement pipeline and spend overview. Reviews all purchase orders by status (draft, ordered, received, cancelled) and total value. Used by inventory manager and owner for spend tracking, procurement planning, and ensuring no orders are stuck in draft.
+
 ---
 
 ## RPT-P02: Supplier Performance Report
@@ -51,6 +55,10 @@
 **Filters:** Date range, minimum order count
 **Insight:** Supplier selection, negotiation leverage
 
+**Why It Is Needed:** Not all suppliers are equal. This report scores suppliers on delivery reliability, lead time, and fulfillment rate. A supplier who is consistently late causes stockouts and lost sales. A supplier with high cancellations wastes staff time. Answers: Which suppliers are reliable? Which ones should we replace? Who is our best value supplier?
+
+**Business Area Reviewed:** Supplier reliability and vendor management. Reviews each supplier's delivery performance, order fulfillment, and lead times. Used by inventory manager and owner for supplier selection, contract negotiation, and vendor performance reviews.
+
 ---
 
 ## RPT-P03: Purchase by Item/Category
@@ -71,6 +79,10 @@
 **Filters:** Date range, category, supplier
 **Insight:** Price volatility, bulk purchasing opportunities
 
+**Why It Is Needed:** Shows what the restaurant is buying and at what price. Price trend lines reveal inflation in ingredient costs — if tomato prices have doubled, menu prices may need adjustment. Also identifies items where bulk purchasing could save money. Answers: What are we buying most of? Are ingredient prices rising? Should we buy in bulk?
+
+**Business Area Reviewed:** Spend analysis by item and price trend monitoring. Reviews purchasing volumes, costs, and unit price changes over time. Used by chef and inventory manager for ingredient costing, identifying price inflation, and planning bulk purchases.
+
 ---
 
 ## RPT-P04: Supplier Price Comparison
@@ -89,6 +101,10 @@
 **Visualization:** Side-by-side comparison table + bar chart
 **Filters:** Item, date range
 **Insight:** Cost optimization, supplier negotiation
+
+**Why It Is Needed:** The fastest way to reduce costs is by comparing supplier prices and negotiating. This report shows exactly who offers the best price for each ingredient. Armed with this data, the manager can negotiate better rates or switch suppliers. Answers: Which supplier offers the best price for each item? How much could we save by switching suppliers?
+
+**Business Area Reviewed:** Cost optimization through competitive pricing. Reviews prices from different suppliers for the same items. Used by inventory manager and owner for supplier negotiation, cost reduction, and sourcing decisions.
 
 ---
 
@@ -109,6 +125,10 @@
 **Visualization:** Pipeline funnel + timeline
 **Filters:** Date range, supplier, status
 **Insight:** Cash flow planning, payment scheduling
+
+**Why It Is Needed:** Tracks the entire lifecycle from order to payment. Helps understand cash outflow timing — when will supplier payments be due? Also highlights POs that have been received but not yet paid (accrued liabilities). Answers: What payments are coming due soon? How long does it take from ordering to receiving goods?
+
+**Business Area Reviewed:** Purchase cycle time and payment planning. Reviews the end-to-end purchase lifecycle and payment timing. Used by accountant and manager for cash flow planning, payment scheduling, and ensuring timely payments to avoid supply disruption.
 
 ---
 
@@ -131,6 +151,10 @@
 **Filters:** Category, urgency level
 **Action:** Auto-generate PO suggestions
 
+**Why It Is Needed:** The single most important procurement tool — it tells you exactly what to order, how much, and from whom. By combining current stock, consumption rate, and supplier lead time, it calculates the optimal order quantity. Answers: What should we order today or this week? How much of each item? From which supplier at what price?
+
+**Business Area Reviewed:** Automated reorder planning and stock optimization. Reviews stock levels against consumption and lead time to calculate reorder quantities. Used by inventory manager to streamline the ordering process, reduce stockouts, and optimize order quantities.
+
 ---
 
 ## RPT-P07: Monthly Purchase Trend
@@ -149,6 +173,10 @@
 **Visualization:** Line chart + monthly summary table
 **Filters:** Year, granularity
 **Insight:** Spending trends, budget planning
+
+**Why It Is Needed:** Tracks procurement spending over time to identify seasonality and budget adherence. If purchase costs spike in December (holiday season), the restaurant should plan for it. Also helps compare actual purchasing costs against budget. Answers: How does our procurement spend vary month to month? Are we staying within budget? Which months require higher inventory?
+
+**Business Area Reviewed:** Procurement spend trends and budget tracking. Reviews monthly purchasing patterns and total spend. Used by owner and accountant for budget planning, cash flow forecasting, and identifying seasonal procurement patterns.
 
 ---
 

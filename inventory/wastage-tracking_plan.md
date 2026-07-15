@@ -1,9 +1,10 @@
-# Module 5: Reasoned wastage + auto-posted production shrinkage
+# Module 7: Reasoned wastage + auto-posted production shrinkage
 
-See [`README.md`](./README.md) for full background/goal. Depends on:
-[`ledger-integration_plan.md`](./ledger-integration_plan.md) (module 3) —
-wastage needs to hit the Wastage & Spoilage account; and
-[`batch-tracking_plan.md`](./batch-tracking_plan.md) (module 4) — expiry
+See [`README.md`](./README.md) for full background/goal and
+[`data-model_plan.md`](./data-model_plan.md) for the underlying schema.
+Depends on: [`ledger-integration_plan.md`](./ledger-integration_plan.md)
+(module 5) — wastage needs to hit the Wastage & Spoilage account; and
+[`batch-tracking_plan.md`](./batch-tracking_plan.md) (module 6) — expiry
 sweep needs a `wastage` reason to post with.
 
 ## What
@@ -54,7 +55,7 @@ Two related gaps:
   pick whichever matches how the existing seed data models chicken
   (check `database-seed.service.ts` for whether "Whole Chicken" and
   "Boneless Chicken" are seeded as separate items before deciding).
-- `apps/api/src/inventory/services/expiry-sweep.service.ts` (module 4) —
+- `apps/api/src/inventory/services/expiry-sweep.service.ts` (module 6) —
   writes off expired batches with `wastageReason: EXPIRED`.
 - Frontend: `apps/restaurant-ui/src/modules/inventory/pages/InventoryPage.tsx`
   — wherever a manual "adjust stock" / wastage entry form exists, add the
@@ -66,9 +67,9 @@ Two related gaps:
 - `tsc --noEmit` in both apps.
 - Log a production entry with a known yield ratio below 100% — confirm a
   `wastage`/`trim_loss` movement posts automatically for the shrinkage
-  and the Wastage & Spoilage ledger account (module 3) moves by the
+  and the Wastage & Spoilage ledger account (module 5) moves by the
   correct cost.
 - Manual wastage entry via `POST /inventory/:itemId/adjust` with
   `type: wastage, wastageReason: dropped` — confirm it's stored and
   rejecting a `wastageReason` on a non-wastage movement type.
-- Expired-batch sweep (module 4) posts with `wastageReason: expired`.
+- Expired-batch sweep (module 6) posts with `wastageReason: expired`.

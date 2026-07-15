@@ -1,9 +1,10 @@
-# Module 3: Ledger integration (COGS, wastage expense, inventory valuation)
+# Module 5: Ledger integration (COGS, wastage expense, inventory valuation)
 
-See [`README.md`](./README.md) for full background/goal. Depends on:
-[`purchase-receiving_plan.md`](./purchase-receiving_plan.md) (module 2) —
-needs `purchase_in` movements to actually exist before they can be posted
-to the ledger.
+See [`README.md`](./README.md) for full background/goal and
+[`data-model_plan.md`](./data-model_plan.md) for the underlying schema.
+Depends on: [`purchase-receiving_plan.md`](./purchase-receiving_plan.md)
+(module 4) — needs `purchase_in` movements to actually exist before they
+can be posted to the ledger.
 
 ## What
 
@@ -36,7 +37,7 @@ Posting map (`MovementType` → ledger entries):
 | `adjustment_in` | Inventory Asset | Stock Adjustment |
 | `adjustment_out` | Stock Adjustment | Inventory Asset |
 | `production_consumption` / `production_yield` | no P&L entry — value moves item→item, net zero | — |
-| `transfer_in` / `transfer_out` | no net entry unless multi-location (module 7) makes inter-store accounting real | — |
+| `transfer_in` / `transfer_out` | no net entry unless storage units (module 2) makes inter-store accounting real | — |
 
 ## Files
 
@@ -45,7 +46,7 @@ Posting map (`MovementType` → ledger entries):
 - `apps/api/src/inventory/services/inventory.service.ts` — inject
   `LedgerService`. Add a private `postLedgerForMovement(movement, item)`
   called from `adjustStock()` and the new `postPurchaseReceipt()`
-  (module 2), mapping per the table above. `sale_out` and `wastage` use
+  (module 4), mapping per the table above. `sale_out` and `wastage` use
   `movement.quantity * inv.unitCost` (the average cost at time of
   movement, **not** the sale price) for the ledger amount — this is the
   standard COGS-at-cost rule, don't accidentally use `Item.price`.
@@ -74,7 +75,7 @@ Posting map (`MovementType` → ledger entries):
 ## Verification
 
 - `tsc --noEmit` in `apps/api`.
-- After module 2's purchase-receipt test: confirm `GET /ledger/accounts`
+- After module 4's purchase-receipt test: confirm `GET /ledger/accounts`
   shows Inventory Asset and Purchase Payable moved by the correct amounts
   (including the GST split).
 - Sell an item with a recipe and one without — confirm both post to COGS

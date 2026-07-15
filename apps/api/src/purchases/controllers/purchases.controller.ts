@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, Query, HttpCode } from '@nestjs/common';
 import { PurchasesService } from '../services/purchases.service';
 import { PurchaseStatus } from '../entities/purchase.entity';
 
@@ -22,7 +22,13 @@ export class PurchasesController {
   }
 
   @Patch(':id/status')
-  updateStatus(@Param('id') id: string, @Body('status') status: PurchaseStatus) {
-    return this.service.updateStatus(id, status);
+  updateStatus(@Param('id') id: string, @Body('status') status: PurchaseStatus, @Body('userId') userId?: string) {
+    return this.service.updateStatus(id, status, userId);
+  }
+
+  @Patch(':id/receive')
+  @HttpCode(200)
+  receive(@Param('id') id: string, @Body('userId') userId?: string) {
+    return this.service.receive(id, userId);
   }
 }

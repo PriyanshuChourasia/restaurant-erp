@@ -22,6 +22,7 @@ export class ZonesService {
     return this.zoneRepo.create({
       name: dto.name,
       description: dto.description ?? null,
+      floor: dto.floor ?? 0,
       isActive: dto.isActive ?? true,
     });
   }

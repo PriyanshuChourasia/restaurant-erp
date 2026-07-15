@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ZonesRouteImport } from './routes/zones'
+import { Route as VouchersRouteImport } from './routes/vouchers'
 import { Route as TablesRouteImport } from './routes/tables'
+import { Route as StorageUnitsRouteImport } from './routes/storage-units'
 import { Route as StaffRouteImport } from './routes/staff'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SalesRouteImport } from './routes/sales'
@@ -24,6 +26,7 @@ import { Route as OrdersRouteImport } from './routes/orders'
 import { Route as MenuRouteImport } from './routes/menu'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LedgerRouteImport } from './routes/ledger'
+import { Route as KotHistoryRouteImport } from './routes/kot-history'
 import { Route as KotRouteImport } from './routes/kot'
 import { Route as KitchenPrepRouteImport } from './routes/kitchen-prep'
 import { Route as ItemsRouteImport } from './routes/items'
@@ -32,17 +35,80 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ZonesZoneIdRouteImport } from './routes/zones.$zoneId'
+import { Route as ReportsZonePerformanceRouteImport } from './routes/reports/zone-performance'
+import { Route as ReportsTrendsRouteImport } from './routes/reports/trends'
+import { Route as ReportsTableUtilizationRouteImport } from './routes/reports/table-utilization'
 import { Route as ReportsStockRouteImport } from './routes/reports/stock'
 import { Route as ReportsSalesRouteImport } from './routes/reports/sales'
+import { Route as ReportsReservationSourceRouteImport } from './routes/reports/reservation-source'
+import { Route as ReportsReservationPeakHoursRouteImport } from './routes/reports/reservation-peak-hours'
+import { Route as ReportsReservationOverviewRouteImport } from './routes/reports/reservation-overview'
+import { Route as ReportsReservationNoShowRouteImport } from './routes/reports/reservation-no-show'
 import { Route as ReportsProfitLossRouteImport } from './routes/reports/profit-loss'
+import { Route as ReportsProcurementSupplierPerformanceRouteImport } from './routes/reports/procurement-supplier-performance'
+import { Route as ReportsProcurementReorderRouteImport } from './routes/reports/procurement-reorder'
+import { Route as ReportsProcurementPurchaseToPayRouteImport } from './routes/reports/procurement-purchase-to-pay'
+import { Route as ReportsProcurementPurchaseByItemRouteImport } from './routes/reports/procurement-purchase-by-item'
+import { Route as ReportsProcurementPriceComparisonRouteImport } from './routes/reports/procurement-price-comparison'
+import { Route as ReportsProcurementPoSummaryRouteImport } from './routes/reports/procurement-po-summary'
+import { Route as ReportsProcurementMonthlyTrendRouteImport } from './routes/reports/procurement-monthly-trend'
 import { Route as ReportsPopularItemsRouteImport } from './routes/reports/popular-items'
 import { Route as ReportsPaymentMethodsRouteImport } from './routes/reports/payment-methods'
+import { Route as ReportsOperationsWeeklyReviewRouteImport } from './routes/reports/operations-weekly-review'
+import { Route as ReportsOperationsStaffActivityRouteImport } from './routes/reports/operations-staff-activity'
+import { Route as ReportsOperationsPeakStaffingRouteImport } from './routes/reports/operations-peak-staffing'
+import { Route as ReportsOperationsPaymentCollectionRouteImport } from './routes/reports/operations-payment-collection'
+import { Route as ReportsOperationsEodReconciliationRouteImport } from './routes/reports/operations-eod-reconciliation'
+import { Route as ReportsOperationsDailySummaryRouteImport } from './routes/reports/operations-daily-summary'
+import { Route as ReportsOperationsCancellationSummaryRouteImport } from './routes/reports/operations-cancellation-summary'
 import { Route as ReportsLowStockRouteImport } from './routes/reports/low-stock'
+import { Route as ReportsKitchenThroughputRouteImport } from './routes/reports/kitchen-throughput'
+import { Route as ReportsKitchenStationLoadRouteImport } from './routes/reports/kitchen-station-load'
+import { Route as ReportsKitchenQueueStatusRouteImport } from './routes/reports/kitchen-queue-status'
+import { Route as ReportsKitchenPerformanceRouteImport } from './routes/reports/kitchen-performance'
+import { Route as ReportsKitchenItemFrequencyRouteImport } from './routes/reports/kitchen-item-frequency'
+import { Route as ReportsKitchenDietaryMixRouteImport } from './routes/reports/kitchen-dietary-mix'
+import { Route as ReportsKitchenCancellationRouteImport } from './routes/reports/kitchen-cancellation'
+import { Route as ReportsInvoiceDrilldownRouteImport } from './routes/reports/invoice-drilldown'
+import { Route as ReportsInventoryWastageRouteImport } from './routes/reports/inventory-wastage'
+import { Route as ReportsInventoryValuationRouteImport } from './routes/reports/inventory-valuation'
+import { Route as ReportsInventoryReconciliationRouteImport } from './routes/reports/inventory-reconciliation'
+import { Route as ReportsInventoryRecipeCostsRouteImport } from './routes/reports/inventory-recipe-costs'
+import { Route as ReportsInventoryPurchaseTimelineRouteImport } from './routes/reports/inventory-purchase-timeline'
+import { Route as ReportsInventoryProductionRouteImport } from './routes/reports/inventory-production'
+import { Route as ReportsInventoryMovementsRouteImport } from './routes/reports/inventory-movements'
+import { Route as ReportsInventoryConsumptionRouteImport } from './routes/reports/inventory-consumption'
+import { Route as ReportsHourlyRouteImport } from './routes/reports/hourly'
 import { Route as ReportsGstRouteImport } from './routes/reports/gst'
+import { Route as ReportsFinanceTaxSummaryRouteImport } from './routes/reports/finance-tax-summary'
+import { Route as ReportsFinanceRevenueVsExpenseRouteImport } from './routes/reports/finance-revenue-vs-expense'
+import { Route as ReportsFinanceLedgerStatementRouteImport } from './routes/reports/finance-ledger-statement'
+import { Route as ReportsFinanceGstReturnRouteImport } from './routes/reports/finance-gst-return'
+import { Route as ReportsFinanceExpensesRouteImport } from './routes/reports/finance-expenses'
+import { Route as ReportsFinanceCashFlowRouteImport } from './routes/reports/finance-cash-flow'
+import { Route as ReportsExecutiveTrendForecastRouteImport } from './routes/reports/executive-trend-forecast'
+import { Route as ReportsExecutiveProfitabilityRouteImport } from './routes/reports/executive-profitability'
+import { Route as ReportsExecutiveKpiDashboardRouteImport } from './routes/reports/executive-kpi-dashboard'
+import { Route as ReportsExecutiveHealthScorecardRouteImport } from './routes/reports/executive-health-scorecard'
+import { Route as ReportsExecutiveComparativeRouteImport } from './routes/reports/executive-comparative'
+import { Route as ReportsDiscountAnalysisRouteImport } from './routes/reports/discount-analysis'
+import { Route as ReportsCustomerWalkinVsRegisteredRouteImport } from './routes/reports/customer-walkin-vs-registered'
+import { Route as ReportsCustomerTypeAnalysisRouteImport } from './routes/reports/customer-type-analysis'
+import { Route as ReportsCustomerRevenueRouteImport } from './routes/reports/customer-revenue'
+import { Route as ReportsCustomerPreferencesRouteImport } from './routes/reports/customer-preferences'
+import { Route as ReportsCustomerNewVsReturningRouteImport } from './routes/reports/customer-new-vs-returning'
+import { Route as ReportsCustomerLoyaltyRouteImport } from './routes/reports/customer-loyalty'
+import { Route as ReportsCustomerLifetimeValueRouteImport } from './routes/reports/customer-lifetime-value'
+import { Route as ReportsCustomerDirectoryRouteImport } from './routes/reports/customer-directory'
 import { Route as ReportsCategoriesRouteImport } from './routes/reports/categories'
+import { Route as ReportsCancelledRouteImport } from './routes/reports/cancelled'
+import { Route as ReportsBalanceSheetRouteImport } from './routes/reports/balance-sheet'
+import { Route as ReportsReportIdRouteImport } from './routes/reports/$reportId'
 import { Route as PriceLevelsCreateRouteImport } from './routes/price-levels_.create'
 import { Route as ItemsCreateRouteImport } from './routes/items_.create'
 import { Route as ItemsIdRouteImport } from './routes/items_.$id'
+import { Route as InventoryStockCountsRouteImport } from './routes/inventory/stock-counts'
+import { Route as InventoryBatchesRouteImport } from './routes/inventory/batches'
 import { Route as CategoriesTreeRouteImport } from './routes/categories_.tree'
 import { Route as CategoriesCreateRouteImport } from './routes/categories_.create'
 import { Route as CategoriesIdRouteImport } from './routes/categories_.$id'
@@ -55,9 +121,19 @@ const ZonesRoute = ZonesRouteImport.update({
   path: '/zones',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VouchersRoute = VouchersRouteImport.update({
+  id: '/vouchers',
+  path: '/vouchers',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TablesRoute = TablesRouteImport.update({
   id: '/tables',
   path: '/tables',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StorageUnitsRoute = StorageUnitsRouteImport.update({
+  id: '/storage-units',
+  path: '/storage-units',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StaffRoute = StaffRouteImport.update({
@@ -125,6 +201,11 @@ const LedgerRoute = LedgerRouteImport.update({
   path: '/ledger',
   getParentRoute: () => rootRouteImport,
 } as any)
+const KotHistoryRoute = KotHistoryRouteImport.update({
+  id: '/kot-history',
+  path: '/kot-history',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const KotRoute = KotRouteImport.update({
   id: '/kot',
   path: '/kot',
@@ -165,6 +246,21 @@ const ZonesZoneIdRoute = ZonesZoneIdRouteImport.update({
   path: '/$zoneId',
   getParentRoute: () => ZonesRoute,
 } as any)
+const ReportsZonePerformanceRoute = ReportsZonePerformanceRouteImport.update({
+  id: '/zone-performance',
+  path: '/zone-performance',
+  getParentRoute: () => ReportsRoute,
+} as any)
+const ReportsTrendsRoute = ReportsTrendsRouteImport.update({
+  id: '/trends',
+  path: '/trends',
+  getParentRoute: () => ReportsRoute,
+} as any)
+const ReportsTableUtilizationRoute = ReportsTableUtilizationRouteImport.update({
+  id: '/table-utilization',
+  path: '/table-utilization',
+  getParentRoute: () => ReportsRoute,
+} as any)
 const ReportsStockRoute = ReportsStockRouteImport.update({
   id: '/stock',
   path: '/stock',
@@ -175,11 +271,77 @@ const ReportsSalesRoute = ReportsSalesRouteImport.update({
   path: '/sales',
   getParentRoute: () => ReportsRoute,
 } as any)
+const ReportsReservationSourceRoute =
+  ReportsReservationSourceRouteImport.update({
+    id: '/reservation-source',
+    path: '/reservation-source',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsReservationPeakHoursRoute =
+  ReportsReservationPeakHoursRouteImport.update({
+    id: '/reservation-peak-hours',
+    path: '/reservation-peak-hours',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsReservationOverviewRoute =
+  ReportsReservationOverviewRouteImport.update({
+    id: '/reservation-overview',
+    path: '/reservation-overview',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsReservationNoShowRoute =
+  ReportsReservationNoShowRouteImport.update({
+    id: '/reservation-no-show',
+    path: '/reservation-no-show',
+    getParentRoute: () => ReportsRoute,
+  } as any)
 const ReportsProfitLossRoute = ReportsProfitLossRouteImport.update({
   id: '/profit-loss',
   path: '/profit-loss',
   getParentRoute: () => ReportsRoute,
 } as any)
+const ReportsProcurementSupplierPerformanceRoute =
+  ReportsProcurementSupplierPerformanceRouteImport.update({
+    id: '/procurement-supplier-performance',
+    path: '/procurement-supplier-performance',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsProcurementReorderRoute =
+  ReportsProcurementReorderRouteImport.update({
+    id: '/procurement-reorder',
+    path: '/procurement-reorder',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsProcurementPurchaseToPayRoute =
+  ReportsProcurementPurchaseToPayRouteImport.update({
+    id: '/procurement-purchase-to-pay',
+    path: '/procurement-purchase-to-pay',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsProcurementPurchaseByItemRoute =
+  ReportsProcurementPurchaseByItemRouteImport.update({
+    id: '/procurement-purchase-by-item',
+    path: '/procurement-purchase-by-item',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsProcurementPriceComparisonRoute =
+  ReportsProcurementPriceComparisonRouteImport.update({
+    id: '/procurement-price-comparison',
+    path: '/procurement-price-comparison',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsProcurementPoSummaryRoute =
+  ReportsProcurementPoSummaryRouteImport.update({
+    id: '/procurement-po-summary',
+    path: '/procurement-po-summary',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsProcurementMonthlyTrendRoute =
+  ReportsProcurementMonthlyTrendRouteImport.update({
+    id: '/procurement-monthly-trend',
+    path: '/procurement-monthly-trend',
+    getParentRoute: () => ReportsRoute,
+  } as any)
 const ReportsPopularItemsRoute = ReportsPopularItemsRouteImport.update({
   id: '/popular-items',
   path: '/popular-items',
@@ -190,9 +352,150 @@ const ReportsPaymentMethodsRoute = ReportsPaymentMethodsRouteImport.update({
   path: '/payment-methods',
   getParentRoute: () => ReportsRoute,
 } as any)
+const ReportsOperationsWeeklyReviewRoute =
+  ReportsOperationsWeeklyReviewRouteImport.update({
+    id: '/operations-weekly-review',
+    path: '/operations-weekly-review',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsOperationsStaffActivityRoute =
+  ReportsOperationsStaffActivityRouteImport.update({
+    id: '/operations-staff-activity',
+    path: '/operations-staff-activity',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsOperationsPeakStaffingRoute =
+  ReportsOperationsPeakStaffingRouteImport.update({
+    id: '/operations-peak-staffing',
+    path: '/operations-peak-staffing',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsOperationsPaymentCollectionRoute =
+  ReportsOperationsPaymentCollectionRouteImport.update({
+    id: '/operations-payment-collection',
+    path: '/operations-payment-collection',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsOperationsEodReconciliationRoute =
+  ReportsOperationsEodReconciliationRouteImport.update({
+    id: '/operations-eod-reconciliation',
+    path: '/operations-eod-reconciliation',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsOperationsDailySummaryRoute =
+  ReportsOperationsDailySummaryRouteImport.update({
+    id: '/operations-daily-summary',
+    path: '/operations-daily-summary',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsOperationsCancellationSummaryRoute =
+  ReportsOperationsCancellationSummaryRouteImport.update({
+    id: '/operations-cancellation-summary',
+    path: '/operations-cancellation-summary',
+    getParentRoute: () => ReportsRoute,
+  } as any)
 const ReportsLowStockRoute = ReportsLowStockRouteImport.update({
   id: '/low-stock',
   path: '/low-stock',
+  getParentRoute: () => ReportsRoute,
+} as any)
+const ReportsKitchenThroughputRoute =
+  ReportsKitchenThroughputRouteImport.update({
+    id: '/kitchen-throughput',
+    path: '/kitchen-throughput',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsKitchenStationLoadRoute =
+  ReportsKitchenStationLoadRouteImport.update({
+    id: '/kitchen-station-load',
+    path: '/kitchen-station-load',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsKitchenQueueStatusRoute =
+  ReportsKitchenQueueStatusRouteImport.update({
+    id: '/kitchen-queue-status',
+    path: '/kitchen-queue-status',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsKitchenPerformanceRoute =
+  ReportsKitchenPerformanceRouteImport.update({
+    id: '/kitchen-performance',
+    path: '/kitchen-performance',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsKitchenItemFrequencyRoute =
+  ReportsKitchenItemFrequencyRouteImport.update({
+    id: '/kitchen-item-frequency',
+    path: '/kitchen-item-frequency',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsKitchenDietaryMixRoute =
+  ReportsKitchenDietaryMixRouteImport.update({
+    id: '/kitchen-dietary-mix',
+    path: '/kitchen-dietary-mix',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsKitchenCancellationRoute =
+  ReportsKitchenCancellationRouteImport.update({
+    id: '/kitchen-cancellation',
+    path: '/kitchen-cancellation',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsInvoiceDrilldownRoute = ReportsInvoiceDrilldownRouteImport.update({
+  id: '/invoice-drilldown',
+  path: '/invoice-drilldown',
+  getParentRoute: () => ReportsRoute,
+} as any)
+const ReportsInventoryWastageRoute = ReportsInventoryWastageRouteImport.update({
+  id: '/inventory-wastage',
+  path: '/inventory-wastage',
+  getParentRoute: () => ReportsRoute,
+} as any)
+const ReportsInventoryValuationRoute =
+  ReportsInventoryValuationRouteImport.update({
+    id: '/inventory-valuation',
+    path: '/inventory-valuation',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsInventoryReconciliationRoute =
+  ReportsInventoryReconciliationRouteImport.update({
+    id: '/inventory-reconciliation',
+    path: '/inventory-reconciliation',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsInventoryRecipeCostsRoute =
+  ReportsInventoryRecipeCostsRouteImport.update({
+    id: '/inventory-recipe-costs',
+    path: '/inventory-recipe-costs',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsInventoryPurchaseTimelineRoute =
+  ReportsInventoryPurchaseTimelineRouteImport.update({
+    id: '/inventory-purchase-timeline',
+    path: '/inventory-purchase-timeline',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsInventoryProductionRoute =
+  ReportsInventoryProductionRouteImport.update({
+    id: '/inventory-production',
+    path: '/inventory-production',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsInventoryMovementsRoute =
+  ReportsInventoryMovementsRouteImport.update({
+    id: '/inventory-movements',
+    path: '/inventory-movements',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsInventoryConsumptionRoute =
+  ReportsInventoryConsumptionRouteImport.update({
+    id: '/inventory-consumption',
+    path: '/inventory-consumption',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsHourlyRoute = ReportsHourlyRouteImport.update({
+  id: '/hourly',
+  path: '/hourly',
   getParentRoute: () => ReportsRoute,
 } as any)
 const ReportsGstRoute = ReportsGstRouteImport.update({
@@ -200,9 +503,138 @@ const ReportsGstRoute = ReportsGstRouteImport.update({
   path: '/gst',
   getParentRoute: () => ReportsRoute,
 } as any)
+const ReportsFinanceTaxSummaryRoute =
+  ReportsFinanceTaxSummaryRouteImport.update({
+    id: '/finance-tax-summary',
+    path: '/finance-tax-summary',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsFinanceRevenueVsExpenseRoute =
+  ReportsFinanceRevenueVsExpenseRouteImport.update({
+    id: '/finance-revenue-vs-expense',
+    path: '/finance-revenue-vs-expense',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsFinanceLedgerStatementRoute =
+  ReportsFinanceLedgerStatementRouteImport.update({
+    id: '/finance-ledger-statement',
+    path: '/finance-ledger-statement',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsFinanceGstReturnRoute = ReportsFinanceGstReturnRouteImport.update({
+  id: '/finance-gst-return',
+  path: '/finance-gst-return',
+  getParentRoute: () => ReportsRoute,
+} as any)
+const ReportsFinanceExpensesRoute = ReportsFinanceExpensesRouteImport.update({
+  id: '/finance-expenses',
+  path: '/finance-expenses',
+  getParentRoute: () => ReportsRoute,
+} as any)
+const ReportsFinanceCashFlowRoute = ReportsFinanceCashFlowRouteImport.update({
+  id: '/finance-cash-flow',
+  path: '/finance-cash-flow',
+  getParentRoute: () => ReportsRoute,
+} as any)
+const ReportsExecutiveTrendForecastRoute =
+  ReportsExecutiveTrendForecastRouteImport.update({
+    id: '/executive-trend-forecast',
+    path: '/executive-trend-forecast',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsExecutiveProfitabilityRoute =
+  ReportsExecutiveProfitabilityRouteImport.update({
+    id: '/executive-profitability',
+    path: '/executive-profitability',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsExecutiveKpiDashboardRoute =
+  ReportsExecutiveKpiDashboardRouteImport.update({
+    id: '/executive-kpi-dashboard',
+    path: '/executive-kpi-dashboard',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsExecutiveHealthScorecardRoute =
+  ReportsExecutiveHealthScorecardRouteImport.update({
+    id: '/executive-health-scorecard',
+    path: '/executive-health-scorecard',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsExecutiveComparativeRoute =
+  ReportsExecutiveComparativeRouteImport.update({
+    id: '/executive-comparative',
+    path: '/executive-comparative',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsDiscountAnalysisRoute = ReportsDiscountAnalysisRouteImport.update({
+  id: '/discount-analysis',
+  path: '/discount-analysis',
+  getParentRoute: () => ReportsRoute,
+} as any)
+const ReportsCustomerWalkinVsRegisteredRoute =
+  ReportsCustomerWalkinVsRegisteredRouteImport.update({
+    id: '/customer-walkin-vs-registered',
+    path: '/customer-walkin-vs-registered',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsCustomerTypeAnalysisRoute =
+  ReportsCustomerTypeAnalysisRouteImport.update({
+    id: '/customer-type-analysis',
+    path: '/customer-type-analysis',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsCustomerRevenueRoute = ReportsCustomerRevenueRouteImport.update({
+  id: '/customer-revenue',
+  path: '/customer-revenue',
+  getParentRoute: () => ReportsRoute,
+} as any)
+const ReportsCustomerPreferencesRoute =
+  ReportsCustomerPreferencesRouteImport.update({
+    id: '/customer-preferences',
+    path: '/customer-preferences',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsCustomerNewVsReturningRoute =
+  ReportsCustomerNewVsReturningRouteImport.update({
+    id: '/customer-new-vs-returning',
+    path: '/customer-new-vs-returning',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsCustomerLoyaltyRoute = ReportsCustomerLoyaltyRouteImport.update({
+  id: '/customer-loyalty',
+  path: '/customer-loyalty',
+  getParentRoute: () => ReportsRoute,
+} as any)
+const ReportsCustomerLifetimeValueRoute =
+  ReportsCustomerLifetimeValueRouteImport.update({
+    id: '/customer-lifetime-value',
+    path: '/customer-lifetime-value',
+    getParentRoute: () => ReportsRoute,
+  } as any)
+const ReportsCustomerDirectoryRoute =
+  ReportsCustomerDirectoryRouteImport.update({
+    id: '/customer-directory',
+    path: '/customer-directory',
+    getParentRoute: () => ReportsRoute,
+  } as any)
 const ReportsCategoriesRoute = ReportsCategoriesRouteImport.update({
   id: '/categories',
   path: '/categories',
+  getParentRoute: () => ReportsRoute,
+} as any)
+const ReportsCancelledRoute = ReportsCancelledRouteImport.update({
+  id: '/cancelled',
+  path: '/cancelled',
+  getParentRoute: () => ReportsRoute,
+} as any)
+const ReportsBalanceSheetRoute = ReportsBalanceSheetRouteImport.update({
+  id: '/balance-sheet',
+  path: '/balance-sheet',
+  getParentRoute: () => ReportsRoute,
+} as any)
+const ReportsReportIdRoute = ReportsReportIdRouteImport.update({
+  id: '/$reportId',
+  path: '/$reportId',
   getParentRoute: () => ReportsRoute,
 } as any)
 const PriceLevelsCreateRoute = PriceLevelsCreateRouteImport.update({
@@ -219,6 +651,16 @@ const ItemsIdRoute = ItemsIdRouteImport.update({
   id: '/items_/$id',
   path: '/items/$id',
   getParentRoute: () => rootRouteImport,
+} as any)
+const InventoryStockCountsRoute = InventoryStockCountsRouteImport.update({
+  id: '/stock-counts',
+  path: '/stock-counts',
+  getParentRoute: () => InventoryRoute,
+} as any)
+const InventoryBatchesRoute = InventoryBatchesRouteImport.update({
+  id: '/batches',
+  path: '/batches',
+  getParentRoute: () => InventoryRoute,
 } as any)
 const CategoriesTreeRoute = CategoriesTreeRouteImport.update({
   id: '/categories_/tree',
@@ -255,10 +697,11 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/categories': typeof CategoriesRoute
   '/dashboard': typeof DashboardRoute
-  '/inventory': typeof InventoryRoute
+  '/inventory': typeof InventoryRouteWithChildren
   '/items': typeof ItemsRoute
   '/kitchen-prep': typeof KitchenPrepRoute
   '/kot': typeof KotRoute
+  '/kot-history': typeof KotHistoryRoute
   '/ledger': typeof LedgerRoute
   '/login': typeof LoginRoute
   '/menu': typeof MenuRoute
@@ -272,22 +715,87 @@ export interface FileRoutesByFullPath {
   '/sales': typeof SalesRoute
   '/settings': typeof SettingsRoute
   '/staff': typeof StaffRoute
+  '/storage-units': typeof StorageUnitsRoute
   '/tables': typeof TablesRoute
+  '/vouchers': typeof VouchersRoute
   '/zones': typeof ZonesRouteWithChildren
   '/categories/$id': typeof CategoriesIdRoute
   '/categories/create': typeof CategoriesCreateRoute
   '/categories/tree': typeof CategoriesTreeRoute
+  '/inventory/batches': typeof InventoryBatchesRoute
+  '/inventory/stock-counts': typeof InventoryStockCountsRoute
   '/items/$id': typeof ItemsIdRoute
   '/items/create': typeof ItemsCreateRoute
   '/price-levels/create': typeof PriceLevelsCreateRoute
+  '/reports/$reportId': typeof ReportsReportIdRoute
+  '/reports/balance-sheet': typeof ReportsBalanceSheetRoute
+  '/reports/cancelled': typeof ReportsCancelledRoute
   '/reports/categories': typeof ReportsCategoriesRoute
+  '/reports/customer-directory': typeof ReportsCustomerDirectoryRoute
+  '/reports/customer-lifetime-value': typeof ReportsCustomerLifetimeValueRoute
+  '/reports/customer-loyalty': typeof ReportsCustomerLoyaltyRoute
+  '/reports/customer-new-vs-returning': typeof ReportsCustomerNewVsReturningRoute
+  '/reports/customer-preferences': typeof ReportsCustomerPreferencesRoute
+  '/reports/customer-revenue': typeof ReportsCustomerRevenueRoute
+  '/reports/customer-type-analysis': typeof ReportsCustomerTypeAnalysisRoute
+  '/reports/customer-walkin-vs-registered': typeof ReportsCustomerWalkinVsRegisteredRoute
+  '/reports/discount-analysis': typeof ReportsDiscountAnalysisRoute
+  '/reports/executive-comparative': typeof ReportsExecutiveComparativeRoute
+  '/reports/executive-health-scorecard': typeof ReportsExecutiveHealthScorecardRoute
+  '/reports/executive-kpi-dashboard': typeof ReportsExecutiveKpiDashboardRoute
+  '/reports/executive-profitability': typeof ReportsExecutiveProfitabilityRoute
+  '/reports/executive-trend-forecast': typeof ReportsExecutiveTrendForecastRoute
+  '/reports/finance-cash-flow': typeof ReportsFinanceCashFlowRoute
+  '/reports/finance-expenses': typeof ReportsFinanceExpensesRoute
+  '/reports/finance-gst-return': typeof ReportsFinanceGstReturnRoute
+  '/reports/finance-ledger-statement': typeof ReportsFinanceLedgerStatementRoute
+  '/reports/finance-revenue-vs-expense': typeof ReportsFinanceRevenueVsExpenseRoute
+  '/reports/finance-tax-summary': typeof ReportsFinanceTaxSummaryRoute
   '/reports/gst': typeof ReportsGstRoute
+  '/reports/hourly': typeof ReportsHourlyRoute
+  '/reports/inventory-consumption': typeof ReportsInventoryConsumptionRoute
+  '/reports/inventory-movements': typeof ReportsInventoryMovementsRoute
+  '/reports/inventory-production': typeof ReportsInventoryProductionRoute
+  '/reports/inventory-purchase-timeline': typeof ReportsInventoryPurchaseTimelineRoute
+  '/reports/inventory-recipe-costs': typeof ReportsInventoryRecipeCostsRoute
+  '/reports/inventory-reconciliation': typeof ReportsInventoryReconciliationRoute
+  '/reports/inventory-valuation': typeof ReportsInventoryValuationRoute
+  '/reports/inventory-wastage': typeof ReportsInventoryWastageRoute
+  '/reports/invoice-drilldown': typeof ReportsInvoiceDrilldownRoute
+  '/reports/kitchen-cancellation': typeof ReportsKitchenCancellationRoute
+  '/reports/kitchen-dietary-mix': typeof ReportsKitchenDietaryMixRoute
+  '/reports/kitchen-item-frequency': typeof ReportsKitchenItemFrequencyRoute
+  '/reports/kitchen-performance': typeof ReportsKitchenPerformanceRoute
+  '/reports/kitchen-queue-status': typeof ReportsKitchenQueueStatusRoute
+  '/reports/kitchen-station-load': typeof ReportsKitchenStationLoadRoute
+  '/reports/kitchen-throughput': typeof ReportsKitchenThroughputRoute
   '/reports/low-stock': typeof ReportsLowStockRoute
+  '/reports/operations-cancellation-summary': typeof ReportsOperationsCancellationSummaryRoute
+  '/reports/operations-daily-summary': typeof ReportsOperationsDailySummaryRoute
+  '/reports/operations-eod-reconciliation': typeof ReportsOperationsEodReconciliationRoute
+  '/reports/operations-payment-collection': typeof ReportsOperationsPaymentCollectionRoute
+  '/reports/operations-peak-staffing': typeof ReportsOperationsPeakStaffingRoute
+  '/reports/operations-staff-activity': typeof ReportsOperationsStaffActivityRoute
+  '/reports/operations-weekly-review': typeof ReportsOperationsWeeklyReviewRoute
   '/reports/payment-methods': typeof ReportsPaymentMethodsRoute
   '/reports/popular-items': typeof ReportsPopularItemsRoute
+  '/reports/procurement-monthly-trend': typeof ReportsProcurementMonthlyTrendRoute
+  '/reports/procurement-po-summary': typeof ReportsProcurementPoSummaryRoute
+  '/reports/procurement-price-comparison': typeof ReportsProcurementPriceComparisonRoute
+  '/reports/procurement-purchase-by-item': typeof ReportsProcurementPurchaseByItemRoute
+  '/reports/procurement-purchase-to-pay': typeof ReportsProcurementPurchaseToPayRoute
+  '/reports/procurement-reorder': typeof ReportsProcurementReorderRoute
+  '/reports/procurement-supplier-performance': typeof ReportsProcurementSupplierPerformanceRoute
   '/reports/profit-loss': typeof ReportsProfitLossRoute
+  '/reports/reservation-no-show': typeof ReportsReservationNoShowRoute
+  '/reports/reservation-overview': typeof ReportsReservationOverviewRoute
+  '/reports/reservation-peak-hours': typeof ReportsReservationPeakHoursRoute
+  '/reports/reservation-source': typeof ReportsReservationSourceRoute
   '/reports/sales': typeof ReportsSalesRoute
   '/reports/stock': typeof ReportsStockRoute
+  '/reports/table-utilization': typeof ReportsTableUtilizationRoute
+  '/reports/trends': typeof ReportsTrendsRoute
+  '/reports/zone-performance': typeof ReportsZonePerformanceRoute
   '/zones/$zoneId': typeof ZonesZoneIdRoute
   '/categories/$id/edit': typeof CategoriesIdEditRoute
   '/price-levels/$id/edit': typeof PriceLevelsIdEditRoute
@@ -297,10 +805,11 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/categories': typeof CategoriesRoute
   '/dashboard': typeof DashboardRoute
-  '/inventory': typeof InventoryRoute
+  '/inventory': typeof InventoryRouteWithChildren
   '/items': typeof ItemsRoute
   '/kitchen-prep': typeof KitchenPrepRoute
   '/kot': typeof KotRoute
+  '/kot-history': typeof KotHistoryRoute
   '/ledger': typeof LedgerRoute
   '/login': typeof LoginRoute
   '/menu': typeof MenuRoute
@@ -314,22 +823,87 @@ export interface FileRoutesByTo {
   '/sales': typeof SalesRoute
   '/settings': typeof SettingsRoute
   '/staff': typeof StaffRoute
+  '/storage-units': typeof StorageUnitsRoute
   '/tables': typeof TablesRoute
+  '/vouchers': typeof VouchersRoute
   '/zones': typeof ZonesRouteWithChildren
   '/categories/$id': typeof CategoriesIdRoute
   '/categories/create': typeof CategoriesCreateRoute
   '/categories/tree': typeof CategoriesTreeRoute
+  '/inventory/batches': typeof InventoryBatchesRoute
+  '/inventory/stock-counts': typeof InventoryStockCountsRoute
   '/items/$id': typeof ItemsIdRoute
   '/items/create': typeof ItemsCreateRoute
   '/price-levels/create': typeof PriceLevelsCreateRoute
+  '/reports/$reportId': typeof ReportsReportIdRoute
+  '/reports/balance-sheet': typeof ReportsBalanceSheetRoute
+  '/reports/cancelled': typeof ReportsCancelledRoute
   '/reports/categories': typeof ReportsCategoriesRoute
+  '/reports/customer-directory': typeof ReportsCustomerDirectoryRoute
+  '/reports/customer-lifetime-value': typeof ReportsCustomerLifetimeValueRoute
+  '/reports/customer-loyalty': typeof ReportsCustomerLoyaltyRoute
+  '/reports/customer-new-vs-returning': typeof ReportsCustomerNewVsReturningRoute
+  '/reports/customer-preferences': typeof ReportsCustomerPreferencesRoute
+  '/reports/customer-revenue': typeof ReportsCustomerRevenueRoute
+  '/reports/customer-type-analysis': typeof ReportsCustomerTypeAnalysisRoute
+  '/reports/customer-walkin-vs-registered': typeof ReportsCustomerWalkinVsRegisteredRoute
+  '/reports/discount-analysis': typeof ReportsDiscountAnalysisRoute
+  '/reports/executive-comparative': typeof ReportsExecutiveComparativeRoute
+  '/reports/executive-health-scorecard': typeof ReportsExecutiveHealthScorecardRoute
+  '/reports/executive-kpi-dashboard': typeof ReportsExecutiveKpiDashboardRoute
+  '/reports/executive-profitability': typeof ReportsExecutiveProfitabilityRoute
+  '/reports/executive-trend-forecast': typeof ReportsExecutiveTrendForecastRoute
+  '/reports/finance-cash-flow': typeof ReportsFinanceCashFlowRoute
+  '/reports/finance-expenses': typeof ReportsFinanceExpensesRoute
+  '/reports/finance-gst-return': typeof ReportsFinanceGstReturnRoute
+  '/reports/finance-ledger-statement': typeof ReportsFinanceLedgerStatementRoute
+  '/reports/finance-revenue-vs-expense': typeof ReportsFinanceRevenueVsExpenseRoute
+  '/reports/finance-tax-summary': typeof ReportsFinanceTaxSummaryRoute
   '/reports/gst': typeof ReportsGstRoute
+  '/reports/hourly': typeof ReportsHourlyRoute
+  '/reports/inventory-consumption': typeof ReportsInventoryConsumptionRoute
+  '/reports/inventory-movements': typeof ReportsInventoryMovementsRoute
+  '/reports/inventory-production': typeof ReportsInventoryProductionRoute
+  '/reports/inventory-purchase-timeline': typeof ReportsInventoryPurchaseTimelineRoute
+  '/reports/inventory-recipe-costs': typeof ReportsInventoryRecipeCostsRoute
+  '/reports/inventory-reconciliation': typeof ReportsInventoryReconciliationRoute
+  '/reports/inventory-valuation': typeof ReportsInventoryValuationRoute
+  '/reports/inventory-wastage': typeof ReportsInventoryWastageRoute
+  '/reports/invoice-drilldown': typeof ReportsInvoiceDrilldownRoute
+  '/reports/kitchen-cancellation': typeof ReportsKitchenCancellationRoute
+  '/reports/kitchen-dietary-mix': typeof ReportsKitchenDietaryMixRoute
+  '/reports/kitchen-item-frequency': typeof ReportsKitchenItemFrequencyRoute
+  '/reports/kitchen-performance': typeof ReportsKitchenPerformanceRoute
+  '/reports/kitchen-queue-status': typeof ReportsKitchenQueueStatusRoute
+  '/reports/kitchen-station-load': typeof ReportsKitchenStationLoadRoute
+  '/reports/kitchen-throughput': typeof ReportsKitchenThroughputRoute
   '/reports/low-stock': typeof ReportsLowStockRoute
+  '/reports/operations-cancellation-summary': typeof ReportsOperationsCancellationSummaryRoute
+  '/reports/operations-daily-summary': typeof ReportsOperationsDailySummaryRoute
+  '/reports/operations-eod-reconciliation': typeof ReportsOperationsEodReconciliationRoute
+  '/reports/operations-payment-collection': typeof ReportsOperationsPaymentCollectionRoute
+  '/reports/operations-peak-staffing': typeof ReportsOperationsPeakStaffingRoute
+  '/reports/operations-staff-activity': typeof ReportsOperationsStaffActivityRoute
+  '/reports/operations-weekly-review': typeof ReportsOperationsWeeklyReviewRoute
   '/reports/payment-methods': typeof ReportsPaymentMethodsRoute
   '/reports/popular-items': typeof ReportsPopularItemsRoute
+  '/reports/procurement-monthly-trend': typeof ReportsProcurementMonthlyTrendRoute
+  '/reports/procurement-po-summary': typeof ReportsProcurementPoSummaryRoute
+  '/reports/procurement-price-comparison': typeof ReportsProcurementPriceComparisonRoute
+  '/reports/procurement-purchase-by-item': typeof ReportsProcurementPurchaseByItemRoute
+  '/reports/procurement-purchase-to-pay': typeof ReportsProcurementPurchaseToPayRoute
+  '/reports/procurement-reorder': typeof ReportsProcurementReorderRoute
+  '/reports/procurement-supplier-performance': typeof ReportsProcurementSupplierPerformanceRoute
   '/reports/profit-loss': typeof ReportsProfitLossRoute
+  '/reports/reservation-no-show': typeof ReportsReservationNoShowRoute
+  '/reports/reservation-overview': typeof ReportsReservationOverviewRoute
+  '/reports/reservation-peak-hours': typeof ReportsReservationPeakHoursRoute
+  '/reports/reservation-source': typeof ReportsReservationSourceRoute
   '/reports/sales': typeof ReportsSalesRoute
   '/reports/stock': typeof ReportsStockRoute
+  '/reports/table-utilization': typeof ReportsTableUtilizationRoute
+  '/reports/trends': typeof ReportsTrendsRoute
+  '/reports/zone-performance': typeof ReportsZonePerformanceRoute
   '/zones/$zoneId': typeof ZonesZoneIdRoute
   '/categories/$id/edit': typeof CategoriesIdEditRoute
   '/price-levels/$id/edit': typeof PriceLevelsIdEditRoute
@@ -340,10 +914,11 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/categories': typeof CategoriesRoute
   '/dashboard': typeof DashboardRoute
-  '/inventory': typeof InventoryRoute
+  '/inventory': typeof InventoryRouteWithChildren
   '/items': typeof ItemsRoute
   '/kitchen-prep': typeof KitchenPrepRoute
   '/kot': typeof KotRoute
+  '/kot-history': typeof KotHistoryRoute
   '/ledger': typeof LedgerRoute
   '/login': typeof LoginRoute
   '/menu': typeof MenuRoute
@@ -357,22 +932,87 @@ export interface FileRoutesById {
   '/sales': typeof SalesRoute
   '/settings': typeof SettingsRoute
   '/staff': typeof StaffRoute
+  '/storage-units': typeof StorageUnitsRoute
   '/tables': typeof TablesRoute
+  '/vouchers': typeof VouchersRoute
   '/zones': typeof ZonesRouteWithChildren
   '/categories_/$id': typeof CategoriesIdRoute
   '/categories_/create': typeof CategoriesCreateRoute
   '/categories_/tree': typeof CategoriesTreeRoute
+  '/inventory/batches': typeof InventoryBatchesRoute
+  '/inventory/stock-counts': typeof InventoryStockCountsRoute
   '/items_/$id': typeof ItemsIdRoute
   '/items_/create': typeof ItemsCreateRoute
   '/price-levels_/create': typeof PriceLevelsCreateRoute
+  '/reports/$reportId': typeof ReportsReportIdRoute
+  '/reports/balance-sheet': typeof ReportsBalanceSheetRoute
+  '/reports/cancelled': typeof ReportsCancelledRoute
   '/reports/categories': typeof ReportsCategoriesRoute
+  '/reports/customer-directory': typeof ReportsCustomerDirectoryRoute
+  '/reports/customer-lifetime-value': typeof ReportsCustomerLifetimeValueRoute
+  '/reports/customer-loyalty': typeof ReportsCustomerLoyaltyRoute
+  '/reports/customer-new-vs-returning': typeof ReportsCustomerNewVsReturningRoute
+  '/reports/customer-preferences': typeof ReportsCustomerPreferencesRoute
+  '/reports/customer-revenue': typeof ReportsCustomerRevenueRoute
+  '/reports/customer-type-analysis': typeof ReportsCustomerTypeAnalysisRoute
+  '/reports/customer-walkin-vs-registered': typeof ReportsCustomerWalkinVsRegisteredRoute
+  '/reports/discount-analysis': typeof ReportsDiscountAnalysisRoute
+  '/reports/executive-comparative': typeof ReportsExecutiveComparativeRoute
+  '/reports/executive-health-scorecard': typeof ReportsExecutiveHealthScorecardRoute
+  '/reports/executive-kpi-dashboard': typeof ReportsExecutiveKpiDashboardRoute
+  '/reports/executive-profitability': typeof ReportsExecutiveProfitabilityRoute
+  '/reports/executive-trend-forecast': typeof ReportsExecutiveTrendForecastRoute
+  '/reports/finance-cash-flow': typeof ReportsFinanceCashFlowRoute
+  '/reports/finance-expenses': typeof ReportsFinanceExpensesRoute
+  '/reports/finance-gst-return': typeof ReportsFinanceGstReturnRoute
+  '/reports/finance-ledger-statement': typeof ReportsFinanceLedgerStatementRoute
+  '/reports/finance-revenue-vs-expense': typeof ReportsFinanceRevenueVsExpenseRoute
+  '/reports/finance-tax-summary': typeof ReportsFinanceTaxSummaryRoute
   '/reports/gst': typeof ReportsGstRoute
+  '/reports/hourly': typeof ReportsHourlyRoute
+  '/reports/inventory-consumption': typeof ReportsInventoryConsumptionRoute
+  '/reports/inventory-movements': typeof ReportsInventoryMovementsRoute
+  '/reports/inventory-production': typeof ReportsInventoryProductionRoute
+  '/reports/inventory-purchase-timeline': typeof ReportsInventoryPurchaseTimelineRoute
+  '/reports/inventory-recipe-costs': typeof ReportsInventoryRecipeCostsRoute
+  '/reports/inventory-reconciliation': typeof ReportsInventoryReconciliationRoute
+  '/reports/inventory-valuation': typeof ReportsInventoryValuationRoute
+  '/reports/inventory-wastage': typeof ReportsInventoryWastageRoute
+  '/reports/invoice-drilldown': typeof ReportsInvoiceDrilldownRoute
+  '/reports/kitchen-cancellation': typeof ReportsKitchenCancellationRoute
+  '/reports/kitchen-dietary-mix': typeof ReportsKitchenDietaryMixRoute
+  '/reports/kitchen-item-frequency': typeof ReportsKitchenItemFrequencyRoute
+  '/reports/kitchen-performance': typeof ReportsKitchenPerformanceRoute
+  '/reports/kitchen-queue-status': typeof ReportsKitchenQueueStatusRoute
+  '/reports/kitchen-station-load': typeof ReportsKitchenStationLoadRoute
+  '/reports/kitchen-throughput': typeof ReportsKitchenThroughputRoute
   '/reports/low-stock': typeof ReportsLowStockRoute
+  '/reports/operations-cancellation-summary': typeof ReportsOperationsCancellationSummaryRoute
+  '/reports/operations-daily-summary': typeof ReportsOperationsDailySummaryRoute
+  '/reports/operations-eod-reconciliation': typeof ReportsOperationsEodReconciliationRoute
+  '/reports/operations-payment-collection': typeof ReportsOperationsPaymentCollectionRoute
+  '/reports/operations-peak-staffing': typeof ReportsOperationsPeakStaffingRoute
+  '/reports/operations-staff-activity': typeof ReportsOperationsStaffActivityRoute
+  '/reports/operations-weekly-review': typeof ReportsOperationsWeeklyReviewRoute
   '/reports/payment-methods': typeof ReportsPaymentMethodsRoute
   '/reports/popular-items': typeof ReportsPopularItemsRoute
+  '/reports/procurement-monthly-trend': typeof ReportsProcurementMonthlyTrendRoute
+  '/reports/procurement-po-summary': typeof ReportsProcurementPoSummaryRoute
+  '/reports/procurement-price-comparison': typeof ReportsProcurementPriceComparisonRoute
+  '/reports/procurement-purchase-by-item': typeof ReportsProcurementPurchaseByItemRoute
+  '/reports/procurement-purchase-to-pay': typeof ReportsProcurementPurchaseToPayRoute
+  '/reports/procurement-reorder': typeof ReportsProcurementReorderRoute
+  '/reports/procurement-supplier-performance': typeof ReportsProcurementSupplierPerformanceRoute
   '/reports/profit-loss': typeof ReportsProfitLossRoute
+  '/reports/reservation-no-show': typeof ReportsReservationNoShowRoute
+  '/reports/reservation-overview': typeof ReportsReservationOverviewRoute
+  '/reports/reservation-peak-hours': typeof ReportsReservationPeakHoursRoute
+  '/reports/reservation-source': typeof ReportsReservationSourceRoute
   '/reports/sales': typeof ReportsSalesRoute
   '/reports/stock': typeof ReportsStockRoute
+  '/reports/table-utilization': typeof ReportsTableUtilizationRoute
+  '/reports/trends': typeof ReportsTrendsRoute
+  '/reports/zone-performance': typeof ReportsZonePerformanceRoute
   '/zones/$zoneId': typeof ZonesZoneIdRoute
   '/categories_/$id_/edit': typeof CategoriesIdEditRoute
   '/price-levels_/$id_/edit': typeof PriceLevelsIdEditRoute
@@ -388,6 +1028,7 @@ export interface FileRouteTypes {
     | '/items'
     | '/kitchen-prep'
     | '/kot'
+    | '/kot-history'
     | '/ledger'
     | '/login'
     | '/menu'
@@ -401,22 +1042,87 @@ export interface FileRouteTypes {
     | '/sales'
     | '/settings'
     | '/staff'
+    | '/storage-units'
     | '/tables'
+    | '/vouchers'
     | '/zones'
     | '/categories/$id'
     | '/categories/create'
     | '/categories/tree'
+    | '/inventory/batches'
+    | '/inventory/stock-counts'
     | '/items/$id'
     | '/items/create'
     | '/price-levels/create'
+    | '/reports/$reportId'
+    | '/reports/balance-sheet'
+    | '/reports/cancelled'
     | '/reports/categories'
+    | '/reports/customer-directory'
+    | '/reports/customer-lifetime-value'
+    | '/reports/customer-loyalty'
+    | '/reports/customer-new-vs-returning'
+    | '/reports/customer-preferences'
+    | '/reports/customer-revenue'
+    | '/reports/customer-type-analysis'
+    | '/reports/customer-walkin-vs-registered'
+    | '/reports/discount-analysis'
+    | '/reports/executive-comparative'
+    | '/reports/executive-health-scorecard'
+    | '/reports/executive-kpi-dashboard'
+    | '/reports/executive-profitability'
+    | '/reports/executive-trend-forecast'
+    | '/reports/finance-cash-flow'
+    | '/reports/finance-expenses'
+    | '/reports/finance-gst-return'
+    | '/reports/finance-ledger-statement'
+    | '/reports/finance-revenue-vs-expense'
+    | '/reports/finance-tax-summary'
     | '/reports/gst'
+    | '/reports/hourly'
+    | '/reports/inventory-consumption'
+    | '/reports/inventory-movements'
+    | '/reports/inventory-production'
+    | '/reports/inventory-purchase-timeline'
+    | '/reports/inventory-recipe-costs'
+    | '/reports/inventory-reconciliation'
+    | '/reports/inventory-valuation'
+    | '/reports/inventory-wastage'
+    | '/reports/invoice-drilldown'
+    | '/reports/kitchen-cancellation'
+    | '/reports/kitchen-dietary-mix'
+    | '/reports/kitchen-item-frequency'
+    | '/reports/kitchen-performance'
+    | '/reports/kitchen-queue-status'
+    | '/reports/kitchen-station-load'
+    | '/reports/kitchen-throughput'
     | '/reports/low-stock'
+    | '/reports/operations-cancellation-summary'
+    | '/reports/operations-daily-summary'
+    | '/reports/operations-eod-reconciliation'
+    | '/reports/operations-payment-collection'
+    | '/reports/operations-peak-staffing'
+    | '/reports/operations-staff-activity'
+    | '/reports/operations-weekly-review'
     | '/reports/payment-methods'
     | '/reports/popular-items'
+    | '/reports/procurement-monthly-trend'
+    | '/reports/procurement-po-summary'
+    | '/reports/procurement-price-comparison'
+    | '/reports/procurement-purchase-by-item'
+    | '/reports/procurement-purchase-to-pay'
+    | '/reports/procurement-reorder'
+    | '/reports/procurement-supplier-performance'
     | '/reports/profit-loss'
+    | '/reports/reservation-no-show'
+    | '/reports/reservation-overview'
+    | '/reports/reservation-peak-hours'
+    | '/reports/reservation-source'
     | '/reports/sales'
     | '/reports/stock'
+    | '/reports/table-utilization'
+    | '/reports/trends'
+    | '/reports/zone-performance'
     | '/zones/$zoneId'
     | '/categories/$id/edit'
     | '/price-levels/$id/edit'
@@ -430,6 +1136,7 @@ export interface FileRouteTypes {
     | '/items'
     | '/kitchen-prep'
     | '/kot'
+    | '/kot-history'
     | '/ledger'
     | '/login'
     | '/menu'
@@ -443,22 +1150,87 @@ export interface FileRouteTypes {
     | '/sales'
     | '/settings'
     | '/staff'
+    | '/storage-units'
     | '/tables'
+    | '/vouchers'
     | '/zones'
     | '/categories/$id'
     | '/categories/create'
     | '/categories/tree'
+    | '/inventory/batches'
+    | '/inventory/stock-counts'
     | '/items/$id'
     | '/items/create'
     | '/price-levels/create'
+    | '/reports/$reportId'
+    | '/reports/balance-sheet'
+    | '/reports/cancelled'
     | '/reports/categories'
+    | '/reports/customer-directory'
+    | '/reports/customer-lifetime-value'
+    | '/reports/customer-loyalty'
+    | '/reports/customer-new-vs-returning'
+    | '/reports/customer-preferences'
+    | '/reports/customer-revenue'
+    | '/reports/customer-type-analysis'
+    | '/reports/customer-walkin-vs-registered'
+    | '/reports/discount-analysis'
+    | '/reports/executive-comparative'
+    | '/reports/executive-health-scorecard'
+    | '/reports/executive-kpi-dashboard'
+    | '/reports/executive-profitability'
+    | '/reports/executive-trend-forecast'
+    | '/reports/finance-cash-flow'
+    | '/reports/finance-expenses'
+    | '/reports/finance-gst-return'
+    | '/reports/finance-ledger-statement'
+    | '/reports/finance-revenue-vs-expense'
+    | '/reports/finance-tax-summary'
     | '/reports/gst'
+    | '/reports/hourly'
+    | '/reports/inventory-consumption'
+    | '/reports/inventory-movements'
+    | '/reports/inventory-production'
+    | '/reports/inventory-purchase-timeline'
+    | '/reports/inventory-recipe-costs'
+    | '/reports/inventory-reconciliation'
+    | '/reports/inventory-valuation'
+    | '/reports/inventory-wastage'
+    | '/reports/invoice-drilldown'
+    | '/reports/kitchen-cancellation'
+    | '/reports/kitchen-dietary-mix'
+    | '/reports/kitchen-item-frequency'
+    | '/reports/kitchen-performance'
+    | '/reports/kitchen-queue-status'
+    | '/reports/kitchen-station-load'
+    | '/reports/kitchen-throughput'
     | '/reports/low-stock'
+    | '/reports/operations-cancellation-summary'
+    | '/reports/operations-daily-summary'
+    | '/reports/operations-eod-reconciliation'
+    | '/reports/operations-payment-collection'
+    | '/reports/operations-peak-staffing'
+    | '/reports/operations-staff-activity'
+    | '/reports/operations-weekly-review'
     | '/reports/payment-methods'
     | '/reports/popular-items'
+    | '/reports/procurement-monthly-trend'
+    | '/reports/procurement-po-summary'
+    | '/reports/procurement-price-comparison'
+    | '/reports/procurement-purchase-by-item'
+    | '/reports/procurement-purchase-to-pay'
+    | '/reports/procurement-reorder'
+    | '/reports/procurement-supplier-performance'
     | '/reports/profit-loss'
+    | '/reports/reservation-no-show'
+    | '/reports/reservation-overview'
+    | '/reports/reservation-peak-hours'
+    | '/reports/reservation-source'
     | '/reports/sales'
     | '/reports/stock'
+    | '/reports/table-utilization'
+    | '/reports/trends'
+    | '/reports/zone-performance'
     | '/zones/$zoneId'
     | '/categories/$id/edit'
     | '/price-levels/$id/edit'
@@ -472,6 +1244,7 @@ export interface FileRouteTypes {
     | '/items'
     | '/kitchen-prep'
     | '/kot'
+    | '/kot-history'
     | '/ledger'
     | '/login'
     | '/menu'
@@ -485,22 +1258,87 @@ export interface FileRouteTypes {
     | '/sales'
     | '/settings'
     | '/staff'
+    | '/storage-units'
     | '/tables'
+    | '/vouchers'
     | '/zones'
     | '/categories_/$id'
     | '/categories_/create'
     | '/categories_/tree'
+    | '/inventory/batches'
+    | '/inventory/stock-counts'
     | '/items_/$id'
     | '/items_/create'
     | '/price-levels_/create'
+    | '/reports/$reportId'
+    | '/reports/balance-sheet'
+    | '/reports/cancelled'
     | '/reports/categories'
+    | '/reports/customer-directory'
+    | '/reports/customer-lifetime-value'
+    | '/reports/customer-loyalty'
+    | '/reports/customer-new-vs-returning'
+    | '/reports/customer-preferences'
+    | '/reports/customer-revenue'
+    | '/reports/customer-type-analysis'
+    | '/reports/customer-walkin-vs-registered'
+    | '/reports/discount-analysis'
+    | '/reports/executive-comparative'
+    | '/reports/executive-health-scorecard'
+    | '/reports/executive-kpi-dashboard'
+    | '/reports/executive-profitability'
+    | '/reports/executive-trend-forecast'
+    | '/reports/finance-cash-flow'
+    | '/reports/finance-expenses'
+    | '/reports/finance-gst-return'
+    | '/reports/finance-ledger-statement'
+    | '/reports/finance-revenue-vs-expense'
+    | '/reports/finance-tax-summary'
     | '/reports/gst'
+    | '/reports/hourly'
+    | '/reports/inventory-consumption'
+    | '/reports/inventory-movements'
+    | '/reports/inventory-production'
+    | '/reports/inventory-purchase-timeline'
+    | '/reports/inventory-recipe-costs'
+    | '/reports/inventory-reconciliation'
+    | '/reports/inventory-valuation'
+    | '/reports/inventory-wastage'
+    | '/reports/invoice-drilldown'
+    | '/reports/kitchen-cancellation'
+    | '/reports/kitchen-dietary-mix'
+    | '/reports/kitchen-item-frequency'
+    | '/reports/kitchen-performance'
+    | '/reports/kitchen-queue-status'
+    | '/reports/kitchen-station-load'
+    | '/reports/kitchen-throughput'
     | '/reports/low-stock'
+    | '/reports/operations-cancellation-summary'
+    | '/reports/operations-daily-summary'
+    | '/reports/operations-eod-reconciliation'
+    | '/reports/operations-payment-collection'
+    | '/reports/operations-peak-staffing'
+    | '/reports/operations-staff-activity'
+    | '/reports/operations-weekly-review'
     | '/reports/payment-methods'
     | '/reports/popular-items'
+    | '/reports/procurement-monthly-trend'
+    | '/reports/procurement-po-summary'
+    | '/reports/procurement-price-comparison'
+    | '/reports/procurement-purchase-by-item'
+    | '/reports/procurement-purchase-to-pay'
+    | '/reports/procurement-reorder'
+    | '/reports/procurement-supplier-performance'
     | '/reports/profit-loss'
+    | '/reports/reservation-no-show'
+    | '/reports/reservation-overview'
+    | '/reports/reservation-peak-hours'
+    | '/reports/reservation-source'
     | '/reports/sales'
     | '/reports/stock'
+    | '/reports/table-utilization'
+    | '/reports/trends'
+    | '/reports/zone-performance'
     | '/zones/$zoneId'
     | '/categories_/$id_/edit'
     | '/price-levels_/$id_/edit'
@@ -511,10 +1349,11 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CategoriesRoute: typeof CategoriesRoute
   DashboardRoute: typeof DashboardRoute
-  InventoryRoute: typeof InventoryRoute
+  InventoryRoute: typeof InventoryRouteWithChildren
   ItemsRoute: typeof ItemsRoute
   KitchenPrepRoute: typeof KitchenPrepRoute
   KotRoute: typeof KotRoute
+  KotHistoryRoute: typeof KotHistoryRoute
   LedgerRoute: typeof LedgerRoute
   LoginRoute: typeof LoginRoute
   MenuRoute: typeof MenuRoute
@@ -528,7 +1367,9 @@ export interface RootRouteChildren {
   SalesRoute: typeof SalesRoute
   SettingsRoute: typeof SettingsRoute
   StaffRoute: typeof StaffRoute
+  StorageUnitsRoute: typeof StorageUnitsRoute
   TablesRoute: typeof TablesRoute
+  VouchersRoute: typeof VouchersRoute
   ZonesRoute: typeof ZonesRouteWithChildren
   CategoriesIdRoute: typeof CategoriesIdRoute
   CategoriesCreateRoute: typeof CategoriesCreateRoute
@@ -550,11 +1391,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ZonesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/vouchers': {
+      id: '/vouchers'
+      path: '/vouchers'
+      fullPath: '/vouchers'
+      preLoaderRoute: typeof VouchersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tables': {
       id: '/tables'
       path: '/tables'
       fullPath: '/tables'
       preLoaderRoute: typeof TablesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/storage-units': {
+      id: '/storage-units'
+      path: '/storage-units'
+      fullPath: '/storage-units'
+      preLoaderRoute: typeof StorageUnitsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/staff': {
@@ -648,6 +1503,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LedgerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/kot-history': {
+      id: '/kot-history'
+      path: '/kot-history'
+      fullPath: '/kot-history'
+      preLoaderRoute: typeof KotHistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/kot': {
       id: '/kot'
       path: '/kot'
@@ -704,6 +1566,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ZonesZoneIdRouteImport
       parentRoute: typeof ZonesRoute
     }
+    '/reports/zone-performance': {
+      id: '/reports/zone-performance'
+      path: '/zone-performance'
+      fullPath: '/reports/zone-performance'
+      preLoaderRoute: typeof ReportsZonePerformanceRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/trends': {
+      id: '/reports/trends'
+      path: '/trends'
+      fullPath: '/reports/trends'
+      preLoaderRoute: typeof ReportsTrendsRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/table-utilization': {
+      id: '/reports/table-utilization'
+      path: '/table-utilization'
+      fullPath: '/reports/table-utilization'
+      preLoaderRoute: typeof ReportsTableUtilizationRouteImport
+      parentRoute: typeof ReportsRoute
+    }
     '/reports/stock': {
       id: '/reports/stock'
       path: '/stock'
@@ -718,11 +1601,88 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReportsSalesRouteImport
       parentRoute: typeof ReportsRoute
     }
+    '/reports/reservation-source': {
+      id: '/reports/reservation-source'
+      path: '/reservation-source'
+      fullPath: '/reports/reservation-source'
+      preLoaderRoute: typeof ReportsReservationSourceRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/reservation-peak-hours': {
+      id: '/reports/reservation-peak-hours'
+      path: '/reservation-peak-hours'
+      fullPath: '/reports/reservation-peak-hours'
+      preLoaderRoute: typeof ReportsReservationPeakHoursRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/reservation-overview': {
+      id: '/reports/reservation-overview'
+      path: '/reservation-overview'
+      fullPath: '/reports/reservation-overview'
+      preLoaderRoute: typeof ReportsReservationOverviewRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/reservation-no-show': {
+      id: '/reports/reservation-no-show'
+      path: '/reservation-no-show'
+      fullPath: '/reports/reservation-no-show'
+      preLoaderRoute: typeof ReportsReservationNoShowRouteImport
+      parentRoute: typeof ReportsRoute
+    }
     '/reports/profit-loss': {
       id: '/reports/profit-loss'
       path: '/profit-loss'
       fullPath: '/reports/profit-loss'
       preLoaderRoute: typeof ReportsProfitLossRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/procurement-supplier-performance': {
+      id: '/reports/procurement-supplier-performance'
+      path: '/procurement-supplier-performance'
+      fullPath: '/reports/procurement-supplier-performance'
+      preLoaderRoute: typeof ReportsProcurementSupplierPerformanceRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/procurement-reorder': {
+      id: '/reports/procurement-reorder'
+      path: '/procurement-reorder'
+      fullPath: '/reports/procurement-reorder'
+      preLoaderRoute: typeof ReportsProcurementReorderRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/procurement-purchase-to-pay': {
+      id: '/reports/procurement-purchase-to-pay'
+      path: '/procurement-purchase-to-pay'
+      fullPath: '/reports/procurement-purchase-to-pay'
+      preLoaderRoute: typeof ReportsProcurementPurchaseToPayRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/procurement-purchase-by-item': {
+      id: '/reports/procurement-purchase-by-item'
+      path: '/procurement-purchase-by-item'
+      fullPath: '/reports/procurement-purchase-by-item'
+      preLoaderRoute: typeof ReportsProcurementPurchaseByItemRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/procurement-price-comparison': {
+      id: '/reports/procurement-price-comparison'
+      path: '/procurement-price-comparison'
+      fullPath: '/reports/procurement-price-comparison'
+      preLoaderRoute: typeof ReportsProcurementPriceComparisonRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/procurement-po-summary': {
+      id: '/reports/procurement-po-summary'
+      path: '/procurement-po-summary'
+      fullPath: '/reports/procurement-po-summary'
+      preLoaderRoute: typeof ReportsProcurementPoSummaryRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/procurement-monthly-trend': {
+      id: '/reports/procurement-monthly-trend'
+      path: '/procurement-monthly-trend'
+      fullPath: '/reports/procurement-monthly-trend'
+      preLoaderRoute: typeof ReportsProcurementMonthlyTrendRouteImport
       parentRoute: typeof ReportsRoute
     }
     '/reports/popular-items': {
@@ -739,11 +1699,179 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReportsPaymentMethodsRouteImport
       parentRoute: typeof ReportsRoute
     }
+    '/reports/operations-weekly-review': {
+      id: '/reports/operations-weekly-review'
+      path: '/operations-weekly-review'
+      fullPath: '/reports/operations-weekly-review'
+      preLoaderRoute: typeof ReportsOperationsWeeklyReviewRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/operations-staff-activity': {
+      id: '/reports/operations-staff-activity'
+      path: '/operations-staff-activity'
+      fullPath: '/reports/operations-staff-activity'
+      preLoaderRoute: typeof ReportsOperationsStaffActivityRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/operations-peak-staffing': {
+      id: '/reports/operations-peak-staffing'
+      path: '/operations-peak-staffing'
+      fullPath: '/reports/operations-peak-staffing'
+      preLoaderRoute: typeof ReportsOperationsPeakStaffingRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/operations-payment-collection': {
+      id: '/reports/operations-payment-collection'
+      path: '/operations-payment-collection'
+      fullPath: '/reports/operations-payment-collection'
+      preLoaderRoute: typeof ReportsOperationsPaymentCollectionRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/operations-eod-reconciliation': {
+      id: '/reports/operations-eod-reconciliation'
+      path: '/operations-eod-reconciliation'
+      fullPath: '/reports/operations-eod-reconciliation'
+      preLoaderRoute: typeof ReportsOperationsEodReconciliationRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/operations-daily-summary': {
+      id: '/reports/operations-daily-summary'
+      path: '/operations-daily-summary'
+      fullPath: '/reports/operations-daily-summary'
+      preLoaderRoute: typeof ReportsOperationsDailySummaryRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/operations-cancellation-summary': {
+      id: '/reports/operations-cancellation-summary'
+      path: '/operations-cancellation-summary'
+      fullPath: '/reports/operations-cancellation-summary'
+      preLoaderRoute: typeof ReportsOperationsCancellationSummaryRouteImport
+      parentRoute: typeof ReportsRoute
+    }
     '/reports/low-stock': {
       id: '/reports/low-stock'
       path: '/low-stock'
       fullPath: '/reports/low-stock'
       preLoaderRoute: typeof ReportsLowStockRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/kitchen-throughput': {
+      id: '/reports/kitchen-throughput'
+      path: '/kitchen-throughput'
+      fullPath: '/reports/kitchen-throughput'
+      preLoaderRoute: typeof ReportsKitchenThroughputRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/kitchen-station-load': {
+      id: '/reports/kitchen-station-load'
+      path: '/kitchen-station-load'
+      fullPath: '/reports/kitchen-station-load'
+      preLoaderRoute: typeof ReportsKitchenStationLoadRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/kitchen-queue-status': {
+      id: '/reports/kitchen-queue-status'
+      path: '/kitchen-queue-status'
+      fullPath: '/reports/kitchen-queue-status'
+      preLoaderRoute: typeof ReportsKitchenQueueStatusRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/kitchen-performance': {
+      id: '/reports/kitchen-performance'
+      path: '/kitchen-performance'
+      fullPath: '/reports/kitchen-performance'
+      preLoaderRoute: typeof ReportsKitchenPerformanceRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/kitchen-item-frequency': {
+      id: '/reports/kitchen-item-frequency'
+      path: '/kitchen-item-frequency'
+      fullPath: '/reports/kitchen-item-frequency'
+      preLoaderRoute: typeof ReportsKitchenItemFrequencyRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/kitchen-dietary-mix': {
+      id: '/reports/kitchen-dietary-mix'
+      path: '/kitchen-dietary-mix'
+      fullPath: '/reports/kitchen-dietary-mix'
+      preLoaderRoute: typeof ReportsKitchenDietaryMixRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/kitchen-cancellation': {
+      id: '/reports/kitchen-cancellation'
+      path: '/kitchen-cancellation'
+      fullPath: '/reports/kitchen-cancellation'
+      preLoaderRoute: typeof ReportsKitchenCancellationRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/invoice-drilldown': {
+      id: '/reports/invoice-drilldown'
+      path: '/invoice-drilldown'
+      fullPath: '/reports/invoice-drilldown'
+      preLoaderRoute: typeof ReportsInvoiceDrilldownRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/inventory-wastage': {
+      id: '/reports/inventory-wastage'
+      path: '/inventory-wastage'
+      fullPath: '/reports/inventory-wastage'
+      preLoaderRoute: typeof ReportsInventoryWastageRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/inventory-valuation': {
+      id: '/reports/inventory-valuation'
+      path: '/inventory-valuation'
+      fullPath: '/reports/inventory-valuation'
+      preLoaderRoute: typeof ReportsInventoryValuationRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/inventory-reconciliation': {
+      id: '/reports/inventory-reconciliation'
+      path: '/inventory-reconciliation'
+      fullPath: '/reports/inventory-reconciliation'
+      preLoaderRoute: typeof ReportsInventoryReconciliationRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/inventory-recipe-costs': {
+      id: '/reports/inventory-recipe-costs'
+      path: '/inventory-recipe-costs'
+      fullPath: '/reports/inventory-recipe-costs'
+      preLoaderRoute: typeof ReportsInventoryRecipeCostsRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/inventory-purchase-timeline': {
+      id: '/reports/inventory-purchase-timeline'
+      path: '/inventory-purchase-timeline'
+      fullPath: '/reports/inventory-purchase-timeline'
+      preLoaderRoute: typeof ReportsInventoryPurchaseTimelineRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/inventory-production': {
+      id: '/reports/inventory-production'
+      path: '/inventory-production'
+      fullPath: '/reports/inventory-production'
+      preLoaderRoute: typeof ReportsInventoryProductionRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/inventory-movements': {
+      id: '/reports/inventory-movements'
+      path: '/inventory-movements'
+      fullPath: '/reports/inventory-movements'
+      preLoaderRoute: typeof ReportsInventoryMovementsRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/inventory-consumption': {
+      id: '/reports/inventory-consumption'
+      path: '/inventory-consumption'
+      fullPath: '/reports/inventory-consumption'
+      preLoaderRoute: typeof ReportsInventoryConsumptionRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/hourly': {
+      id: '/reports/hourly'
+      path: '/hourly'
+      fullPath: '/reports/hourly'
+      preLoaderRoute: typeof ReportsHourlyRouteImport
       parentRoute: typeof ReportsRoute
     }
     '/reports/gst': {
@@ -753,11 +1881,172 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReportsGstRouteImport
       parentRoute: typeof ReportsRoute
     }
+    '/reports/finance-tax-summary': {
+      id: '/reports/finance-tax-summary'
+      path: '/finance-tax-summary'
+      fullPath: '/reports/finance-tax-summary'
+      preLoaderRoute: typeof ReportsFinanceTaxSummaryRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/finance-revenue-vs-expense': {
+      id: '/reports/finance-revenue-vs-expense'
+      path: '/finance-revenue-vs-expense'
+      fullPath: '/reports/finance-revenue-vs-expense'
+      preLoaderRoute: typeof ReportsFinanceRevenueVsExpenseRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/finance-ledger-statement': {
+      id: '/reports/finance-ledger-statement'
+      path: '/finance-ledger-statement'
+      fullPath: '/reports/finance-ledger-statement'
+      preLoaderRoute: typeof ReportsFinanceLedgerStatementRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/finance-gst-return': {
+      id: '/reports/finance-gst-return'
+      path: '/finance-gst-return'
+      fullPath: '/reports/finance-gst-return'
+      preLoaderRoute: typeof ReportsFinanceGstReturnRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/finance-expenses': {
+      id: '/reports/finance-expenses'
+      path: '/finance-expenses'
+      fullPath: '/reports/finance-expenses'
+      preLoaderRoute: typeof ReportsFinanceExpensesRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/finance-cash-flow': {
+      id: '/reports/finance-cash-flow'
+      path: '/finance-cash-flow'
+      fullPath: '/reports/finance-cash-flow'
+      preLoaderRoute: typeof ReportsFinanceCashFlowRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/executive-trend-forecast': {
+      id: '/reports/executive-trend-forecast'
+      path: '/executive-trend-forecast'
+      fullPath: '/reports/executive-trend-forecast'
+      preLoaderRoute: typeof ReportsExecutiveTrendForecastRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/executive-profitability': {
+      id: '/reports/executive-profitability'
+      path: '/executive-profitability'
+      fullPath: '/reports/executive-profitability'
+      preLoaderRoute: typeof ReportsExecutiveProfitabilityRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/executive-kpi-dashboard': {
+      id: '/reports/executive-kpi-dashboard'
+      path: '/executive-kpi-dashboard'
+      fullPath: '/reports/executive-kpi-dashboard'
+      preLoaderRoute: typeof ReportsExecutiveKpiDashboardRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/executive-health-scorecard': {
+      id: '/reports/executive-health-scorecard'
+      path: '/executive-health-scorecard'
+      fullPath: '/reports/executive-health-scorecard'
+      preLoaderRoute: typeof ReportsExecutiveHealthScorecardRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/executive-comparative': {
+      id: '/reports/executive-comparative'
+      path: '/executive-comparative'
+      fullPath: '/reports/executive-comparative'
+      preLoaderRoute: typeof ReportsExecutiveComparativeRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/discount-analysis': {
+      id: '/reports/discount-analysis'
+      path: '/discount-analysis'
+      fullPath: '/reports/discount-analysis'
+      preLoaderRoute: typeof ReportsDiscountAnalysisRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/customer-walkin-vs-registered': {
+      id: '/reports/customer-walkin-vs-registered'
+      path: '/customer-walkin-vs-registered'
+      fullPath: '/reports/customer-walkin-vs-registered'
+      preLoaderRoute: typeof ReportsCustomerWalkinVsRegisteredRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/customer-type-analysis': {
+      id: '/reports/customer-type-analysis'
+      path: '/customer-type-analysis'
+      fullPath: '/reports/customer-type-analysis'
+      preLoaderRoute: typeof ReportsCustomerTypeAnalysisRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/customer-revenue': {
+      id: '/reports/customer-revenue'
+      path: '/customer-revenue'
+      fullPath: '/reports/customer-revenue'
+      preLoaderRoute: typeof ReportsCustomerRevenueRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/customer-preferences': {
+      id: '/reports/customer-preferences'
+      path: '/customer-preferences'
+      fullPath: '/reports/customer-preferences'
+      preLoaderRoute: typeof ReportsCustomerPreferencesRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/customer-new-vs-returning': {
+      id: '/reports/customer-new-vs-returning'
+      path: '/customer-new-vs-returning'
+      fullPath: '/reports/customer-new-vs-returning'
+      preLoaderRoute: typeof ReportsCustomerNewVsReturningRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/customer-loyalty': {
+      id: '/reports/customer-loyalty'
+      path: '/customer-loyalty'
+      fullPath: '/reports/customer-loyalty'
+      preLoaderRoute: typeof ReportsCustomerLoyaltyRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/customer-lifetime-value': {
+      id: '/reports/customer-lifetime-value'
+      path: '/customer-lifetime-value'
+      fullPath: '/reports/customer-lifetime-value'
+      preLoaderRoute: typeof ReportsCustomerLifetimeValueRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/customer-directory': {
+      id: '/reports/customer-directory'
+      path: '/customer-directory'
+      fullPath: '/reports/customer-directory'
+      preLoaderRoute: typeof ReportsCustomerDirectoryRouteImport
+      parentRoute: typeof ReportsRoute
+    }
     '/reports/categories': {
       id: '/reports/categories'
       path: '/categories'
       fullPath: '/reports/categories'
       preLoaderRoute: typeof ReportsCategoriesRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/cancelled': {
+      id: '/reports/cancelled'
+      path: '/cancelled'
+      fullPath: '/reports/cancelled'
+      preLoaderRoute: typeof ReportsCancelledRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/balance-sheet': {
+      id: '/reports/balance-sheet'
+      path: '/balance-sheet'
+      fullPath: '/reports/balance-sheet'
+      preLoaderRoute: typeof ReportsBalanceSheetRouteImport
+      parentRoute: typeof ReportsRoute
+    }
+    '/reports/$reportId': {
+      id: '/reports/$reportId'
+      path: '/$reportId'
+      fullPath: '/reports/$reportId'
+      preLoaderRoute: typeof ReportsReportIdRouteImport
       parentRoute: typeof ReportsRoute
     }
     '/price-levels_/create': {
@@ -780,6 +2069,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/items/$id'
       preLoaderRoute: typeof ItemsIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/inventory/stock-counts': {
+      id: '/inventory/stock-counts'
+      path: '/stock-counts'
+      fullPath: '/inventory/stock-counts'
+      preLoaderRoute: typeof InventoryStockCountsRouteImport
+      parentRoute: typeof InventoryRoute
+    }
+    '/inventory/batches': {
+      id: '/inventory/batches'
+      path: '/batches'
+      fullPath: '/inventory/batches'
+      preLoaderRoute: typeof InventoryBatchesRouteImport
+      parentRoute: typeof InventoryRoute
     }
     '/categories_/tree': {
       id: '/categories_/tree'
@@ -826,26 +2129,168 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface InventoryRouteChildren {
+  InventoryBatchesRoute: typeof InventoryBatchesRoute
+  InventoryStockCountsRoute: typeof InventoryStockCountsRoute
+}
+
+const InventoryRouteChildren: InventoryRouteChildren = {
+  InventoryBatchesRoute: InventoryBatchesRoute,
+  InventoryStockCountsRoute: InventoryStockCountsRoute,
+}
+
+const InventoryRouteWithChildren = InventoryRoute._addFileChildren(
+  InventoryRouteChildren,
+)
+
 interface ReportsRouteChildren {
+  ReportsReportIdRoute: typeof ReportsReportIdRoute
+  ReportsBalanceSheetRoute: typeof ReportsBalanceSheetRoute
+  ReportsCancelledRoute: typeof ReportsCancelledRoute
   ReportsCategoriesRoute: typeof ReportsCategoriesRoute
+  ReportsCustomerDirectoryRoute: typeof ReportsCustomerDirectoryRoute
+  ReportsCustomerLifetimeValueRoute: typeof ReportsCustomerLifetimeValueRoute
+  ReportsCustomerLoyaltyRoute: typeof ReportsCustomerLoyaltyRoute
+  ReportsCustomerNewVsReturningRoute: typeof ReportsCustomerNewVsReturningRoute
+  ReportsCustomerPreferencesRoute: typeof ReportsCustomerPreferencesRoute
+  ReportsCustomerRevenueRoute: typeof ReportsCustomerRevenueRoute
+  ReportsCustomerTypeAnalysisRoute: typeof ReportsCustomerTypeAnalysisRoute
+  ReportsCustomerWalkinVsRegisteredRoute: typeof ReportsCustomerWalkinVsRegisteredRoute
+  ReportsDiscountAnalysisRoute: typeof ReportsDiscountAnalysisRoute
+  ReportsExecutiveComparativeRoute: typeof ReportsExecutiveComparativeRoute
+  ReportsExecutiveHealthScorecardRoute: typeof ReportsExecutiveHealthScorecardRoute
+  ReportsExecutiveKpiDashboardRoute: typeof ReportsExecutiveKpiDashboardRoute
+  ReportsExecutiveProfitabilityRoute: typeof ReportsExecutiveProfitabilityRoute
+  ReportsExecutiveTrendForecastRoute: typeof ReportsExecutiveTrendForecastRoute
+  ReportsFinanceCashFlowRoute: typeof ReportsFinanceCashFlowRoute
+  ReportsFinanceExpensesRoute: typeof ReportsFinanceExpensesRoute
+  ReportsFinanceGstReturnRoute: typeof ReportsFinanceGstReturnRoute
+  ReportsFinanceLedgerStatementRoute: typeof ReportsFinanceLedgerStatementRoute
+  ReportsFinanceRevenueVsExpenseRoute: typeof ReportsFinanceRevenueVsExpenseRoute
+  ReportsFinanceTaxSummaryRoute: typeof ReportsFinanceTaxSummaryRoute
   ReportsGstRoute: typeof ReportsGstRoute
+  ReportsHourlyRoute: typeof ReportsHourlyRoute
+  ReportsInventoryConsumptionRoute: typeof ReportsInventoryConsumptionRoute
+  ReportsInventoryMovementsRoute: typeof ReportsInventoryMovementsRoute
+  ReportsInventoryProductionRoute: typeof ReportsInventoryProductionRoute
+  ReportsInventoryPurchaseTimelineRoute: typeof ReportsInventoryPurchaseTimelineRoute
+  ReportsInventoryRecipeCostsRoute: typeof ReportsInventoryRecipeCostsRoute
+  ReportsInventoryReconciliationRoute: typeof ReportsInventoryReconciliationRoute
+  ReportsInventoryValuationRoute: typeof ReportsInventoryValuationRoute
+  ReportsInventoryWastageRoute: typeof ReportsInventoryWastageRoute
+  ReportsInvoiceDrilldownRoute: typeof ReportsInvoiceDrilldownRoute
+  ReportsKitchenCancellationRoute: typeof ReportsKitchenCancellationRoute
+  ReportsKitchenDietaryMixRoute: typeof ReportsKitchenDietaryMixRoute
+  ReportsKitchenItemFrequencyRoute: typeof ReportsKitchenItemFrequencyRoute
+  ReportsKitchenPerformanceRoute: typeof ReportsKitchenPerformanceRoute
+  ReportsKitchenQueueStatusRoute: typeof ReportsKitchenQueueStatusRoute
+  ReportsKitchenStationLoadRoute: typeof ReportsKitchenStationLoadRoute
+  ReportsKitchenThroughputRoute: typeof ReportsKitchenThroughputRoute
   ReportsLowStockRoute: typeof ReportsLowStockRoute
+  ReportsOperationsCancellationSummaryRoute: typeof ReportsOperationsCancellationSummaryRoute
+  ReportsOperationsDailySummaryRoute: typeof ReportsOperationsDailySummaryRoute
+  ReportsOperationsEodReconciliationRoute: typeof ReportsOperationsEodReconciliationRoute
+  ReportsOperationsPaymentCollectionRoute: typeof ReportsOperationsPaymentCollectionRoute
+  ReportsOperationsPeakStaffingRoute: typeof ReportsOperationsPeakStaffingRoute
+  ReportsOperationsStaffActivityRoute: typeof ReportsOperationsStaffActivityRoute
+  ReportsOperationsWeeklyReviewRoute: typeof ReportsOperationsWeeklyReviewRoute
   ReportsPaymentMethodsRoute: typeof ReportsPaymentMethodsRoute
   ReportsPopularItemsRoute: typeof ReportsPopularItemsRoute
+  ReportsProcurementMonthlyTrendRoute: typeof ReportsProcurementMonthlyTrendRoute
+  ReportsProcurementPoSummaryRoute: typeof ReportsProcurementPoSummaryRoute
+  ReportsProcurementPriceComparisonRoute: typeof ReportsProcurementPriceComparisonRoute
+  ReportsProcurementPurchaseByItemRoute: typeof ReportsProcurementPurchaseByItemRoute
+  ReportsProcurementPurchaseToPayRoute: typeof ReportsProcurementPurchaseToPayRoute
+  ReportsProcurementReorderRoute: typeof ReportsProcurementReorderRoute
+  ReportsProcurementSupplierPerformanceRoute: typeof ReportsProcurementSupplierPerformanceRoute
   ReportsProfitLossRoute: typeof ReportsProfitLossRoute
+  ReportsReservationNoShowRoute: typeof ReportsReservationNoShowRoute
+  ReportsReservationOverviewRoute: typeof ReportsReservationOverviewRoute
+  ReportsReservationPeakHoursRoute: typeof ReportsReservationPeakHoursRoute
+  ReportsReservationSourceRoute: typeof ReportsReservationSourceRoute
   ReportsSalesRoute: typeof ReportsSalesRoute
   ReportsStockRoute: typeof ReportsStockRoute
+  ReportsTableUtilizationRoute: typeof ReportsTableUtilizationRoute
+  ReportsTrendsRoute: typeof ReportsTrendsRoute
+  ReportsZonePerformanceRoute: typeof ReportsZonePerformanceRoute
 }
 
 const ReportsRouteChildren: ReportsRouteChildren = {
+  ReportsReportIdRoute: ReportsReportIdRoute,
+  ReportsBalanceSheetRoute: ReportsBalanceSheetRoute,
+  ReportsCancelledRoute: ReportsCancelledRoute,
   ReportsCategoriesRoute: ReportsCategoriesRoute,
+  ReportsCustomerDirectoryRoute: ReportsCustomerDirectoryRoute,
+  ReportsCustomerLifetimeValueRoute: ReportsCustomerLifetimeValueRoute,
+  ReportsCustomerLoyaltyRoute: ReportsCustomerLoyaltyRoute,
+  ReportsCustomerNewVsReturningRoute: ReportsCustomerNewVsReturningRoute,
+  ReportsCustomerPreferencesRoute: ReportsCustomerPreferencesRoute,
+  ReportsCustomerRevenueRoute: ReportsCustomerRevenueRoute,
+  ReportsCustomerTypeAnalysisRoute: ReportsCustomerTypeAnalysisRoute,
+  ReportsCustomerWalkinVsRegisteredRoute:
+    ReportsCustomerWalkinVsRegisteredRoute,
+  ReportsDiscountAnalysisRoute: ReportsDiscountAnalysisRoute,
+  ReportsExecutiveComparativeRoute: ReportsExecutiveComparativeRoute,
+  ReportsExecutiveHealthScorecardRoute: ReportsExecutiveHealthScorecardRoute,
+  ReportsExecutiveKpiDashboardRoute: ReportsExecutiveKpiDashboardRoute,
+  ReportsExecutiveProfitabilityRoute: ReportsExecutiveProfitabilityRoute,
+  ReportsExecutiveTrendForecastRoute: ReportsExecutiveTrendForecastRoute,
+  ReportsFinanceCashFlowRoute: ReportsFinanceCashFlowRoute,
+  ReportsFinanceExpensesRoute: ReportsFinanceExpensesRoute,
+  ReportsFinanceGstReturnRoute: ReportsFinanceGstReturnRoute,
+  ReportsFinanceLedgerStatementRoute: ReportsFinanceLedgerStatementRoute,
+  ReportsFinanceRevenueVsExpenseRoute: ReportsFinanceRevenueVsExpenseRoute,
+  ReportsFinanceTaxSummaryRoute: ReportsFinanceTaxSummaryRoute,
   ReportsGstRoute: ReportsGstRoute,
+  ReportsHourlyRoute: ReportsHourlyRoute,
+  ReportsInventoryConsumptionRoute: ReportsInventoryConsumptionRoute,
+  ReportsInventoryMovementsRoute: ReportsInventoryMovementsRoute,
+  ReportsInventoryProductionRoute: ReportsInventoryProductionRoute,
+  ReportsInventoryPurchaseTimelineRoute: ReportsInventoryPurchaseTimelineRoute,
+  ReportsInventoryRecipeCostsRoute: ReportsInventoryRecipeCostsRoute,
+  ReportsInventoryReconciliationRoute: ReportsInventoryReconciliationRoute,
+  ReportsInventoryValuationRoute: ReportsInventoryValuationRoute,
+  ReportsInventoryWastageRoute: ReportsInventoryWastageRoute,
+  ReportsInvoiceDrilldownRoute: ReportsInvoiceDrilldownRoute,
+  ReportsKitchenCancellationRoute: ReportsKitchenCancellationRoute,
+  ReportsKitchenDietaryMixRoute: ReportsKitchenDietaryMixRoute,
+  ReportsKitchenItemFrequencyRoute: ReportsKitchenItemFrequencyRoute,
+  ReportsKitchenPerformanceRoute: ReportsKitchenPerformanceRoute,
+  ReportsKitchenQueueStatusRoute: ReportsKitchenQueueStatusRoute,
+  ReportsKitchenStationLoadRoute: ReportsKitchenStationLoadRoute,
+  ReportsKitchenThroughputRoute: ReportsKitchenThroughputRoute,
   ReportsLowStockRoute: ReportsLowStockRoute,
+  ReportsOperationsCancellationSummaryRoute:
+    ReportsOperationsCancellationSummaryRoute,
+  ReportsOperationsDailySummaryRoute: ReportsOperationsDailySummaryRoute,
+  ReportsOperationsEodReconciliationRoute:
+    ReportsOperationsEodReconciliationRoute,
+  ReportsOperationsPaymentCollectionRoute:
+    ReportsOperationsPaymentCollectionRoute,
+  ReportsOperationsPeakStaffingRoute: ReportsOperationsPeakStaffingRoute,
+  ReportsOperationsStaffActivityRoute: ReportsOperationsStaffActivityRoute,
+  ReportsOperationsWeeklyReviewRoute: ReportsOperationsWeeklyReviewRoute,
   ReportsPaymentMethodsRoute: ReportsPaymentMethodsRoute,
   ReportsPopularItemsRoute: ReportsPopularItemsRoute,
+  ReportsProcurementMonthlyTrendRoute: ReportsProcurementMonthlyTrendRoute,
+  ReportsProcurementPoSummaryRoute: ReportsProcurementPoSummaryRoute,
+  ReportsProcurementPriceComparisonRoute:
+    ReportsProcurementPriceComparisonRoute,
+  ReportsProcurementPurchaseByItemRoute: ReportsProcurementPurchaseByItemRoute,
+  ReportsProcurementPurchaseToPayRoute: ReportsProcurementPurchaseToPayRoute,
+  ReportsProcurementReorderRoute: ReportsProcurementReorderRoute,
+  ReportsProcurementSupplierPerformanceRoute:
+    ReportsProcurementSupplierPerformanceRoute,
   ReportsProfitLossRoute: ReportsProfitLossRoute,
+  ReportsReservationNoShowRoute: ReportsReservationNoShowRoute,
+  ReportsReservationOverviewRoute: ReportsReservationOverviewRoute,
+  ReportsReservationPeakHoursRoute: ReportsReservationPeakHoursRoute,
+  ReportsReservationSourceRoute: ReportsReservationSourceRoute,
   ReportsSalesRoute: ReportsSalesRoute,
   ReportsStockRoute: ReportsStockRoute,
+  ReportsTableUtilizationRoute: ReportsTableUtilizationRoute,
+  ReportsTrendsRoute: ReportsTrendsRoute,
+  ReportsZonePerformanceRoute: ReportsZonePerformanceRoute,
 }
 
 const ReportsRouteWithChildren =
@@ -865,10 +2310,11 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CategoriesRoute: CategoriesRoute,
   DashboardRoute: DashboardRoute,
-  InventoryRoute: InventoryRoute,
+  InventoryRoute: InventoryRouteWithChildren,
   ItemsRoute: ItemsRoute,
   KitchenPrepRoute: KitchenPrepRoute,
   KotRoute: KotRoute,
+  KotHistoryRoute: KotHistoryRoute,
   LedgerRoute: LedgerRoute,
   LoginRoute: LoginRoute,
   MenuRoute: MenuRoute,
@@ -882,7 +2328,9 @@ const rootRouteChildren: RootRouteChildren = {
   SalesRoute: SalesRoute,
   SettingsRoute: SettingsRoute,
   StaffRoute: StaffRoute,
+  StorageUnitsRoute: StorageUnitsRoute,
   TablesRoute: TablesRoute,
+  VouchersRoute: VouchersRoute,
   ZonesRoute: ZonesRouteWithChildren,
   CategoriesIdRoute: CategoriesIdRoute,
   CategoriesCreateRoute: CategoriesCreateRoute,

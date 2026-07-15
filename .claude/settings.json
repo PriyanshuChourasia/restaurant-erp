@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "deny": [
+      "Edit(apps/api/src/auth/**)",
+      "Write(apps/api/src/auth/**)",
+      "Edit(apps/api/src/main.ts)",
+      "Write(apps/api/src/main.ts)"
+    ]
+  }
+}

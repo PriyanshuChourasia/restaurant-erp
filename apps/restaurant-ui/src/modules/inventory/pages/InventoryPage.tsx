@@ -1,11 +1,14 @@
 import { useState, useMemo } from 'react'
 import { createColumnHelper, type ColumnDef } from '@tanstack/react-table'
-import { Plus, Search, Package, AlertTriangle, Filter } from 'lucide-react'
+import { Plus, Search, Package, AlertTriangle, Filter, ArrowLeftRight } from 'lucide-react'
 import { useInventory, useLowStock } from '../hooks/useInventoryQueries'
 import { DataTable } from '@/components/ui/data-table'
 import { AdjustStockDialog } from '../dialogs/AdjustStockDialog'
 import { StockHistoryDialog } from '../dialogs/StockHistoryDialog'
 import { AddInventoryItemDialog } from '../dialogs/AddInventoryItemDialog'
+import { UnitConversionWidget } from '@/modules/units/components/UnitConversionWidget'
+import { ViewBatchesDialog } from '../dialogs/ViewBatchesDialog'
+import { FormattedQuantity } from '@/components/ui/FormattedQuantity'
 
 interface InventoryRow {
   id: string
@@ -44,6 +47,8 @@ export function InventoryPage() {
   const [adjustTarget, setAdjustTarget] = useState<InventoryRow | null>(null)
   const [historyTarget, setHistoryTarget] = useState<InventoryRow | null>(null)
   const [showAddItem, setShowAddItem] = useState(false)
+  const [convertTarget, setConvertTarget] = useState<InventoryRow | null>(null)
+  const [batchesTarget, setBatchesTarget] = useState<InventoryRow | null>(null)
 
   const { data, isLoading } = useInventory({ page, limit: 20, search: search || undefined, status: statusFilter || undefined })
   const { data: lowStockData } = useLowStock()
@@ -64,7 +69,7 @@ export function InventoryPage() {
         currentStock: item.currentStock,
         minStockLevel: item.minStockLevel,
         unitCost: Number(item.unitCost || 0),
-        unit: item.item?.unit || '',
+        unit: item.item?.unit?.code || item.item?.unit?.name || '',
         status: getStockStatus(item),
       })),
     [rawItems],
@@ -90,9 +95,20 @@ export function InventoryPage() {
         cell: (info) => {
           const row = info.row.original
           return (
-            <span className="font-semibold text-gray-900">
-              {info.getValue()} {row.unit && <span className="text-xs text-gray-400 font-normal">{row.unit}</span>}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-gray-900">
+                <FormattedQuantity quantity={info.getValue()} unit={row.unit} variant="full" />
+              </span>
+              {row.unit && (
+                <button
+                  onClick={() => setConvertTarget(row)}
+                  className="flex h-6 w-6 items-center justify-center rounded-md border border-gray-200 text-gray-300 hover:border-primary/30 hover:bg-primary/5 hover:text-primary transition-all"
+                  title="Convert units"
+                >
+                  <ArrowLeftRight size={12} />
+                </button>
+              )}
+            </div>
           )
         },
       }),
@@ -100,7 +116,9 @@ export function InventoryPage() {
         header: 'Min Level',
         cell: (info) => {
           const row = info.row.original
-          return info.getValue() > 0 ? `${info.getValue()} ${row.unit || ''}` : '-'
+          return info.getValue() > 0
+            ? <FormattedQuantity quantity={info.getValue()} unit={row.unit} variant="full" />
+            : '-'
         },
       }),
       columnHelper.accessor('unitCost', {
@@ -127,6 +145,12 @@ export function InventoryPage() {
                 className="h-7 px-2.5 rounded-md border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-100 transition-all"
               >
                 Adjust
+              </button>
+              <button
+                onClick={() => setBatchesTarget(row)}
+                className="h-7 px-2.5 rounded-md border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-100 transition-all"
+              >
+                Batches
               </button>
               <button
                 onClick={() => setHistoryTarget(row)}
@@ -253,6 +277,22 @@ export function InventoryPage() {
       )}
 
       {showAddItem && <AddInventoryItemDialog onClose={() => setShowAddItem(false)} />}
+
+      {batchesTarget && (
+        <ViewBatchesDialog
+          itemId={batchesTarget.itemId}
+          itemName={batchesTarget.itemName}
+          onClose={() => setBatchesTarget(null)}
+        />
+      )}
+
+      {convertTarget && (
+        <UnitConversionWidget
+          quantity={convertTarget.currentStock}
+          unitCode={convertTarget.unit}
+          onClose={() => setConvertTarget(null)}
+        />
+      )}
     </div>
   )
 }

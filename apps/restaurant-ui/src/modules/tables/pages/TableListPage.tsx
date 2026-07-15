@@ -89,6 +89,18 @@ export function TableListPage() {
     occupied: 'text-blue-500',
   }
 
+  const statusSortRank: Record<string, number> = {
+    available: 0,
+    booked: 1,
+    occupied: 2,
+  }
+
+  const sortedTables = [...(tables || [])].sort((a, b) => {
+    const rankDiff = (statusSortRank[a.status] ?? 0) - (statusSortRank[b.status] ?? 0)
+    if (rankDiff !== 0) return rankDiff
+    return a.label.localeCompare(b.label, undefined, { numeric: true })
+  })
+
   const getZoneName = (zoneId: string | null) => {
     if (!zoneId) return '—'
     return zones?.find((z) => z.id === zoneId)?.name || 'Unknown Zone'
@@ -210,7 +222,7 @@ export function TableListPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {(tables || []).map((table) => (
+              {sortedTables.map((table) => (
                 <tr key={table.id} className="group hover:bg-gray-50/50 transition-all">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
@@ -218,7 +230,7 @@ export function TableListPage() {
                         table.status === 'available' ? 'bg-emerald-500' :
                         table.status === 'booked' ? 'bg-amber-500' : 'bg-blue-500'
                       }`}>
-                        {table.label.charAt(0).toUpperCase()}
+                        {table.label ? table.label.charAt(0).toUpperCase() : '?'}
                       </div>
                       <span className="text-sm font-medium text-gray-900">{table.label}</span>
                     </div>
@@ -228,7 +240,7 @@ export function TableListPage() {
                       statusColors[table.status] || 'bg-gray-100 text-gray-600'
                     }`}>
                       <Circle size={6} fill="currentColor" className={statusDots[table.status]} />
-                      {table.status.charAt(0).toUpperCase() + table.status.slice(1)}
+                      {table.status ? table.status.charAt(0).toUpperCase() + table.status.slice(1) : 'Unknown'}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-600 capitalize">{table.category}</td>

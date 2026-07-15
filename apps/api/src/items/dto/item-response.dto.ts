@@ -26,6 +26,18 @@ export class ItemResponseDto {
   gstRate: number;
 
   @Expose()
+  itemType: string;
+
+  @Expose()
+  isTaxable: boolean;
+
+  @Expose()
+  cessPercent: number;
+
+  @Expose()
+  reverseCharge: boolean;
+
+  @Expose()
   unit: string;
 
   @Expose()

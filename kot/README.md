@@ -1,5 +1,10 @@
 # KOT Management — Module Index
 
+**If you're an LLM/agent about to implement anything in this folder, read
+[`AGENTS.md`](./AGENTS.md) first** — it has the task-workflow rule
+(`.project/prompt.md`) and the module breakdown as an actionable checklist.
+This file has the full background, goal, and worked example.
+
 ## Background
 
 This is a NestJS (`apps/api`) + React/TanStack Router (`apps/restaurant-ui`)
@@ -96,6 +101,9 @@ restaurant ERP monorepo. Confirmed by reading the actual KOT code path
 11. Cancel a KOT or KOT item properly — structured reasons, approval
     gating on already-started work, stock reversal, and an alert to
     whoever's already cooking it — not just a bare status flip. → **[`kot-cancellation_plan.md`](./kot-cancellation_plan.md)**
+12. Combine multiple still-active KOTs for the same table (separate
+    rounds) into one consolidated kitchen ticket, instead of leaving the
+    kitchen to juggle several tickets for one table. → **[`kot-merge-plan.md`](./kot-merge-plan.md)**
 
 ## Modules
 
@@ -112,6 +120,7 @@ restaurant ERP monorepo. Confirmed by reading the actual KOT code path
 | 9 | [`kds_plan.md`](./kds_plan.md) | 3, 4, 5 | Real kitchen-terminal experience: WebSocket push, per-station kiosk screens, sound alerts, bump-bar controls |
 | 10 | [`chef-workflow_plan.md`](./chef-workflow_plan.md) | 3, 4, 9, and [`../inventory/`](../inventory/README.md) | Ticket claiming, recipe/method visibility, 86 (sold-out) workflow, hold-and-fire course control |
 | 11 | [`kot-cancellation_plan.md`](./kot-cancellation_plan.md) | 1 (basic); 7, 9, 10, [`../order-sessions/`](../order-sessions/README.md) (deeper integrations) | Structured cancel reasons, approval gating, stock reversal, KDS/chef alerting, billing exclusion |
+| 12 | [`kot-merge-plan.md`](./kot-merge-plan.md) | 8 (rollup helper); interacts with 11 (`MERGED` status added to the cancel lock-point check) | Combine several active KOTs for one table into a single ticket; source KOTs closed out with a `MERGED` status and provenance pointer, items reassigned to the target |
 
 Do modules 1–2 first, then **module 11's basic mechanism** can ship
 early (right after module 1) since cancellation is needed by so much
@@ -125,7 +134,11 @@ cancel first, then 7's timing decision, then wire 7's reversal call back
 into 11's cancel path. Module 8 depends on both 6 and 11. Module 9 is a
 presentation layer over 3/4/5 — do it once those are stable. Module 10
 is the highest-touch module in the folder, reaching into
-`../order-sessions/` and `../inventory/` — do it last.
+`../order-sessions/` and `../inventory/` — do it last. Module 12 only
+needs module 8's rollup-helper extraction and can otherwise ship any time
+after that (independent of 3–10); build it before or alongside module 11
+if convenient, since 11 needs a one-line update once 12's `MERGED` status
+exists.
 
 ## Pipeline — how the 9 modules connect
 

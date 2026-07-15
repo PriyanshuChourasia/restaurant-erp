@@ -24,6 +24,10 @@
 **Visualization:** KPI cards + daily trend line chart
 **Filters:** Single date (defaults to today)
 
+**Why It Is Needed:** The first report a manager looks at each day to know how the business performed. Answers: Did we hit today's target? How does today compare to yesterday? Are we on track for the month? Enables quick corrective action if sales are down.
+
+**Business Area Reviewed:** Daily top-line performance. Reviews total revenue, invoice count, discounts, and tax collected. Used by manager and owner for daily pulse check and target tracking.
+
 ---
 
 ## RPT-S02: Sales Report (Date Range)
@@ -41,6 +45,10 @@
 **Visualization:** KPI cards + trend line
 **Filters:** fromDate, toDate, groupBy (day/week/month)
 
+**Why It Is Needed:** Core report for tracking sales performance over any period. Helps answer: Is revenue growing month-over-month? What is the average ticket size? Are customers spending more or less over time? Used for target setting and performance reviews.
+
+**Business Area Reviewed:** Revenue performance over time. Reviews sales volume, value, and order patterns across days, weeks, or months. Used by owner and manager for trend analysis and goal tracking.
+
 ---
 
 ## RPT-S03: Sales by Payment Method
@@ -56,6 +64,10 @@
 **Visualization:** Pie chart + bar chart + table
 **Filters:** Date range
 **Grouping:** By payment method
+
+**Why It Is Needed:** Tells the manager how customers prefer to pay. If digital payments are rising, the restaurant may need better UPI/card infrastructure. If cash is dominant, bank deposit planning changes. Also critical for cash management — if card/UPI is >80%, less physical cash needs to be kept on premises.
+
+**Business Area Reviewed:** Payment preference trends and cash management. Reviews the mix of cash, card, UPI, and credit transactions. Used by manager and accountant for cash handling procedures, bank deposit planning, and payment infrastructure decisions.
 
 ---
 
@@ -73,6 +85,10 @@
 
 **Visualization:** Treemap + horizontal bar chart
 **Filters:** Date range, category depth (1-3 levels)
+
+**Why It Is Needed:** Reveals which menu categories drive revenue. Are starters outselling mains? Is the beverage category underperforming? Enables data-driven menu engineering — promote high-margin categories, rework or replace underperforming ones. Answers: Which food categories should we focus on?
+
+**Business Area Reviewed:** Menu category performance and contribution mix. Reviews revenue distribution across food categories (e.g., starters, mains, desserts, beverages). Used by owner, chef, and manager for menu engineering and category strategy.
 
 ---
 
@@ -94,6 +110,10 @@
 **Filters:** Date range, veg-only toggle, category filter
 **Sorting:** By quantity sold or revenue (toggle)
 
+**Why It Is Needed:** The most actionable report for a chef and manager. Identifies best-sellers (keep and promote) and slow-movers (rework or remove). Answers: What are customers coming here for? Which items should be featured on promotions? Combined with food cost data, this becomes the foundation of menu profitability analysis.
+
+**Business Area Reviewed:** Menu item performance and customer preference. Reviews each item's popularity by quantity sold and revenue generated. Used by chef and owner for menu optimization, pricing decisions, and promotion planning.
+
 ---
 
 ## RPT-S06: Hourly Sales Distribution
@@ -109,6 +129,10 @@
 **Visualization:** Heatmap (hour of day vs day of week) + bar chart
 **Filters:** Date range, day-of-week filter
 **Insight:** Identifies peak hours for staffing optimization
+
+**Why It Is Needed:** Directly informs staffing schedules. If 60% of revenue comes between 7-10 PM, that's where most staff should be scheduled. Also helps plan happy hours, lunch specials, or off-peak promotions. Answers: When are we busiest? When should we have more servers and kitchen staff?
+
+**Business Area Reviewed:** Sales distribution by time of day and day of week. Reviews revenue patterns across operating hours. Used by manager for staffing optimization, shift scheduling, and timing of promotions.
 
 ---
 
@@ -127,6 +151,10 @@
 **Filters:** Granularity (weekly/monthly), comparison period (MoM, YoY)
 **Insight:** Growth trajectory and seasonality patterns
 
+**Why It Is Needed:** Reveals the restaurant's growth trajectory and seasonal patterns. Answers: Are we growing compared to last month/last year? Which months are naturally high/low? Enables setting realistic targets and comparing performance against industry benchmarks. Essential for understanding seasonality in the restaurant business.
+
+**Business Area Reviewed:** Revenue growth trajectory and seasonality. Reviews period-over-period (monthly, weekly, yearly) performance changes. Used by owner for strategic planning, target setting, and evaluating business direction.
+
 ---
 
 ## RPT-S08: Discount Analysis
@@ -143,6 +171,10 @@
 **Visualization:** Trend line + breakdown table
 **Filters:** Date range, minimum discount threshold
 **Insight:** Discount leakage and promotion effectiveness
+
+**Why It Is Needed:** Discounts directly eat into profit. This report prevents revenue leakage by surfacing who is giving discounts, how much, and whether they are effective. Answers: Are we giving away too much? Are discounts driving enough additional volume to justify the margin loss? Critical for preventing staff abuse of discounting power.
+
+**Business Area Reviewed:** Discount discipline and promotion ROI. Reviews the extent and pattern of discounts affecting revenue. Used by owner and manager to control discount leakage, evaluate promo effectiveness, and prevent staff misuse.
 
 ---
 
@@ -162,6 +194,10 @@
 **Visualization:** Stacked bar chart + summary table
 **Filters:** Date range
 **Compliance:** Required for GST filing
+
+**Why It Is Needed:** Mandatory for reconciling tax collected with what will be filed in GST returns. Helps verify that correct GST rates are being applied to menu items. Also identifies if certain items are incorrectly taxed (e.g., charging 5% when it should be 12%).
+
+**Business Area Reviewed:** Tax collection accuracy and compliance. Reviews GST collected by rate slab across all sales. Used by accountant and manager to ensure correct tax application and prepare for GST filing.
 
 ---
 
@@ -185,6 +221,10 @@
 **Filters:** Invoice number, date range, customer, status
 **Drill-down:** From any sales summary report into individual invoices
 
+**Why It Is Needed:** Provides the transaction-level detail behind any summary number. When a customer disputes a bill, the accountant needs to match the invoice, or the manager needs to audit a suspicious transaction — this is where you go. Answers: What exactly was ordered, when, by whom, and how was it paid?
+
+**Business Area Reviewed:** Transaction-level audit and verification. Reviews full details of any individual sale. Used by manager, accountant, and customer service for dispute resolution, audit, and verification of summary data.
+
 ---
 
 ## RPT-S11: Cancelled & Voided Transactions
@@ -200,6 +240,10 @@
 **Visualization:** KPI card + trend line
 **Filters:** Date range
 **Insight:** Revenue loss from cancellations
+
+**Why It Is Needed:** High cancellation rates can signal process problems — orders going to wrong tables, long wait times causing customers to leave, or even staff fraud (false cancellations to steal cash). Answers: How much revenue are we losing to cancellations? Is the rate normal or rising? This is a key control report for fraud detection.
+
+**Business Area Reviewed:** Order accuracy and revenue leakage. Reviews transaction cancellations and their impact on revenue. Used by owner and manager for fraud detection, process improvement, and minimizing revenue loss.
 
 ---
 
@@ -217,6 +261,10 @@
 **Visualization:** Donut chart + comparison bar
 **Filters:** Date range
 **Insight:** Menu mix and dietary preference trends
+
+**Why It Is Needed:** Helps understand customer dietary preferences in the restaurant's location. If veg is 70% of sales, the menu should emphasize vegetarian options. Also useful for inventory planning — which raw materials to stock more of. Answers: What is the veg/non-veg ratio of our customer base? Should we add more veg or non-veg items?
+
+**Business Area Reviewed:** Dietary preference trends and menu-mix balance. Reviews split between vegetarian and non-vegetarian item sales. Used by chef for menu development and by owner for understanding customer demographics.
 
 ---
 

@@ -148,12 +148,45 @@ export class RecipesService {
 
       await this.movementRepo.save(this.movementRepo.create({
         itemId: ing.componentItemId,
+        storageUnitId: inv.storageUnitId,
         type: MovementType.SALE_OUT,
         quantity: requiredQty,
         balanceBefore,
         balanceAfter,
         reference: invoiceNumber,
         notes: `Recipe deduction: ${soldQuantity}x ${recipe.outputItem?.name || itemId}`,
+      }));
+    }
+
+    return true;
+  }
+
+  /** Mirrors deductOnSale — restores component stock when a sale is cancelled. */
+  async reverseOnSale(itemId: string, soldQuantity: number, invoiceNumber: string) {
+    const recipe = await this.recipeRepo.findByOutputItem(itemId);
+    if (!recipe) return false;
+
+    for (const ing of recipe.ingredients) {
+      const requiredQty = (soldQuantity / recipe.yieldQuantity) * ing.quantity;
+
+      const inv = await this.inventoryRepo.findOne({ where: { itemId: ing.componentItemId } });
+      if (!inv) continue;
+
+      const balanceBefore = inv.currentStock;
+      const balanceAfter = balanceBefore + requiredQty;
+
+      inv.currentStock = balanceAfter;
+      await this.inventoryRepo.save(inv);
+
+      await this.movementRepo.save(this.movementRepo.create({
+        itemId: ing.componentItemId,
+        storageUnitId: inv.storageUnitId,
+        type: MovementType.ADJUSTMENT_IN,
+        quantity: requiredQty,
+        balanceBefore,
+        balanceAfter,
+        reference: invoiceNumber,
+        notes: `Invoice cancelled — recipe reversal: ${soldQuantity}x ${recipe.outputItem?.name || itemId}`,
       }));
     }
 

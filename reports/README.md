@@ -1,8 +1,39 @@
 # Restaurant ERP — Business Report Plan
 
+**If you're an LLM/agent about to implement anything in this folder, read
+[`AGENTS.md`](./AGENTS.md) first** — it has the task-workflow rule
+(`.project/prompt.md`) and the module breakdown as an actionable checklist,
+including what's already built. This file has the full business area
+matrix, data source map, and priority phases.
+
 ## Overview
 
 This document serves as the master index for all business reports that can be generated from the Restaurant ERP system. Reports are organized by business domain, covering sales, inventory, finance, kitchen operations, customer analytics, reservations, procurement, and executive-level dashboards.
+
+Each report includes:
+- **What it shows** — The data fields and metrics displayed
+- **Why it is needed** — The business purpose and decision it supports
+- **What part of the business it reviews** — The operational area and role that uses it
+
+---
+
+## Business Area Matrix
+
+This matrix maps each report category to the business area it reviews, the primary audience, and the type of decision it enables.
+
+| Category | Business Area Reviewed | Primary Audience | Decision Type |
+|----------|----------------------|-----------------|---------------|
+| **Sales & Revenue** | Top-line performance, menu mix, pricing effectiveness, payment preferences | Owner, Manager, Cashier | Tactical — pricing, promotions, menu engineering |
+| **Inventory & Stock** | Supply health, stock valuation, wastage, production efficiency | Inventory Manager, Chef, Owner | Operational — reordering, waste reduction, recipe costing |
+| **Financial & Accounting** | Profitability, tax compliance, cash position, expense control | Owner, Accountant, CA | Strategic — tax filing, cost control, investment decisions |
+| **Kitchen Operations** | Prep speed, station workload, throughput, dietary mix | Head Chef, Kitchen Manager | Operational — staffing stations, prep scheduling, bottleneck resolution |
+| **Customer Analytics** | Customer value, loyalty, segmentation, ordering behavior | Owner, Marketing Manager | Strategic — loyalty programs, targeted marketing, menu personalization |
+| **Reservations & Seating** | Table utilization, no-show patterns, channel effectiveness, demand forecasting | Manager, Host, Owner | Tactical — table layout, overbooking policy, staffing per shift |
+| **Procurement & Suppliers** | Supplier reliability, price trends, purchase cycles, spend analysis | Inventory Manager, Owner, Chef | Tactical — supplier selection, bulk buying, budget planning |
+| **Daily Operations** | Daily health check, staff productivity, end-of-day reconciliation, peak hour analysis | Manager, Shift Lead | Operational — daily decisions, staffing adjustments, cash management |
+| **Executive Dashboard** | Overall business health, profitability dimensions, trends, comparative analysis | Owner, CEO, Investor | Strategic — growth strategy, investment, long-term planning |
+
+---
 
 ## Report Categories
 

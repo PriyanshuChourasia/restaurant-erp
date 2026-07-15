@@ -21,13 +21,16 @@ a React SPA.
 
 ### Current modules (`apps/api/src/`):
 
-`auth/`, `users/`, `roles/`, `permissions/`, `category/`, `items/`, `inventory/`, `purchases/`, `suppliers/`, `sales/`, `kot/`, `ledger/`, `customers/`, `price-levels/`, `recipes/`, `seating/`, `reports/`, `shared/`, `database/`
+`auth/`, `users/`, `roles/`, `permissions/`, `category/`, `items/`, `inventory/`, `purchases/`, `suppliers/`, `sales/`, `kot/`, `ledger/`, `vouchers/`, `customers/`, `price-levels/`, `recipes/`, `seating/`, `reports/`, `shared/`, `database/`
 
 - `customers/` — Customer management with price-level resolution (2026-07-11)
 - `price-levels/` — Price Level management with per-item pricing overrides (2026-07-11)
 - `recipes/` — Recipe Engineering / Bill of Materials: Recipe + RecipeIngredient + ProductionEntry entities, recursive cost computation, sale-time component stock deduction, production batch logging (2026-07-11)
 - `seating/` — Zone + Seat entities for floor-plan management (2026-07-11)
-- `reports/` — Entity-free reporting module: 12 read-only endpoints across sales, inventory, and finance (2026-07-12)
+- `reports/` — Entity-free reporting module: 71 read-only endpoints across sales (12), inventory (10), financial (8), kitchen (7), customer (8), reservation (6), procurement (7), operations (8), and executive (5). Uses TypeORM repos from other modules injected via `TypeOrmModule.forFeature`. As of 2026-07-13, all hardcoded/stub values (previously 17) have been replaced with real data queries. (2026-07-12, verified clean 2026-07-13)
+- `ledger/` — Real double-entry accounting as of 2026-07-15: `LedgerAccount` now has `accountType` (asset/liability/equity/revenue/expense) driving `LedgerService.addEntry`'s balance direction; `JournalEntry`/`JournalService` is the atomic posting engine (`post()` enforces `sum(debit)===sum(credit)` in one transaction, `reverse()` posts a mirror entry). `InventoryService.postLedgerForMovement` and `SalesService.create()` both post through it. `LedgerEntry` rows are journal *lines* now (nullable `journalEntryId` links them back to their `JournalEntry`).
+- `vouchers/` — Payment/Receipt/Journal vouchers, each a thin document wrapping one `JournalEntry` (`Voucher.journalEntryId`). POS Charge auto-creates a Receipt Voucher for cash/card/upi/online, or a bare Journal Entry (Debit Accounts Receivable) for credit sales. (2026-07-15)
+- `sales/` — `SalesService.cancel()` (`POST /sales/:id/cancel`) reverses a *whole* confirmed invoice: stock (via `RecipesService.reverseOnSale` or `InventoryService.adjustStock(ADJUSTMENT_IN)`), tables, linked KOTs (`KotService.findByOrderId`), and the posted voucher/journal entry. `Invoice` carries `journalEntryId`/`voucherId` to know what to reverse. For correcting *specific items* on an already-served invoice (not a full cancel), use `SalesService.createCreditNote()` instead — new `CreditNote`/`CreditNoteItem` entities, reverses just the credited items' revenue/tax with optional per-line stock restore, and can ring up a replacement item as a normal follow-on invoice in the same call. (2026-07-15)
 
 ## Backend (`apps/api/`)
 
@@ -35,7 +38,7 @@ a React SPA.
 - Validation via class-validator + class-transformer
 - Testing: Jest + Supertest
 - Modules (`apps/api/src/`): `auth/`, `users/`, `roles/`, `permissions/`, `category/`,
-  `items/`, `inventory/`, `purchases/`, `suppliers/`, `sales/`, `kot/`, `ledger/`, `shared/`
+  `items/`, `inventory/`, `purchases/`, `suppliers/`, `sales/`, `kot/`, `ledger/`, `vouchers/`, `shared/`
 - Each module follows: `controller -> service -> repository (interface) -> entity`
 - `shared/` holds guards, decorators, filters, interfaces
 - Auth decorators: `@Public()`, `@Roles()`, `@Permissions()`, `@CurrentUser()`
@@ -52,7 +55,8 @@ a React SPA.
 - Auth via `AuthContext` provider (`src/lib/auth-context.tsx`) — login, logout,
   refresh token rotation, session restoration from localStorage
 - Feature modules under `src/modules/`, each with: `api/`, `hooks/`, `types/`,
-  `schemas/`, `components/`, `dialogs/`, `forms/`, `pages/`, `utils/`
+  `schemas/`, `components/`, `dialogs/`, `forms/`, `pages/`, `configs/`, `utils/`
+- Reports module uses declarative `ReportConfig` objects (in `configs/`) rather than individual page components. Generic `GenericReportPage` renders any config via dynamic `$reportId` route. New reports = new config entry. (2026-07-12)
 - UI primitives in `src/components/ui/`; layout components in `src/components/layout/`
 - `@/` path alias maps to `src/`
 
@@ -112,17 +116,27 @@ hitting a real database surfaces it.
 
 ## Frontend auth
 
-- `apps/restaurant-ui/vite.config.ts` proxies `/api/*` to `http://localhost:3001`
+- `apps/restaurant-ui/vite.config.ts` proxies `/api/*` to `http://localhost:4210`
   in dev — required for every relative-path axios call in the app to reach the
   backend. Vite *does* auto-restart on `vite.config.ts` changes in practice (contrary
   to earlier assumption) — but if a stale proxy target is suspected, restart `pnpm dev`.
-- **Gotcha (port 3000 conflict):** an unrelated project on this same machine
-  (`pharmacy-erp-blueprint/doctor-erp`) also runs a NestJS API and can end up
-  listening on `localhost:3000` (bound IPv6-only, `[::1]:3000`). Since `localhost`
+- **Gotcha (recurring port collisions on this machine — happened twice now):**
+  this machine runs several unrelated side projects that default to the same
+  common Node dev ports. First `pharmacy-erp-blueprint/doctor-erp`'s NestJS API
+  collided on `localhost:3000` (bound IPv6-only, `[::1]:3000`; since `localhost`
   resolves to IPv6 first on this Mac, requests silently hit the *wrong* backend
-  with no obvious error (e.g., login fails with a message that isn't even in this
-  codebase). This is why the API's dev port was moved to **3001** — check
-  `lsof -nP -iTCP:3000` if API calls ever behave unexplainably again.
+  with no obvious error — e.g. login fails with a 404 that isn't even from this
+  codebase). That's why the API moved to **3001**. Then a *second*, different
+  project (`portfolio-tanstack`'s `apps/web`/`apps/resume-ui`, both Vite dev
+  servers) ended up squatting on **3001** (and 3000) instead, breaking login the
+  exact same way. Since generic low port numbers (3000/3001/3002...) are exactly
+  what other local projects default to, the API's dev port was moved again to
+  **4210** — a value distinctive enough that another project's default `pnpm
+  dev` is very unlikely to pick it. If API calls ever silently 404 or hit the
+  wrong app again, run `lsof -nP -iTCP:4210 -sTCP:LISTEN` (or check whichever
+  port `apps/api/.env.development`'s `PORT` currently holds) to confirm the
+  right process — not a different project's — owns that port before debugging
+  anything else.
 - **AuthContext** (`src/lib/auth-context.tsx`) — React Context wrapping the whole app
   via `AuthProvider` in `main.tsx`. Provides `user`, `login()`, `logout()`, `refreshing`.
 - **AxiosClient** (`src/lib/axios-client.ts`) — configured axios instance with:
