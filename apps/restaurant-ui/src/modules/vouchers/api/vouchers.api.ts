@@ -1,6 +1,6 @@
 import { apiClient } from '@/lib/axios-client'
 import type {
-  Voucher, VoucherLineInput, JournalVoucherLineInput, LedgerAccountOption, VoucherType, VoucherStatus,
+  Voucher, VoucherLineInput, JournalVoucherLineInput, LedgerAccountOption, VoucherStatus,
 } from '../types/voucher.types'
 
 export interface VouchersResponse {
@@ -10,7 +10,7 @@ export interface VouchersResponse {
   limit: number
 }
 
-export async function getVouchers(params?: { page?: number; limit?: number; voucherType?: VoucherType; status?: VoucherStatus }) {
+export async function getVouchers(params?: { page?: number; limit?: number; voucherType?: string; status?: VoucherStatus }) {
   const { data } = await apiClient.get<VouchersResponse>('/vouchers', { params })
   return data
 }

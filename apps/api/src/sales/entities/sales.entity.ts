@@ -99,6 +99,9 @@ export class Invoice {
   @Column({ type: 'uuid', name: 'voucher_id', nullable: true })
   voucherId!: string | null;
 
+  @Column({ type: 'uuid', name: 'order_id', nullable: true })
+  orderId!: string | null;
+
   @OneToMany(() => InvoiceItem, (item) => item.invoice, { cascade: true })
   items!: InvoiceItem[];
 

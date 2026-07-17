@@ -14,6 +14,7 @@ import { InventoryModule } from './inventory/inventory.module';
 import { PurchasesModule } from './purchases/purchases.module';
 import { SuppliersModule } from './suppliers/suppliers.module';
 import { SalesModule } from './sales/sales.module';
+import { OrdersModule } from './orders/orders.module';
 import { KotModule } from './kot/kot.module';
 import { LedgerModule } from './ledger/ledger.module';
 import { VouchersModule } from './vouchers/vouchers.module';
@@ -28,6 +29,7 @@ import { ReportsModule } from './reports/reports.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { UnitsModule } from './units/units.module';
 import { ItemSuppliersModule } from './item-suppliers/item-suppliers.module';
+import { DeveloperModule } from './developer/developer.module';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
 import { JwtAuthGuard } from './shared/guards/jwt-auth.guard';
@@ -61,6 +63,7 @@ import { PermissionsGuard } from './shared/guards/permissions.guard';
     PurchasesModule,
     SuppliersModule,
     SalesModule,
+    OrdersModule,
     KotModule,
     LedgerModule,
     VouchersModule,
@@ -75,6 +78,7 @@ import { PermissionsGuard } from './shared/guards/permissions.guard';
     DashboardModule,
     UnitsModule,
     ItemSuppliersModule,
+    DeveloperModule,
   ],
   controllers: [AppController],
   providers: [

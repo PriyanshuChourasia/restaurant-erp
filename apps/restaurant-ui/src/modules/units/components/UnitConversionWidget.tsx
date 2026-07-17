@@ -10,26 +10,33 @@ interface UnitConversionWidgetProps {
   onClose: () => void
 }
 
-function groupByUnitType(units: Unit[]): Map<string, Unit[]> {
-  const map = new Map<string, Unit[]>()
-  for (const u of units) {
-    const key = u.unitType
-    if (!map.has(key)) map.set(key, [])
-    map.get(key)!.push(u)
+/**
+ * Group units that share the same base unit chain into compatibility groups.
+ * Two units are compatible if they share the same ultimate base unit.
+ */
+function getCompatibleUnits(units: Unit[], fromSymbol: string): Unit[] {
+  const unit = units.find((u) => u.symbol === fromSymbol)
+  if (!unit) return units
+  // Find the root base unit (the top of the chain)
+  const resolveRoot = (u: Unit): string => {
+    if (!u.baseUnitId) return u.id
+    const parent = units.find((p) => p.id === u.baseUnitId)
+    return parent ? resolveRoot(parent) : u.id
   }
-  return map
-}
-
-const unitTypeLabels: Record<string, string> = {
-  weight: 'Weight',
-  volume: 'Volume',
-  count: 'Count',
-}
-
-const unitTypeColors: Record<string, string> = {
-  weight: 'bg-blue-50 text-blue-700 border-blue-200',
-  volume: 'bg-purple-50 text-purple-700 border-purple-200',
-  count: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  const rootId = resolveRoot(unit)
+  // All units under this root are compatible
+  const compatibleIds = new Set<string>()
+  const collectDescendants = (parentId: string) => {
+    compatibleIds.add(parentId)
+    for (const u of units) {
+      if (u.baseUnitId === parentId) {
+        compatibleIds.add(u.id)
+        collectDescendants(u.id)
+      }
+    }
+  }
+  collectDescendants(rootId)
+  return units.filter((u) => compatibleIds.has(u.id))
 }
 
 export function UnitConversionWidget({ quantity, unitCode, onClose }: UnitConversionWidgetProps) {
@@ -43,18 +50,16 @@ export function UnitConversionWidget({ quantity, unitCode, onClose }: UnitConver
     queryFn: () => getUnits(),
   })
 
-  const byType = groupByUnitType(units)
-  const currentUnit = units.find((u) => u.code === fromCode)
-  const currentType = currentUnit?.unitType || 'count'
-  const compatibleUnits = byType.get(currentType) || units
+  const fromUnit = units.find((u) => u.symbol === fromCode)
+  const compatibleUnits = fromUnit ? getCompatibleUnits(units, fromCode) : units
 
   // Reset 'to' when from changes if 'to' is same or empty
   useEffect(() => {
     if (!toCode || toCode === fromCode) {
-      const others = compatibleUnits.filter((u) => u.code !== fromCode)
-      setToCode(others[0]?.code || '')
+      const others = compatibleUnits.filter((u) => u.symbol !== fromCode)
+      setToCode(others[0]?.symbol || '')
     }
-  }, [fromCode, currentType])
+  }, [fromCode])
 
   // Debounce quantity input
   useEffect(() => {
@@ -80,8 +85,7 @@ export function UnitConversionWidget({ quantity, unitCode, onClose }: UnitConver
     return n.toLocaleString('en-IN', { maximumFractionDigits: 4, minimumFractionDigits: 0 })
   }
 
-  const fromUnit = units.find((u) => u.code === fromCode)
-  const toUnit = units.find((u) => u.code === toCode)
+  const toUnit = units.find((u) => u.symbol === toCode)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm" onClick={onClose}>
@@ -126,8 +130,8 @@ export function UnitConversionWidget({ quantity, unitCode, onClose }: UnitConver
               className="w-full h-10 rounded-xl border border-gray-200 px-3 text-sm text-gray-900 outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10 transition-all appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22%239ca3af%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M5.23%207.21a.75.75%200%20011.06.02L10%2011.168l3.71-3.938a.75.75%200%20111.08%201.04l-4.25%204.5a.75.75%200%2001-1.08%200l-4.25-4.5a.75.75%200%2001.02-1.06z%22%20clip-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E')] bg-[length:20px_20px] bg-[right_10px_center] bg-no-repeat pr-9"
             >
               {compatibleUnits.map((u) => (
-                <option key={u.id} value={u.code}>
-                  {u.name} ({u.code})
+                <option key={u.id} value={u.symbol}>
+                  {u.name} ({u.symbol})
                 </option>
               ))}
             </select>
@@ -149,19 +153,19 @@ export function UnitConversionWidget({ quantity, unitCode, onClose }: UnitConver
               className="w-full h-10 rounded-xl border border-gray-200 px-3 text-sm text-gray-900 outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10 transition-all appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22%239ca3af%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M5.23%207.21a.75.75%200%20011.06.02L10%2011.168l3.71-3.938a.75.75%200%20111.08%201.04l-4.25%204.5a.75.75%200%2001-1.08%200l-4.25-4.5a.75.75%200%2001.02-1.06z%22%20clip-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E')] bg-[length:20px_20px] bg-[right_10px_center] bg-no-repeat pr-9"
             >
               {compatibleUnits.map((u) => (
-                <option key={u.id} value={u.code}>
-                  {u.name} ({u.code})
+                <option key={u.id} value={u.symbol}>
+                  {u.name} ({u.symbol})
                 </option>
               ))}
             </select>
           </div>
         </div>
 
-        {/* Unit type badge */}
-        {currentUnit && (
+        {/* Compatibility note */}
+        {compatibleUnits.length > 1 && (
           <div className="flex items-center justify-center mb-4">
-            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium border ${unitTypeColors[currentType]}`}>
-              {unitTypeLabels[currentType]}
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium border bg-gray-50 text-gray-600 border-gray-200">
+              {compatibleUnits.length} compatible units
             </span>
           </div>
         )}
@@ -177,10 +181,10 @@ export function UnitConversionWidget({ quantity, unitCode, onClose }: UnitConver
               <p className="text-xs text-gray-500 mb-1">Result</p>
               <p className="text-xl font-bold text-gray-900 tracking-tight">
                 {formatNum(conversion.result)}{' '}
-                <span className="text-sm font-medium text-gray-500">{toUnit.code}</span>
+                <span className="text-sm font-medium text-gray-500">{toUnit.symbol}</span>
               </p>
               <p className="text-xs text-gray-400 mt-1.5">
-                {formatNum(debouncedQty)} {fromUnit.code} = {formatNum(conversion.result)} {toUnit.code}
+                {formatNum(debouncedQty)} {fromUnit.symbol} = {formatNum(conversion.result)} {toUnit.symbol}
               </p>
             </div>
           ) : (
@@ -195,24 +199,24 @@ export function UnitConversionWidget({ quantity, unitCode, onClose }: UnitConver
         </div>
 
         {/* Quick reference: common conversions */}
-        {units.length > 0 && currentUnit && (
+        {units.length > 0 && fromUnit && (
           <div className="mt-3 px-4 py-2.5 rounded-lg border border-gray-100 bg-white">
             <p className="text-xs font-medium text-gray-500 mb-2">Quick Conversions</p>
             <div className="flex flex-wrap gap-1.5">
               {compatibleUnits
-                .filter((u) => u.code !== fromCode)
+                .filter((u) => u.symbol !== fromCode)
                 .slice(0, 4)
                 .map((u) => (
                   <button
                     key={u.id}
-                    onClick={() => setToCode(u.code)}
+                    onClick={() => setToCode(u.symbol)}
                     className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-all ${
-                      toCode === u.code
+                      toCode === u.symbol
                         ? 'border-primary/40 bg-primary/5 text-primary'
                         : 'border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700'
                     }`}
                   >
-                    {u.code}
+                    {u.symbol}
                   </button>
                 ))}
             </div>

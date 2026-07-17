@@ -185,7 +185,7 @@ export function ItemSuppliersDialog({ itemId, itemName }: ItemSuppliersDialogPro
               >
                 <option value="">Per unit...</option>
                 {unitList.map((u: any) => (
-                  <option key={u.id} value={u.id}>{u.name} ({u.code})</option>
+                  <option key={u.id} value={u.id}>{u.name} ({u.symbol})</option>
                 ))}
               </select>
             </div>
@@ -326,7 +326,7 @@ export function ItemSuppliersDialog({ itemId, itemName }: ItemSuppliersDialogPro
                   <span className="flex items-center gap-1 text-gray-700">
                     <IndianRupee size={12} className="text-gray-400" />
                     <span className="font-semibold">₹{link.unitPrice.toFixed(2)}</span>
-                    {link.unit && <span className="text-gray-400">/{link.unit.code}</span>}
+                    {link.unit && <span className="text-gray-400">/{link.unit.symbol}</span>}
                   </span>
                   {link.leadTimeDays > 0 && (
                     <span className="flex items-center gap-1 text-gray-500">

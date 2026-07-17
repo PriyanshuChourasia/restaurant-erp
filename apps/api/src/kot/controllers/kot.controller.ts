@@ -4,6 +4,7 @@ import { KotStatus, KotStation } from '../entities/kot.entity';
 import { CreateKotDto } from '../dto/create-kot.dto';
 import { UpdateKotStatusDto } from '../dto/update-kot-status.dto';
 import { UpdateKotItemStatusDto } from '../dto/update-kot-item-status.dto';
+import { UpdateKotItemAvailabilityDto } from '../dto/update-kot-item-availability.dto';
 import { KotQueryDto } from '../dto/kot-query.dto';
 
 @Controller('kots')
@@ -42,5 +43,14 @@ export class KotController {
     @Body(new ValidationPipe({ transform: true, whitelist: true })) dto: UpdateKotItemStatusDto,
   ) {
     return this.service.updateItemStatus(kotId, itemId, dto.status, dto.preparedBy);
+  }
+
+  @Patch(':kotId/items/:itemId/availability')
+  updateItemAvailability(
+    @Param('kotId') kotId: string,
+    @Param('itemId') itemId: string,
+    @Body(new ValidationPipe({ transform: true, whitelist: true })) dto: UpdateKotItemAvailabilityDto,
+  ) {
+    return this.service.setItemAvailability(kotId, itemId, dto.isUnavailable, dto.note);
   }
 }

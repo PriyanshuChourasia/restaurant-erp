@@ -17,7 +17,7 @@ export function POSLayout({ children }: POSLayoutProps) {
           size="icon"
           className="text-muted-foreground"
           title="Exit to Dashboard"
-          render={<Link to="/" />}
+          render={<Link to="/dashboard" />}
         >
           <Home size={18} />
         </Button>

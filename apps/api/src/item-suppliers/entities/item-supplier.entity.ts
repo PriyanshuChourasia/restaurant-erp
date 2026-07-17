@@ -12,7 +12,7 @@ import {
 } from 'typeorm';
 import { Item } from '../../items/entities/item.entity';
 import { Supplier } from '../../suppliers/entities/supplier.entity';
-import { Unit } from '../../units/entities/unit.entity';
+import { UnitOfMeasure } from '../../units/entities/unit-of-measure.entity';
 import { decimalTransformer } from '../../shared/transformers/decimal.transformer';
 
 @Entity('item_suppliers')
@@ -49,9 +49,9 @@ export class ItemSupplier {
   @Column({ name: 'unit_id', type: 'uuid', nullable: true })
   unitId!: string | null;
 
-  @ManyToOne(() => Unit, { nullable: true })
+  @ManyToOne(() => UnitOfMeasure, { nullable: true })
   @JoinColumn({ name: 'unit_id' })
-  unit!: Unit | null;
+  unit!: UnitOfMeasure | null;
 
   @Column({ name: 'lead_time_days', type: 'int', default: 0 })
   leadTimeDays!: number;

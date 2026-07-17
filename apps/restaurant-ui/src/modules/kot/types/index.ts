@@ -9,6 +9,8 @@ export interface KotItem {
   quantity: number
   instructions: string | null
   status: KotStatus
+  isUnavailable: boolean
+  unavailableNote: string | null
 }
 
 export interface Kot {

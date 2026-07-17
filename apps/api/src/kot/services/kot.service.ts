@@ -8,6 +8,8 @@ export class KotService {
   constructor(
     @InjectRepository(Kot)
     private readonly repo: Repository<Kot>,
+    @InjectRepository(KotItem)
+    private readonly itemRepo: Repository<KotItem>,
   ) {}
 
   async findAll(page = 1, limit = 20, status?: string, station?: string) {
@@ -29,7 +31,7 @@ export class KotService {
   }
 
   async findByOrderId(orderId: string) {
-    return this.repo.find({ where: { orderId } });
+    return this.repo.find({ where: { orderId }, relations: { items: true } });
   }
 
   async create(dto: {
@@ -71,6 +73,22 @@ export class KotService {
     if (status === KotStatus.SERVED) updates.servedAt = new Date();
     await this.repo.update(id, updates);
     return this.findById(id);
+  }
+
+  /**
+   * Kitchen-side "can we actually make this?" flag — purely advisory (doesn't touch prep
+   * status or the linked Order automatically). Surfaced to staff via the Order so they can
+   * swap or drop the item themselves before charging.
+   */
+  async setItemAvailability(kotId: string, itemId: string, isUnavailable: boolean, note?: string) {
+    const kot = await this.findById(kotId);
+    const item = kot.items.find((i) => i.id === itemId);
+    if (!item) throw new NotFoundException('KOT item not found');
+    await this.itemRepo.update(itemId, {
+      isUnavailable,
+      unavailableNote: isUnavailable ? (note || null) : null,
+    });
+    return this.findById(kotId);
   }
 
   async updateItemStatus(kotId: string, itemId: string, status: KotStatus, preparedBy?: string) {

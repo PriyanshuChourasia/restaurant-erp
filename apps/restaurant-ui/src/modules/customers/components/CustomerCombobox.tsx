@@ -15,6 +15,7 @@ export function CustomerCombobox({ onSelect, selected }: CustomerComboboxProps) 
   const [showAddForm, setShowAddForm] = useState(false)
   const [addName, setAddName] = useState('')
   const [addPhone, setAddPhone] = useState('')
+  const [addCustomerType, setAddCustomerType] = useState('regular')
   const [error, setError] = useState<string | null>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -26,7 +27,7 @@ export function CustomerCombobox({ onSelect, selected }: CustomerComboboxProps) 
   })
 
   const createMutation = useMutation({
-    mutationFn: (dto: { name: string; phone: string }) => createCustomer(dto),
+    mutationFn: (dto: { name: string; phone: string; customerType: string }) => createCustomer(dto),
     onSuccess: (newCustomer) => {
       onSelect({
         id: newCustomer.id,
@@ -40,6 +41,7 @@ export function CustomerCombobox({ onSelect, selected }: CustomerComboboxProps) 
       setShowAddForm(false)
       setAddName('')
       setAddPhone('')
+      setAddCustomerType('regular')
       setError(null)
     },
     onError: (err: any) => {
@@ -82,7 +84,7 @@ export function CustomerCombobox({ onSelect, selected }: CustomerComboboxProps) 
   const handleCreate = () => {
     if (!addName.trim() || !addPhone.trim()) return
     setError(null)
-    createMutation.mutate({ name: addName.trim(), phone: addPhone.trim() })
+    createMutation.mutate({ name: addName.trim(), phone: addPhone.trim(), customerType: addCustomerType })
   }
 
   // Reset add form fields when query changes
@@ -209,6 +211,14 @@ export function CustomerCombobox({ onSelect, selected }: CustomerComboboxProps) 
                 }}
                 className="w-full h-8 rounded-md border border-gray-300 px-2.5 text-sm outline-none focus:border-primary/40"
               />
+              <select
+                value={addCustomerType}
+                onChange={(e) => setAddCustomerType(e.target.value)}
+                className="w-full h-8 rounded-md border border-gray-300 px-2.5 text-sm outline-none focus:border-primary/40"
+              >
+                <option value="regular">Regular</option>
+                <option value="corporate">Corporate</option>
+              </select>
               <div className="flex gap-2">
                 <button
                   onClick={() => {

@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { ItemsService } from './items.service';
 import { ItemRepository } from '../repositories/item.repository';
-import { Item, GstRate, ItemUnit, ProductType } from '../entities/item.entity';
+import { Item, GstRate, ProductType } from '../entities/item.entity';
 
 describe('ItemsService', () => {
   let service: ItemsService;
@@ -17,13 +17,21 @@ describe('ItemsService', () => {
     price: 349,
     costPrice: 200,
     gstRate: GstRate.FIVE,
-    unit: ItemUnit.BOWL,
+    unitId: 'uom-bowl',
+    unit: { id: 'uom-bowl', superKey: 1, symbol: 'bowl', name: 'Bowl', description: null, baseUnitId: null, conversionFactor: 1, decimalAllowed: false, isActive: true, createdAt: new Date(), updatedAt: new Date() } as any,
+    purchaseUnitId: null,
+    purchaseUnit: null,
+    itemType: 'goods' as any,
+    isTaxable: true,
+    cessPercent: 0,
+    reverseCharge: false,
     productType: ProductType.FINISHED,
     isActive: true,
     isVeg: false,
     image: null,
     categoryId: null,
     category: null,
+    shelfLifeDays: null,
     createdAt: new Date(),
     updatedAt: new Date(),
     deletedAt: null,
@@ -114,7 +122,7 @@ describe('ItemsService', () => {
       hsnCode: '210690',
       price: 199,
       gstRate: GstRate.EIGHTEEN,
-      unit: ItemUnit.PIECE,
+      unitId: 'uom-piece',
       isVeg: true,
     };
 

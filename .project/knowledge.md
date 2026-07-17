@@ -21,7 +21,7 @@ a React SPA.
 
 ### Current modules (`apps/api/src/`):
 
-`auth/`, `users/`, `roles/`, `permissions/`, `category/`, `items/`, `inventory/`, `purchases/`, `suppliers/`, `sales/`, `kot/`, `ledger/`, `vouchers/`, `customers/`, `price-levels/`, `recipes/`, `seating/`, `reports/`, `shared/`, `database/`
+`auth/`, `users/`, `roles/`, `permissions/`, `category/`, `items/`, `inventory/`, `purchases/`, `suppliers/`, `sales/`, `orders/`, `kot/`, `ledger/`, `vouchers/`, `customers/`, `price-levels/`, `recipes/`, `seating/`, `reservations/`, `reports/`, `shared/`, `database/`
 
 - `customers/` — Customer management with price-level resolution (2026-07-11)
 - `price-levels/` — Price Level management with per-item pricing overrides (2026-07-11)
@@ -31,6 +31,7 @@ a React SPA.
 - `ledger/` — Real double-entry accounting as of 2026-07-15: `LedgerAccount` now has `accountType` (asset/liability/equity/revenue/expense) driving `LedgerService.addEntry`'s balance direction; `JournalEntry`/`JournalService` is the atomic posting engine (`post()` enforces `sum(debit)===sum(credit)` in one transaction, `reverse()` posts a mirror entry). `InventoryService.postLedgerForMovement` and `SalesService.create()` both post through it. `LedgerEntry` rows are journal *lines* now (nullable `journalEntryId` links them back to their `JournalEntry`).
 - `vouchers/` — Payment/Receipt/Journal vouchers, each a thin document wrapping one `JournalEntry` (`Voucher.journalEntryId`). POS Charge auto-creates a Receipt Voucher for cash/card/upi/online, or a bare Journal Entry (Debit Accounts Receivable) for credit sales. (2026-07-15)
 - `sales/` — `SalesService.cancel()` (`POST /sales/:id/cancel`) reverses a *whole* confirmed invoice: stock (via `RecipesService.reverseOnSale` or `InventoryService.adjustStock(ADJUSTMENT_IN)`), tables, linked KOTs (`KotService.findByOrderId`), and the posted voucher/journal entry. `Invoice` carries `journalEntryId`/`voucherId` to know what to reverse. For correcting *specific items* on an already-served invoice (not a full cancel), use `SalesService.createCreditNote()` instead — new `CreditNote`/`CreditNoteItem` entities, reverses just the credited items' revenue/tax with optional per-line stock restore, and can ring up a replacement item as a normal follow-on invoice in the same call. (2026-07-15)
+- `orders/` — New pre-Invoice stage as of 2026-07-16: `Order` (regular/party/scheduled, dine_in/takeaway/delivery, pending_confirmation→confirmed→billed/cancelled). `OrdersService.charge()` converts a confirmed order into an `Invoice` by calling the *existing* `SalesService.create()` unchanged (`Invoice.orderId` / `Order.invoiceId` cross-reference). Regular orders auto-fire their KOT on confirm; Party/Scheduled wait for an explicit `sendToKitchen()` call and can hold a table via an auto-created `Reservation`. Price/GST resolution is shared with `sales/` via `PriceLevelsService.resolveLineItems()` — don't duplicate that logic elsewhere.
 
 ## Backend (`apps/api/`)
 

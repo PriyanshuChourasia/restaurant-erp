@@ -4,15 +4,15 @@ import { createColumnHelper, type ColumnDef } from '@tanstack/react-table'
 import { BookText, Plus, CreditCard, Wallet, X as XIcon } from 'lucide-react'
 import { DataTable } from '@/components/ui/data-table'
 import { getVouchers, cancelVoucher } from '../api/vouchers.api'
-import type { Voucher, VoucherType } from '../types/voucher.types'
+import type { Voucher } from '../types/voucher.types'
 import { PaymentVoucherForm } from '../components/PaymentVoucherForm'
 import { ReceiptVoucherForm } from '../components/ReceiptVoucherForm'
 import { JournalVoucherForm } from '../components/JournalVoucherForm'
 
 const columnHelper = createColumnHelper<Voucher>()
 
-const typeBadgeClass = (type: VoucherType) => {
-  switch (type) {
+const typeBadgeClass = (code: string) => {
+  switch (code) {
     case 'payment': return 'bg-red-50 text-red-700'
     case 'receipt': return 'bg-emerald-50 text-emerald-700'
     default: return 'bg-blue-50 text-blue-700'
@@ -27,7 +27,7 @@ const statusBadgeClass = (status: string) =>
 export function VouchersPage() {
   const [page, setPage] = useState(1)
   const [showTypePicker, setShowTypePicker] = useState(false)
-  const [activeForm, setActiveForm] = useState<VoucherType | null>(null)
+  const [activeForm, setActiveForm] = useState<string | null>(null)
   const queryClient = useQueryClient()
 
   const { data, isLoading } = useQuery({
@@ -51,11 +51,15 @@ export function VouchersPage() {
       }),
       columnHelper.accessor('voucherType', {
         header: 'Type',
-        cell: (info) => (
-          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${typeBadgeClass(info.getValue())}`}>
-            {info.getValue()}
-          </span>
-        ),
+        cell: (info) => {
+          const vt = info.getValue()
+          const code = vt?.code || info.row.original.voucherTypeId?.slice(0, 8) || ''
+          return (
+            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${typeBadgeClass(code)}`}>
+              {vt?.name || code}
+            </span>
+          )
+        },
       }),
       columnHelper.accessor('paymentMode', {
         header: 'Mode',

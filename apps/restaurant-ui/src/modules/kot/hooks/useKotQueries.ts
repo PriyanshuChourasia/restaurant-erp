@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { getActiveKots, getAllKots, getKotById, createKot, updateKotStatus, updateKotItemStatus } from '../api/kot.api'
+import { getActiveKots, getAllKots, getKotById, createKot, updateKotStatus, updateKotItemStatus, updateKotItemAvailability } from '../api/kot.api'
 import type { CreateKotPayload } from '../types'
 
 export function useActiveKots(station?: string) {
@@ -53,6 +53,18 @@ export function useUpdateKotItemStatus() {
       updateKotItemStatus(kotId, itemId, status, preparedBy),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['kots'] })
+    },
+  })
+}
+
+export function useUpdateKotItemAvailability() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ kotId, itemId, isUnavailable, note }: { kotId: string; itemId: string; isUnavailable: boolean; note?: string }) =>
+      updateKotItemAvailability(kotId, itemId, isUnavailable, note),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['kots'] })
+      qc.invalidateQueries({ queryKey: ['orders'] })
     },
   })
 }

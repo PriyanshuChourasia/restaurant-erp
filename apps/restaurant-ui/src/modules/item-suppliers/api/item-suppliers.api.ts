@@ -17,7 +17,7 @@ export interface ItemSupplier {
   createdAt: string
   updatedAt: string
   supplier?: { id: string; name: string; email: string; phone: string | null; gstin: string | null }
-  unit?: { id: string; code: string; name: string }
+  unit?: { id: string; symbol: string; name: string }
 }
 
 export async function getItemSuppliers(itemId: string): Promise<ItemSupplier[]> {

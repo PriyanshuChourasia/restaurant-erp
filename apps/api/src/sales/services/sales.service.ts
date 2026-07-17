@@ -18,12 +18,15 @@ import { JournalService, JournalLineInput } from '../../ledger/services/journal.
 import { LedgerService } from '../../ledger/services/ledger.service';
 import { LedgerEntryType, LedgerCategory } from '../../ledger/entities/ledger.entity';
 import { JournalSourceType } from '../../ledger/entities/journal-entry.entity';
+import { Order, OrderStatus } from '../../orders/entities/order.entity';
 
 @Injectable()
 export class SalesService {
   constructor(
     @InjectRepository(Invoice)
     private readonly repo: Repository<Invoice>,
+    @InjectRepository(Order)
+    private readonly orderRepo: Repository<Order>,
     private readonly priceLevelsService: PriceLevelsService,
     private readonly tablesService: TablesService,
     private readonly customersService: CustomersService,
@@ -74,89 +77,26 @@ export class SalesService {
     paymentMethod?: PaymentMethod;
     discount?: number;
     notes?: string;
+    orderId?: string;
     items: Array<{
       itemId: string;
       quantity: number;
     }>;
   }) {
-    // Resolve price level
-    let resolvedPriceLevelId: string | null = null;
+    // Auto-fill customer info from record if not explicitly provided
     let effectiveCustomerName = dto.customerName || null;
     let effectiveCustomerPhone = dto.customerPhone || null;
     let effectiveCustomerGstin = dto.customerGstin || null;
-
     if (dto.customerId) {
       const customer = await this.customersService.findOne(dto.customerId);
-      resolvedPriceLevelId = customer.priceLevelId;
-      // Auto-fill customer info from record if not explicitly provided
       effectiveCustomerName = effectiveCustomerName || customer.name;
       effectiveCustomerPhone = effectiveCustomerPhone || customer.phone;
       effectiveCustomerGstin = effectiveCustomerGstin || customer.gstin;
     }
 
-    // If no price level from customer, get the default
-    if (!resolvedPriceLevelId) {
-      const activeLevels = await this.priceLevelsService.findAllActive();
-      const defaultLevel = activeLevels.find((pl) => pl.isDefault);
-      resolvedPriceLevelId = defaultLevel?.id ?? null;
-    }
-
-    // Resolve prices server-side
-    const itemEntities: Array<{
-      itemId: string;
-      itemName: string;
-      hsnCode: string;
-      quantity: number;
-      unitPrice: number;
-      gstRate: number;
-      taxableValue: number;
-      cgstAmount: number;
-      sgstAmount: number;
-      totalAmount: number;
-    }> = [];
-
-    for (const cartItem of dto.items) {
-      // Get item base info
-      const item = await this.itemRepo.findOne({ where: { id: cartItem.itemId } });
-      if (!item) {
-        throw new NotFoundException(`Item with ID "${cartItem.itemId}" not found`);
-      }
-
-      // Get effective price for this item at the resolved price level
-      let unitPrice = item.price;
-      if (resolvedPriceLevelId) {
-        try {
-          unitPrice = await this.priceLevelsService.getEffectivePrice(cartItem.itemId, resolvedPriceLevelId);
-        } catch {
-          // Fallback to base price if price level resolution fails
-          unitPrice = item.price;
-        }
-      }
-
-      const taxableValue = cartItem.quantity * unitPrice;
-      const gstRateHalf = item.gstRate / 2;
-      const cgstAmount = (taxableValue * gstRateHalf) / 100;
-      const sgstAmount = (taxableValue * gstRateHalf) / 100;
-      const totalAmount = taxableValue + cgstAmount + sgstAmount;
-
-      itemEntities.push({
-        itemId: item.id,
-        itemName: item.name,
-        hsnCode: item.hsnCode,
-        quantity: cartItem.quantity,
-        unitPrice,
-        gstRate: item.gstRate,
-        taxableValue,
-        cgstAmount,
-        sgstAmount,
-        totalAmount,
-      });
-    }
-
-    const subtotal = itemEntities.reduce((s, i) => s + i.taxableValue, 0);
-    const cgstTotal = itemEntities.reduce((s, i) => s + i.cgstAmount, 0);
-    const sgstTotal = itemEntities.reduce((s, i) => s + i.sgstAmount, 0);
-    const taxTotal = cgstTotal + sgstTotal;
+    // Resolve price level + per-item price/GST server-side (shared with OrdersService)
+    const { itemEntities, subtotal, cgstTotal, sgstTotal, taxTotal } =
+      await this.priceLevelsService.resolveLineItems(dto.items, dto.customerId);
     const discount = dto.discount || 0;
     const rawTotal = subtotal + taxTotal - discount;
     const grandTotal = Math.round(rawTotal * 100) / 100;
@@ -183,6 +123,7 @@ export class SalesService {
       roundOff,
       grandTotal: finalTotal,
       notes: dto.notes || null,
+      orderId: dto.orderId || null,
       items: itemEntities as InvoiceItem[],
     });
     const saved = await this.repo.save(invoice);
@@ -327,8 +268,10 @@ export class SalesService {
       await this.tablesService.bulkUpdateStatus(invoice.tableIds, 'available');
     }
 
-    // Cancel linked KOT(s)
-    const kots = await this.kotService.findByOrderId(invoice.id);
+    // Cancel linked KOT(s) — KOTs are pointed at the Order that produced this invoice when
+    // one exists (the normal path via OrdersService.charge()); fall back to the invoice's
+    // own id for invoices charged directly (no Order stage), matching the old POS flow.
+    const kots = await this.kotService.findByOrderId(invoice.orderId || invoice.id);
     for (const kot of kots) {
       await this.kotService.updateStatus(kot.id, KotStatus.CANCELLED);
     }
@@ -341,6 +284,13 @@ export class SalesService {
     }
 
     await this.repo.update(id, { status: InvoiceStatus.CANCELLED });
+
+    // Keep the originating Order (if any) in sync — otherwise it stays stuck showing
+    // "billed" forever even though its invoice is now cancelled.
+    if (invoice.orderId) {
+      await this.orderRepo.update(invoice.orderId, { status: OrderStatus.CANCELLED });
+    }
+
     return this.findById(id);
   }
 

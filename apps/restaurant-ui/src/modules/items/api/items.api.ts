@@ -2,10 +2,14 @@ import { apiClient } from '@/lib/axios-client'
 
 export interface UnitBrief {
   id: string
-  code: string
+  superKey: number
+  symbol: string
   name: string
-  unitType: string
-  isBaseUnit: boolean
+  description: string | null
+  baseUnitId: string | null
+  conversionFactor: number
+  decimalAllowed: boolean
+  isActive: boolean
 }
 
 export interface Item {

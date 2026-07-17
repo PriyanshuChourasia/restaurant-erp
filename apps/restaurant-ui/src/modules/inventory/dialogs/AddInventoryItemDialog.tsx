@@ -99,7 +99,7 @@ export function AddInventoryItemDialog({ onClose }: AddInventoryItemDialogProps)
                 >
                   <div>
                     <p className="text-sm font-medium text-gray-900">{item.name}</p>
-                    <p className="text-xs text-gray-400">{item.sku} · {item.unit?.code || item.unit?.name || ''}</p>
+                    <p className="text-xs text-gray-400">{item.sku} · {item.unit?.symbol || item.unit?.name || ''}</p>
                   </div>
                   <p className="text-sm text-gray-500">₹{item.price.toFixed(2)}</p>
                 </button>
@@ -117,7 +117,7 @@ export function AddInventoryItemDialog({ onClose }: AddInventoryItemDialogProps)
           <div className="flex items-center justify-between rounded-lg border border-green-200 bg-green-50 px-3 py-2.5">
             <div>
               <p className="text-sm font-medium text-gray-900">{selectedItem.name}</p>
-              <p className="text-xs text-gray-400">{selectedItem.sku} · {selectedItem.unit?.code || selectedItem.unit?.name || ''}</p>
+              <p className="text-xs text-gray-400">{selectedItem.sku} · {selectedItem.unit?.symbol || selectedItem.unit?.name || ''}</p>
             </div>
             <button type="button" onClick={() => setSelectedItem(null)} className="text-xs font-medium text-primary hover:underline">
               Change
@@ -173,7 +173,7 @@ export function AddInventoryItemDialog({ onClose }: AddInventoryItemDialogProps)
           <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5">
             <div>
               <p className="text-sm font-medium text-gray-900">{selectedItem.name}</p>
-              <p className="text-xs text-gray-400">{selectedItem.sku} · {selectedItem.unit?.code || selectedItem.unit?.name || ''}</p>
+              <p className="text-xs text-gray-400">{selectedItem.sku} · {selectedItem.unit?.symbol || selectedItem.unit?.name || ''}</p>
             </div>
             <button type="button" onClick={() => setSelectedItem(null)} className="text-xs font-medium text-primary hover:underline">
               Change
@@ -181,7 +181,7 @@ export function AddInventoryItemDialog({ onClose }: AddInventoryItemDialogProps)
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1.5">Opening Quantity ({selectedItem.unit?.code || selectedItem.unit?.name || ''})</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1.5">Opening Quantity ({selectedItem.unit?.symbol || selectedItem.unit?.name || ''})</label>
             <input
               type="number"
               min="0"

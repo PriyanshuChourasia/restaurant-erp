@@ -106,4 +106,10 @@ export class KotItem {
     default: KotStatus.PENDING,
   })
   status!: KotStatus;
+
+  @Column({ name: 'is_unavailable', default: false })
+  isUnavailable!: boolean;
+
+  @Column({ type: 'text', name: 'unavailable_note', nullable: true })
+  unavailableNote!: string | null;
 }

@@ -1,11 +1,20 @@
-export type VoucherType = 'payment' | 'receipt' | 'journal'
+export interface VoucherTypeBrief {
+  id: string
+  superKey: number
+  code: string
+  name: string
+  module: 'accounting' | 'inventory' | 'sales' | 'purchase'
+  description: string | null
+}
+
 export type VoucherStatus = 'posted' | 'cancelled'
 export type LedgerEntryDirection = 'debit' | 'credit'
 
 export interface Voucher {
   id: string
   voucherNumber: string
-  voucherType: VoucherType
+  voucherTypeId: string
+  voucherType?: VoucherTypeBrief
   status: VoucherStatus
   voucherDate: string
   partyType: string | null

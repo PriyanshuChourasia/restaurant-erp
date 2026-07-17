@@ -10,7 +10,7 @@ import {
   Index,
 } from 'typeorm';
 import { CategoryEntity } from '../../category/entities/category.entity';
-import { Unit } from '../../units/entities/unit.entity';
+import { UnitOfMeasure } from '../../units/entities/unit-of-measure.entity';
 import { decimalTransformer } from '../../shared/transformers/decimal.transformer';
 
 export enum GstRate {
@@ -49,6 +49,10 @@ export enum ProductType {
   RAW = 'raw',
   SEMI_FINISHED = 'semi_finished',
   FINISHED = 'finished',
+  TRADING = 'trading',
+  PACKAGING = 'packaging',
+  CONSUMABLE = 'consumable',
+  SERVICE = 'service',
 }
 
 @Entity('items')
@@ -104,16 +108,16 @@ export class Item {
   @Column({ name: 'unit_id', type: 'uuid' })
   unitId!: string;
 
-  @ManyToOne(() => Unit)
+  @ManyToOne(() => UnitOfMeasure)
   @JoinColumn({ name: 'unit_id' })
-  unit!: Unit;
+  unit!: UnitOfMeasure;
 
   @Column({ name: 'purchase_unit_id', type: 'uuid', nullable: true })
   purchaseUnitId!: string | null;
 
-  @ManyToOne(() => Unit, { nullable: true })
+  @ManyToOne(() => UnitOfMeasure, { nullable: true })
   @JoinColumn({ name: 'purchase_unit_id' })
-  purchaseUnit!: Unit | null;
+  purchaseUnit!: UnitOfMeasure | null;
 
   @Column({ name: 'shelf_life_days', type: 'int', nullable: true })
   shelfLifeDays!: number | null;

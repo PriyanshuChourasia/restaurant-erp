@@ -22,9 +22,13 @@ const ITEM_TYPES = [
 ]
 
 const PRODUCT_TYPES = [
-  { value: 'finished', label: 'Finished (Menu Item)' },
-  { value: 'semi_finished', label: 'Semi-Finished (Prep Item)' },
   { value: 'raw', label: 'Raw Material' },
+  { value: 'finished', label: 'Finished Good' },
+  { value: 'semi_finished', label: 'Semi Finished' },
+  { value: 'trading', label: 'Trading Item' },
+  { value: 'packaging', label: 'Packaging' },
+  { value: 'consumable', label: 'Consumable' },
+  { value: 'service', label: 'Service' },
 ]
 
 interface EditItemPageProps {

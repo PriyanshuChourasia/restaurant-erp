@@ -9,7 +9,7 @@ import {
   Unique,
   Index,
 } from 'typeorm';
-import { Unit } from './unit.entity';
+import { UnitOfMeasure } from './unit-of-measure.entity';
 import { Item } from '../../items/entities/item.entity';
 
 @Entity('unit_conversions')
@@ -31,16 +31,16 @@ export class UnitConversion {
   @Column({ name: 'from_unit_id', type: 'uuid' })
   fromUnitId!: string;
 
-  @ManyToOne(() => Unit)
+  @ManyToOne(() => UnitOfMeasure)
   @JoinColumn({ name: 'from_unit_id' })
-  fromUnit!: Unit;
+  fromUnit!: UnitOfMeasure;
 
   @Column({ name: 'to_unit_id', type: 'uuid' })
   toUnitId!: string;
 
-  @ManyToOne(() => Unit)
+  @ManyToOne(() => UnitOfMeasure)
   @JoinColumn({ name: 'to_unit_id' })
-  toUnit!: Unit;
+  toUnit!: UnitOfMeasure;
 
   @Column({ type: 'decimal', precision: 14, scale: 6 })
   factor!: number;

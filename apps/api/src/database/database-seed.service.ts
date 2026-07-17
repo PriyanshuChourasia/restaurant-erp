@@ -16,7 +16,8 @@ import { Kot, KotItem, KotStatus, KotStation } from '../kot/entities/kot.entity'
 import { Purchase, PurchaseItem, PurchaseStatus } from '../purchases/entities/purchase.entity';
 import { Zone } from '../seating/entities/zone.entity';
 import { Table, TableCategory, TableStatus } from '../seating/entities/table.entity';
-import { Unit, UnitType } from '../units/entities/unit.entity';
+import { UnitOfMeasure } from '../units/entities/unit-of-measure.entity';
+import { Unit } from '../units/entities/unit.entity';
 import { UnitConversion } from '../units/entities/unit-conversion.entity';
 import { StorageUnit, StorageUnitType } from '../inventory/entities/storage-unit.entity';
 import { StockBatch, BatchStatus } from '../inventory/entities/stock-batch.entity';
@@ -26,7 +27,11 @@ import { PriceLevel } from '../price-levels/entities/price-level.entity';
 import { ItemPriceLevel } from '../price-levels/entities/item-price-level.entity';
 import { Recipe, RecipeIngredient } from '../recipes/entities/recipe.entity';
 import { Reservation, ReservationStatus, ReservationSource } from '../reservations/entities/reservation.entity';
+import { StockItem } from '../inventory/entities/stock-item.entity';
+import { StockCategory } from '../inventory/entities/stock-category.entity';
 import { ItemSupplier } from '../item-suppliers/entities/item-supplier.entity';
+import { VoucherType } from '../vouchers/entities/voucher-type.entity';
+import { VoucherModuleEntity } from '../vouchers/entities/voucher-module.entity';
 
 const MODULES = [
   'auth', 'users', 'roles', 'permissions',
@@ -63,6 +68,8 @@ const EXTRA_PERMISSIONS = [
   { name: 'sales.cancel', description: 'Cancel a confirmed invoice', module: 'sales' },
   { name: 'vouchers.cancel', description: 'Cancel a posted voucher', module: 'vouchers' },
   { name: 'sales.credit-note', description: 'Issue a credit note against an invoice', module: 'sales' },
+  { name: 'orders.charge', description: 'Convert a confirmed order into a paid invoice', module: 'orders' },
+  { name: 'orders.cancel', description: 'Cancel a pending or confirmed order', module: 'orders' },
 ];
 
 interface DemoUser {
@@ -80,6 +87,7 @@ const DEMO_USERS: DemoUser[] = [
   { name: 'Raja Chef', email: 'chef@restaurant.com', password: 'Chef@123456', phone: '+91 98765 43214', roleName: 'chef' },
   { name: 'Priya Cashier', email: 'cashier@restaurant.com', password: 'Cashier@123456', phone: '+91 98765 43215', roleName: 'cashier' },
   { name: 'Amit Waiter', email: 'waiter@restaurant.com', password: 'Waiter@123456', phone: '+91 98765 43216', roleName: 'waiter' },
+  { name: 'Developer User', email: 'developer@restaurant.com', password: 'Developer@123456', phone: '+91 98765 43217', roleName: 'developer' },
 ];
 
 // ─── Role definitions ───────────────────────────────────────────
@@ -116,7 +124,7 @@ const ROLE_DEFS: Array<{
     name: 'cashier',
     description: 'Cashier with billing and sales access',
     include: new Set([
-      'orders.read', 'orders.create', 'orders.update',
+      'orders.read', 'orders.create', 'orders.update', 'orders.charge', 'orders.cancel',
       'sales.read', 'sales.create', 'sales.update', 'sales.discount', 'sales.cancel', 'sales.credit-note',
       'menu.read',
       'items.read',
@@ -148,6 +156,11 @@ const ROLE_DEFS: Array<{
       'kot.read',
     ]),
   },
+  {
+    name: 'developer',
+    description: 'Developer with full system access',
+    include: '*',
+  },
 ];
 
 // ─── Demo seed data ─────────────────────────────────────────────
@@ -175,6 +188,8 @@ interface DemoItemDef {
   isTaxable?: boolean
   cessPercent?: number
   reverseCharge?: boolean
+  productType?: string    // finished | semi_finished | raw
+  shelfLifeDays?: number
 }
 
 const DEMO_ITEM_DEFS: DemoItemDef[] = [
@@ -191,8 +206,24 @@ const DEMO_ITEM_DEFS: DemoItemDef[] = [
   { name: 'Masala Chai', sku: 'B-001', hsnCode: '0902', price: 39, costPrice: 10, gstRate: GstRate.FIVE, unitCode: 'cup', isVeg: true, categoryId: 'a0000001-0000-0000-0000-000000000006' },
   { name: 'Cold Coffee', sku: 'B-002', hsnCode: '2202', price: 129, costPrice: 40, gstRate: GstRate.TWELVE, unitCode: 'glass', isVeg: true, categoryId: 'a0000001-0000-0000-0000-000000000007' },
   { name: 'Fresh Lime Soda', sku: 'B-003', hsnCode: '2202', price: 69, costPrice: 15, gstRate: GstRate.TWELVE, unitCode: 'glass', isVeg: true, categoryId: 'a0000001-0000-0000-0000-000000000007' },
-  { name: 'Naan Bread', sku: 'S-005', hsnCode: '1905', price: 39, costPrice: 10, gstRate: GstRate.NIL, unitCode: 'piece', isVeg: true, categoryId: 'a0000001-0000-0000-0000-000000000003' },
-  { name: 'Tandoori Roti', sku: 'S-006', hsnCode: '1905', price: 29, costPrice: 8, gstRate: GstRate.NIL, unitCode: 'piece', isVeg: true, categoryId: 'a0000001-0000-0000-0000-000000000003' },
+  { name: 'Naan Bread', sku: 'S-005', hsnCode: '1905', price: 39, costPrice: 10, gstRate: GstRate.NIL, unitCode: 'pcs', isVeg: true, categoryId: 'a0000001-0000-0000-0000-000000000003' },
+  { name: 'Tandoori Roti', sku: 'S-006', hsnCode: '1905', price: 29, costPrice: 8, gstRate: GstRate.NIL, unitCode: 'pcs', isVeg: true, categoryId: 'a0000001-0000-0000-0000-000000000003' },
+
+  // ── Raw Materials (ingredients) ───────────────────────────
+  { name: 'Wheat Flour (Atta)', sku: 'RAW-001', hsnCode: '1101', price: 30, costPrice: 28, gstRate: GstRate.NIL, unitCode: 'kg', isVeg: true, categoryId: 'a0000001-0000-0000-0000-000000000012', productType: 'raw', isTaxable: false, shelfLifeDays: 180 },
+  { name: 'Sugar', sku: 'RAW-002', hsnCode: '1701', price: 42, costPrice: 40, gstRate: GstRate.NIL, unitCode: 'kg', isVeg: true, categoryId: 'a0000001-0000-0000-0000-000000000012', productType: 'raw', isTaxable: false, shelfLifeDays: 365 },
+  { name: 'All Purpose Flour (Maida)', sku: 'RAW-003', hsnCode: '1101', price: 35, costPrice: 32, gstRate: GstRate.NIL, unitCode: 'kg', isVeg: true, categoryId: 'a0000001-0000-0000-0000-000000000012', productType: 'raw', isTaxable: false, shelfLifeDays: 180 },
+  { name: 'Cooking Oil (Refined)', sku: 'RAW-004', hsnCode: '1515', price: 180, costPrice: 170, gstRate: GstRate.NIL, unitCode: 'L', isVeg: true, categoryId: 'a0000001-0000-0000-0000-000000000012', productType: 'raw', isTaxable: false, shelfLifeDays: 365 },
+  { name: 'Salt', sku: 'RAW-005', hsnCode: '2501', price: 20, costPrice: 15, gstRate: GstRate.NIL, unitCode: 'kg', isVeg: true, categoryId: 'a0000001-0000-0000-0000-000000000012', productType: 'raw', isTaxable: false, shelfLifeDays: 730 },
+  { name: 'Basmati Rice', sku: 'RAW-006', hsnCode: '1006', price: 95, costPrice: 85, gstRate: GstRate.NIL, unitCode: 'kg', isVeg: true, categoryId: 'a0000001-0000-0000-0000-000000000012', productType: 'raw', isTaxable: false, shelfLifeDays: 365 },
+  { name: 'Spices Mix (Garam Masala)', sku: 'RAW-007', hsnCode: '0910', price: 150, costPrice: 120, gstRate: GstRate.FIVE, unitCode: 'kg', isVeg: true, categoryId: 'a0000001-0000-0000-0000-000000000012', productType: 'raw', shelfLifeDays: 180 },
+  { name: 'Milk', sku: 'RAW-008', hsnCode: '0401', price: 60, costPrice: 54, gstRate: GstRate.NIL, unitCode: 'L', isVeg: true, categoryId: 'a0000001-0000-0000-0000-000000000012', productType: 'raw', isTaxable: false, shelfLifeDays: 5 },
+  { name: 'Butter (Cooking)', sku: 'RAW-009', hsnCode: '0405', price: 280, costPrice: 250, gstRate: GstRate.FIVE, unitCode: 'kg', isVeg: true, categoryId: 'a0000001-0000-0000-0000-000000000012', productType: 'raw', shelfLifeDays: 60 },
+  { name: 'Chicken (Boneless)', sku: 'RAW-010', hsnCode: '0207', price: 320, costPrice: 280, gstRate: GstRate.NIL, unitCode: 'kg', isVeg: false, categoryId: 'a0000001-0000-0000-0000-000000000012', productType: 'raw', isTaxable: false, shelfLifeDays: 3 },
+  { name: 'Paneer', sku: 'RAW-011', hsnCode: '0406', price: 380, costPrice: 350, gstRate: GstRate.FIVE, unitCode: 'kg', isVeg: true, categoryId: 'a0000001-0000-0000-0000-000000000012', productType: 'raw', shelfLifeDays: 10 },
+  { name: 'Tomatoes', sku: 'RAW-012', hsnCode: '0702', price: 40, costPrice: 35, gstRate: GstRate.NIL, unitCode: 'kg', isVeg: true, categoryId: 'a0000001-0000-0000-0000-000000000012', productType: 'raw', isTaxable: false, shelfLifeDays: 5 },
+  { name: 'Onions', sku: 'RAW-013', hsnCode: '0703', price: 35, costPrice: 28, gstRate: GstRate.NIL, unitCode: 'kg', isVeg: true, categoryId: 'a0000001-0000-0000-0000-000000000012', productType: 'raw', isTaxable: false, shelfLifeDays: 14 },
+  { name: 'Curd (Yogurt)', sku: 'RAW-014', hsnCode: '0403', price: 60, costPrice: 50, gstRate: GstRate.NIL, unitCode: 'kg', isVeg: true, categoryId: 'a0000001-0000-0000-0000-000000000012', productType: 'raw', isTaxable: false, shelfLifeDays: 7 },
 ];
 
 const DEMO_LEDGER_ACCOUNTS: Array<Partial<LedgerAccount>> = [
@@ -257,6 +288,8 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
     private readonly zoneRepo: Repository<Zone>,
     @InjectRepository(Table)
     private readonly tableRepo: Repository<Table>,
+    @InjectRepository(UnitOfMeasure)
+    private readonly uomRepo: Repository<UnitOfMeasure>,
     @InjectRepository(Unit)
     private readonly unitRepo: Repository<Unit>,
     @InjectRepository(UnitConversion)
@@ -283,8 +316,16 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
     private readonly ingredientRepo: Repository<RecipeIngredient>,
     @InjectRepository(Reservation)
     private readonly reservationRepo: Repository<Reservation>,
+    @InjectRepository(StockItem)
+    private readonly stockItemRepo: Repository<StockItem>,
+    @InjectRepository(StockCategory)
+    private readonly stockCategoryRepo: Repository<StockCategory>,
     @InjectRepository(ItemSupplier)
     private readonly itemSupplierRepo: Repository<ItemSupplier>,
+    @InjectRepository(VoucherType)
+    private readonly voucherTypeRepo: Repository<VoucherType>,
+    @InjectRepository(VoucherModuleEntity)
+    private readonly voucherModuleRepo: Repository<VoucherModuleEntity>,
   ) {}
 
   async onApplicationBootstrap() {
@@ -316,6 +357,10 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
     await this.seedRecipes(items);            // Module: recipes
     await this.seedReservations();            // Module: reservations
     await this.seedStockCounts(items);        // Module 8: completed stock count
+    await this.seedVoucherModules();                // Voucher modules
+    await this.seedVoucherTypes();                 // Voucher types master data
+    await this.seedStockGroups();
+    await this.seedStockCategories();
     await this.seedItemSuppliers(items);          // Item-Supplier links
 
     this.logger.log('Seed check complete.');
@@ -437,92 +482,104 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
   private async seedCategories(): Promise<void> {
     const count = await this.categoryRepo.count();
     if (count > 0) {
-      this.logger.log(`${count} categories already exist — skipping.`);
-      return;
+      this.logger.log(`${count} categories already exist.`);
+    } else {
+      const food = await this.categoryRepo.save(
+        this.categoryRepo.create({
+          id: 'a0000001-0000-0000-0000-000000000001',
+          name: 'Food', slug: 'food', description: 'All food menu items',
+          displayOrder: 1, isActive: true, parentId: null, path: '', level: 0,
+        }),
+      );
+      const beverages = await this.categoryRepo.save(
+        this.categoryRepo.create({
+          id: 'a0000001-0000-0000-0000-000000000002',
+          name: 'Beverages', slug: 'beverages', description: 'All drink menu items',
+          displayOrder: 2, isActive: true, parentId: null, path: '', level: 0,
+        }),
+      );
+      const appetizers = await this.categoryRepo.save(
+        this.categoryRepo.create({
+          id: 'a0000001-0000-0000-0000-000000000003',
+          name: 'Appetizers', slug: 'appetizers', description: 'Starters and small plates',
+          displayOrder: 1, isActive: true, parentId: food.id, path: `${food.id}/`, level: 1,
+        }),
+      );
+      const mainCourse = await this.categoryRepo.save(
+        this.categoryRepo.create({
+          id: 'a0000001-0000-0000-0000-000000000004',
+          name: 'Main Course', slug: 'main-course', description: 'Main dishes and entrees',
+          displayOrder: 2, isActive: true, parentId: food.id, path: `${food.id}/`, level: 1,
+        }),
+      );
+      await this.categoryRepo.save(
+        this.categoryRepo.create({
+          id: 'a0000001-0000-0000-0000-000000000005',
+          name: 'Desserts', slug: 'desserts', description: 'Sweet treats and desserts',
+          displayOrder: 3, isActive: true, parentId: food.id, path: `${food.id}/`, level: 1,
+        }),
+      );
+      await this.categoryRepo.save(
+        this.categoryRepo.create({
+          id: 'a0000001-0000-0000-0000-000000000006',
+          name: 'Hot Beverages', slug: 'hot-beverages', description: 'Coffee, tea, and hot drinks',
+          displayOrder: 1, isActive: true, parentId: beverages.id, path: `${beverages.id}/`, level: 1,
+        }),
+      );
+      await this.categoryRepo.save(
+        this.categoryRepo.create({
+          id: 'a0000001-0000-0000-0000-000000000007',
+          name: 'Cold Beverages', slug: 'cold-beverages', description: 'Soft drinks, juices, and cold drinks',
+          displayOrder: 2, isActive: true, parentId: beverages.id, path: `${beverages.id}/`, level: 1,
+        }),
+      );
+      await this.categoryRepo.save(
+        this.categoryRepo.create({
+          id: 'a0000001-0000-0000-0000-000000000008',
+          name: 'Vegetarian', slug: 'vegetarian', description: 'Vegetarian main course options',
+          displayOrder: 1, isActive: true, parentId: mainCourse.id,
+          path: `${mainCourse.path}${mainCourse.id}/`, level: 2,
+        }),
+      );
+      await this.categoryRepo.save(
+        this.categoryRepo.create({
+          id: 'a0000001-0000-0000-0000-000000000009',
+          name: 'Non-Vegetarian', slug: 'non-vegetarian', description: 'Non-vegetarian main course options',
+          displayOrder: 2, isActive: true, parentId: mainCourse.id,
+          path: `${mainCourse.path}${mainCourse.id}/`, level: 2,
+        }),
+      );
+      await this.categoryRepo.save(
+        this.categoryRepo.create({
+          id: 'a0000001-0000-0000-0000-000000000010',
+          name: 'Soups', slug: 'soups', description: 'Soups and broths',
+          displayOrder: 1, isActive: true, parentId: appetizers.id,
+          path: `${appetizers.path}${appetizers.id}/`, level: 2,
+        }),
+      );
+      await this.categoryRepo.save(
+        this.categoryRepo.create({
+          id: 'a0000001-0000-0000-0000-000000000011',
+          name: 'Salads', slug: 'salads', description: 'Fresh salads',
+          displayOrder: 2, isActive: true, parentId: appetizers.id,
+          path: `${appetizers.path}${appetizers.id}/`, level: 2,
+        }),
+      );
+      this.logger.log('Seeded 11 demo categories with 3-level hierarchy.');
     }
 
-    const food = await this.categoryRepo.save(
-      this.categoryRepo.create({
-        id: 'a0000001-0000-0000-0000-000000000001',
-        name: 'Food', slug: 'food', description: 'All food menu items',
-        displayOrder: 1, isActive: true, parentId: null, path: '', level: 0,
-      }),
-    );
-    const beverages = await this.categoryRepo.save(
-      this.categoryRepo.create({
-        id: 'a0000001-0000-0000-0000-000000000002',
-        name: 'Beverages', slug: 'beverages', description: 'All drink menu items',
-        displayOrder: 2, isActive: true, parentId: null, path: '', level: 0,
-      }),
-    );
-    const appetizers = await this.categoryRepo.save(
-      this.categoryRepo.create({
-        id: 'a0000001-0000-0000-0000-000000000003',
-        name: 'Appetizers', slug: 'appetizers', description: 'Starters and small plates',
-        displayOrder: 1, isActive: true, parentId: food.id, path: `${food.id}/`, level: 1,
-      }),
-    );
-    const mainCourse = await this.categoryRepo.save(
-      this.categoryRepo.create({
-        id: 'a0000001-0000-0000-0000-000000000004',
-        name: 'Main Course', slug: 'main-course', description: 'Main dishes and entrees',
-        displayOrder: 2, isActive: true, parentId: food.id, path: `${food.id}/`, level: 1,
-      }),
-    );
-    await this.categoryRepo.save(
-      this.categoryRepo.create({
-        id: 'a0000001-0000-0000-0000-000000000005',
-        name: 'Desserts', slug: 'desserts', description: 'Sweet treats and desserts',
-        displayOrder: 3, isActive: true, parentId: food.id, path: `${food.id}/`, level: 1,
-      }),
-    );
-    await this.categoryRepo.save(
-      this.categoryRepo.create({
-        id: 'a0000001-0000-0000-0000-000000000006',
-        name: 'Hot Beverages', slug: 'hot-beverages', description: 'Coffee, tea, and hot drinks',
-        displayOrder: 1, isActive: true, parentId: beverages.id, path: `${beverages.id}/`, level: 1,
-      }),
-    );
-    await this.categoryRepo.save(
-      this.categoryRepo.create({
-        id: 'a0000001-0000-0000-0000-000000000007',
-        name: 'Cold Beverages', slug: 'cold-beverages', description: 'Soft drinks, juices, and cold drinks',
-        displayOrder: 2, isActive: true, parentId: beverages.id, path: `${beverages.id}/`, level: 1,
-      }),
-    );
-    await this.categoryRepo.save(
-      this.categoryRepo.create({
-        id: 'a0000001-0000-0000-0000-000000000008',
-        name: 'Vegetarian', slug: 'vegetarian', description: 'Vegetarian main course options',
-        displayOrder: 1, isActive: true, parentId: mainCourse.id,
-        path: `${mainCourse.path}${mainCourse.id}/`, level: 2,
-      }),
-    );
-    await this.categoryRepo.save(
-      this.categoryRepo.create({
-        id: 'a0000001-0000-0000-0000-000000000009',
-        name: 'Non-Vegetarian', slug: 'non-vegetarian', description: 'Non-vegetarian main course options',
-        displayOrder: 2, isActive: true, parentId: mainCourse.id,
-        path: `${mainCourse.path}${mainCourse.id}/`, level: 2,
-      }),
-    );
-    await this.categoryRepo.save(
-      this.categoryRepo.create({
-        id: 'a0000001-0000-0000-0000-000000000010',
-        name: 'Soups', slug: 'soups', description: 'Soups and broths',
-        displayOrder: 1, isActive: true, parentId: appetizers.id,
-        path: `${appetizers.path}${appetizers.id}/`, level: 2,
-      }),
-    );
-    await this.categoryRepo.save(
-      this.categoryRepo.create({
-        id: 'a0000001-0000-0000-0000-000000000011',
-        name: 'Salads', slug: 'salads', description: 'Fresh salads',
-        displayOrder: 2, isActive: true, parentId: appetizers.id,
-        path: `${appetizers.path}${appetizers.id}/`, level: 2,
-      }),
-    );
-    this.logger.log('Seeded 11 demo categories with 3-level hierarchy.');
+    // Always ensure the raw materials category exists
+    const staplesCat = await this.categoryRepo.findOne({ where: { id: 'a0000001-0000-0000-0000-000000000012' } });
+    if (!staplesCat) {
+      await this.categoryRepo.save(
+        this.categoryRepo.create({
+          id: 'a0000001-0000-0000-0000-000000000012',
+          name: 'Staples & Grains', slug: 'staples-grains', description: 'Raw materials, grains, and cooking staples',
+          displayOrder: 3, isActive: true, parentId: null, path: '', level: 0,
+        }),
+      );
+      this.logger.log('Added "Staples & Grains" category for raw materials.');
+    }
   }
 
   // ── Suppliers ───────────────────────────────────────────────
@@ -544,27 +601,27 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
   // ── Items ───────────────────────────────────────────────────
 
   private async seedItems(): Promise<Item[]> {
-    const count = await this.itemRepo.count();
-    if (count > 0) {
-      this.logger.log(`${count} items already exist — skipping.`);
-      return this.itemRepo.find();
-    }
+    const uoms = await this.uomRepo.find();
+    const uomBySymbol = new Map(uoms.map((u) => [u.symbol, u.id]));
 
-    // Build a map of unitCode -> unitId from the seeded units
-    const units = await this.unitRepo.find();
-    const unitByCode = new Map(units.map((u) => [u.code, u.id]));
+    // Load existing items by SKU to make this additive
+    const existing = await this.itemRepo.find();
+    const existingSkus = new Set(existing.map((i) => i.sku));
+    const saved: Item[] = [...existing];
+    let addedCount = 0;
 
-    const saved: Item[] = [];
     for (const def of DEMO_ITEM_DEFS) {
-      const unitId = unitByCode.get(def.unitCode);
+      if (existingSkus.has(def.sku)) continue; // skip already-seeded items
+
+      const unitId = uomBySymbol.get(def.unitCode);
       if (!unitId) {
-        this.logger.warn(`Unit code "${def.unitCode}" not found — skipping item "${def.name}"`);
+        this.logger.warn(`Unit symbol "${def.unitCode}" not found — skipping item "${def.name}"`);
         continue;
       }
 
       let purchaseUnitId: string | null = null;
       if (def.purchaseUnitCode) {
-        purchaseUnitId = unitByCode.get(def.purchaseUnitCode) || null;
+        purchaseUnitId = uomBySymbol.get(def.purchaseUnitCode) || null;
       }
 
       const itemData: Partial<Item> = {
@@ -583,25 +640,25 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
         isTaxable: def.isTaxable !== false,
         cessPercent: def.cessPercent || 0,
         reverseCharge: def.reverseCharge || false,
-        productType: 'finished' as any,
-        shelfLifeDays: def.name === 'Ice Cream' ? 30 : def.name === 'Chicken Tikka' || def.name === 'Butter Chicken' ? 5 : def.name === 'Fresh Lime Soda' ? 14 : null,
+        productType: (def.productType || 'finished') as any,
+        shelfLifeDays: def.shelfLifeDays ?? null,
       };
       const item = this.itemRepo.create(itemData as Item);
       saved.push(await this.itemRepo.save(item));
+      addedCount++;
     }
-    this.logger.log(`Seeded ${saved.length} demo menu items.`);
+
+    if (addedCount > 0) {
+      this.logger.log(`Added ${addedCount} new items. Total ${saved.length}.`);
+    } else {
+      this.logger.log(`All ${saved.length} items already exist.`);
+    }
     return saved;
   }
 
   // ── Inventory ───────────────────────────────────────────────
 
   private async seedInventory(items: Item[]): Promise<void> {
-    const count = await this.inventoryRepo.count();
-    if (count > 0) {
-      this.logger.log(`${count} inventory records already exist — skipping.`);
-      return;
-    }
-
     const defaultSu = await this.storageUnitRepo.findOne({ where: { isDefault: true } });
     const storageUnitId = defaultSu ? defaultSu.id : (await this.storageUnitRepo.find())[0]?.id;
     if (!storageUnitId) {
@@ -609,7 +666,13 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
       return;
     }
 
+    // Check which items already have inventory records (additive)
+    const existingRecords = await this.inventoryRepo.find({ where: { storageUnitId } });
+    const existingItemIds = new Set(existingRecords.map((r) => r.itemId));
+    let addedCount = 0;
+
     for (const item of items) {
+      if (existingItemIds.has(item.id)) continue;
       await this.inventoryRepo.save(
         this.inventoryRepo.create({
           itemId: item.id,
@@ -620,24 +683,32 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
           unitCost: item.costPrice || 0,
         }),
       );
+      addedCount++;
     }
-    this.logger.log(`Seeded inventory for ${items.length} items (opening stock: 50 each, at ${defaultSu?.name || 'Main Store'}).`);
+
+    if (addedCount > 0) {
+      this.logger.log(`Added ${addedCount} new inventory records (opening stock: 50 each). Total ${existingRecords.length + addedCount}.`);
+    } else {
+      this.logger.log(`All ${items.length} items already have inventory records.`);
+    }
   }
 
   // ── Stock Movements ─────────────────────────────────────────
 
   private async seedStockMovements(items: Item[]): Promise<void> {
-    const count = await this.stockMovementRepo.count();
-    if (count > 0) {
-      this.logger.log(`${count} stock movements already exist — skipping.`);
-      return;
-    }
-
     const defaultSu = await this.storageUnitRepo.findOne({ where: { isDefault: true } });
     const storageUnitId = defaultSu ? defaultSu.id : null;
     if (!storageUnitId) return;
 
+    // Additive: only create movements for items without existing ones
+    const existingMovements = await this.stockMovementRepo.find({
+      where: { storageUnitId, type: MovementType.OPENING_BALANCE },
+    });
+    const existingItemIds = new Set(existingMovements.map((m) => m.itemId));
+    let addedCount = 0;
+
     for (const item of items) {
+      if (existingItemIds.has(item.id)) continue;
       await this.stockMovementRepo.save(
         this.stockMovementRepo.create({
           itemId: item.id,
@@ -650,19 +721,17 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
           notes: 'Opening balance',
         }),
       );
+      addedCount++;
     }
-    this.logger.log(`Seeded opening balance stock movements for ${items.length} items.`);
+
+    if (addedCount > 0) {
+      this.logger.log(`Added ${addedCount} new opening balance stock movements.`);
+    }
   }
 
   // ── Opening Stock Entries ─────────────────────────────────────
 
   private async seedOpeningStockEntries(items: Item[]): Promise<void> {
-    const count = await this.openingStockEntryRepo.count();
-    if (count > 0) {
-      this.logger.log(`${count} opening stock entries already exist — skipping.`);
-      return;
-    }
-
     const defaultSu = await this.storageUnitRepo.findOne({ where: { isDefault: true } });
     const storageUnitId = defaultSu ? defaultSu.id : null;
     if (!storageUnitId) return;
@@ -672,8 +741,13 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
     });
     const movementByItemId = new Map(movements.map((m) => [m.itemId, m]));
 
+    // Additive: check existing opening stock entries
+    const existingEntries = await this.openingStockEntryRepo.find();
+    const existingItemIds = new Set(existingEntries.map((e) => e.itemId));
+
     let addedCount = 0;
     for (const item of items) {
+      if (existingItemIds.has(item.id)) continue;
       const movement = movementByItemId.get(item.id);
       if (!movement) continue;
 
@@ -690,7 +764,9 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
       addedCount++;
     }
 
-    this.logger.log(`Seeded ${addedCount} opening stock entries linking to stock movements.`);
+    if (addedCount > 0) {
+      this.logger.log(`Added ${addedCount} new opening stock entries.`);
+    }
   }
 
   // ── Purchases ───────────────────────────────────────────────
@@ -1329,37 +1405,57 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
   // ── Units ───────────────────────────────────────────────────
 
   private async seedUnits(): Promise<void> {
-    const count = await this.unitRepo.count();
+    // Seed UnitOfMeasure records into `unit_of_measures` table
+    const count = await this.uomRepo.count();
     if (count > 0) {
-      this.logger.log(`${count} units already exist — skipping.`);
+      this.logger.log(`${count} units of measure already exist — skipping.`);
       return;
     }
 
-    const unitDefs = [
+    const uomDefs = [
       // Weight
-      { code: 'kg', name: 'Kilogram', unitType: UnitType.WEIGHT, isBaseUnit: true },
-      { code: 'gram', name: 'Gram', unitType: UnitType.WEIGHT, isBaseUnit: false },
+      { symbol: 'kg', name: 'Kilogram', decimalAllowed: true, baseUnitId: null, conversionFactor: 1 },
+      { symbol: 'g', name: 'Gram', decimalAllowed: true, baseUnitId: 'kg-ref', conversionFactor: 0.001 },
       // Volume
-      { code: 'litre', name: 'Litre', unitType: UnitType.VOLUME, isBaseUnit: true },
-      { code: 'ml', name: 'Millilitre', unitType: UnitType.VOLUME, isBaseUnit: false },
+      { symbol: 'L', name: 'Litre', decimalAllowed: true, baseUnitId: null, conversionFactor: 1 },
+      { symbol: 'ml', name: 'Millilitre', decimalAllowed: true, baseUnitId: 'L-ref', conversionFactor: 0.001 },
       // Count
-      { code: 'piece', name: 'Piece', unitType: UnitType.COUNT, isBaseUnit: true },
-      { code: 'dozen', name: 'Dozen', unitType: UnitType.COUNT, isBaseUnit: false },
-      // Serving units (count-based, not base)
-      { code: 'plate', name: 'Plate', unitType: UnitType.COUNT, isBaseUnit: false },
-      { code: 'bowl', name: 'Bowl', unitType: UnitType.COUNT, isBaseUnit: false },
-      { code: 'cup', name: 'Cup', unitType: UnitType.COUNT, isBaseUnit: false },
-      { code: 'glass', name: 'Glass', unitType: UnitType.COUNT, isBaseUnit: false },
-      { code: 'bottle', name: 'Bottle', unitType: UnitType.COUNT, isBaseUnit: false },
-      { code: 'box', name: 'Box', unitType: UnitType.COUNT, isBaseUnit: false },
-      { code: 'packet', name: 'Packet', unitType: UnitType.COUNT, isBaseUnit: false },
+      { symbol: 'pcs', name: 'Piece', decimalAllowed: false, baseUnitId: null, conversionFactor: 1 },
+      { symbol: 'doz', name: 'Dozen', decimalAllowed: false, baseUnitId: 'pcs-ref', conversionFactor: 12 },
+      // Serving units (count-based)
+      { symbol: 'plate', name: 'Plate', decimalAllowed: false, baseUnitId: null, conversionFactor: 1 },
+      { symbol: 'bowl', name: 'Bowl', decimalAllowed: false, baseUnitId: null, conversionFactor: 1 },
+      { symbol: 'cup', name: 'Cup', decimalAllowed: false, baseUnitId: null, conversionFactor: 1 },
+      { symbol: 'glass', name: 'Glass', decimalAllowed: false, baseUnitId: null, conversionFactor: 1 },
+      { symbol: 'bottle', name: 'Bottle', decimalAllowed: false, baseUnitId: null, conversionFactor: 1 },
+      { symbol: 'box', name: 'Box', decimalAllowed: false, baseUnitId: null, conversionFactor: 1 },
+      { symbol: 'packet', name: 'Packet', decimalAllowed: false, baseUnitId: null, conversionFactor: 1 },
     ];
 
-    for (const u of unitDefs) {
-      const unit = this.unitRepo.create({ ...u, isActive: true });
-      await this.unitRepo.save(unit);
+    // First pass: create base units (baseUnitId is null) so they get real UUIDs
+    const baseDefs = uomDefs.filter((u) => u.baseUnitId === null);
+    const subDefs = uomDefs.filter((u) => u.baseUnitId !== null);
+
+    const savedByName = new Map<string, string>();
+    for (const u of baseDefs) {
+      const unit = this.uomRepo.create({ ...u, isActive: true });
+      const saved = await this.uomRepo.save(unit);
+      savedByName.set(u.symbol, saved.id);
     }
-    this.logger.log(`Seeded ${unitDefs.length} units (${new Set(unitDefs.map((u) => u.unitType)).size} types).`);
+
+    // Second pass: create sub-units with resolved baseUnitId
+    for (const u of subDefs) {
+      const baseSymbol = u.symbol === 'g' ? 'kg' : u.symbol === 'ml' ? 'L' : 'pcs';
+      const actualBaseId = savedByName.get(baseSymbol);
+      const unit = this.uomRepo.create({
+        ...u,
+        baseUnitId: actualBaseId || null,
+        isActive: true,
+      });
+      await this.uomRepo.save(unit);
+    }
+
+    this.logger.log(`Seeded ${uomDefs.length} units of measure.`);
   }
 
   private async seedUnitConversions(): Promise<void> {
@@ -1369,25 +1465,25 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
       return;
     }
 
-    const units = await this.unitRepo.find();
-    const byCode = new Map(units.map((u) => [u.code, u.id]));
+    const units = await this.uomRepo.find();
+    const bySymbol = new Map(units.map((u) => [u.symbol, u.id]));
 
-    const get = (code: string) => {
-      const id = byCode.get(code);
-      if (!id) throw new Error(`Unit code "${code}" not found in seed`);
+    const get = (symbol: string) => {
+      const id = bySymbol.get(symbol);
+      if (!id) throw new Error(`Unit symbol "${symbol}" not found in seed`);
       return id;
     };
 
     const conversions = [
       // Global weight: kg <-> gram
-      { itemId: null, fromUnitId: get('kg'), toUnitId: get('gram'), factor: 1000 },
-      { itemId: null, fromUnitId: get('gram'), toUnitId: get('kg'), factor: 0.001 },
+      { itemId: null, fromUnitId: get('kg'), toUnitId: get('g'), factor: 1000 },
+      { itemId: null, fromUnitId: get('g'), toUnitId: get('kg'), factor: 0.001 },
       // Global volume: litre <-> ml
-      { itemId: null, fromUnitId: get('litre'), toUnitId: get('ml'), factor: 1000 },
-      { itemId: null, fromUnitId: get('ml'), toUnitId: get('litre'), factor: 0.001 },
+      { itemId: null, fromUnitId: get('L'), toUnitId: get('ml'), factor: 1000 },
+      { itemId: null, fromUnitId: get('ml'), toUnitId: get('L'), factor: 0.001 },
       // Global count: dozen <-> piece
-      { itemId: null, fromUnitId: get('dozen'), toUnitId: get('piece'), factor: 12 },
-      { itemId: null, fromUnitId: get('piece'), toUnitId: get('dozen'), factor: 1 / 12 },
+      { itemId: null, fromUnitId: get('doz'), toUnitId: get('pcs'), factor: 12 },
+      { itemId: null, fromUnitId: get('pcs'), toUnitId: get('doz'), factor: 1 / 12 },
     ];
 
     for (const conv of conversions) {
@@ -1816,7 +1912,7 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
     if (suppliers.length === 0) return;
 
     const units = await this.unitRepo.find();
-    const unitByCode = new Map(units.map((u) => [u.code, u.id]));
+    const unitByCode = new Map(units.map((u) => [u.code, u.id])); // Unit.entity has `code` (different from UnitOfMeasure.symbol)
     const getUnitId = (code: string) => unitByCode.get(code) || null;
 
     const itemByName = new Map(items.map((i) => [i.name, i]));
@@ -1851,6 +1947,155 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
       await this.itemSupplierRepo.save(this.itemSupplierRepo.create(link));
     }
     this.logger.log(`Seeded ${links.length} item-supplier links.`);
+  }
+
+  // ── Voucher Modules ────────────────────────────────────────────
+
+  private async seedVoucherModules(): Promise<void> {
+    const count = await this.voucherModuleRepo.count();
+    if (count > 0) {
+      this.logger.log(`${count} voucher modules already exist — skipping.`);
+      return;
+    }
+
+    const modules = [
+      { code: 'accounting', name: 'Accounting', displayOrder: 1, description: 'Financial accounting and bookkeeping' },
+      { code: 'inventory', name: 'Inventory', displayOrder: 2, description: 'Stock management and warehouse operations' },
+      { code: 'sales', name: 'Sales', displayOrder: 3, description: 'Sales and customer billing' },
+      { code: 'purchase', name: 'Purchase', displayOrder: 4, description: 'Procurement and supplier payments' },
+    ];
+
+    for (const m of modules) {
+      await this.voucherModuleRepo.save(this.voucherModuleRepo.create(m));
+    }
+    this.logger.log(`Seeded ${modules.length} voucher modules.`);
+  }
+
+  // ── Voucher Types ─────────────────────────────────────────────
+
+  private async seedVoucherTypes(): Promise<void> {
+    const count = await this.voucherTypeRepo.count();
+    if (count > 0) {
+      this.logger.log(`${count} voucher types already exist — skipping.`);
+      return;
+    }
+
+    const modules = await this.voucherModuleRepo.find();
+    const moduleByCode = new Map(modules.map((m) => [m.code, m.id]));
+    const getModuleId = (code: string) => {
+      const id = moduleByCode.get(code);
+      if (!id) throw new Error(`Voucher module "${code}" not found in seed`);
+      return id;
+    };
+
+    const types = [
+      {
+        code: 'payment',
+        name: 'Payment',
+        voucherModuleId: getModuleId('accounting'),
+        affectsAccounts: true,
+        description: 'Outgoing payments to vendors, staff, and other parties',
+      },
+      {
+        code: 'receipt',
+        name: 'Receipt',
+        voucherModuleId: getModuleId('accounting'),
+        affectsAccounts: true,
+        description: 'Incoming receipts from customers and other parties',
+      },
+      {
+        code: 'journal',
+        name: 'Journal',
+        voucherModuleId: getModuleId('accounting'),
+        affectsAccounts: true,
+        description: 'General journal entries for accounting adjustments',
+      },
+      {
+        code: 'credit_note',
+        name: 'Credit Note',
+        voucherModuleId: getModuleId('sales'),
+        affectsAccounts: true,
+        description: 'Credit notes issued to customers for returns or adjustments',
+      },
+      {
+        code: 'debit_note',
+        name: 'Debit Note',
+        voucherModuleId: getModuleId('purchase'),
+        affectsAccounts: true,
+        description: 'Debit notes received from suppliers for returns or adjustments',
+      },
+      {
+        code: 'stock_receipt',
+        name: 'Stock Receipt',
+        voucherModuleId: getModuleId('inventory'),
+        affectsInventory: true,
+        description: 'Stock receipt from purchase orders or production',
+      },
+      {
+        code: 'stock_issue',
+        name: 'Stock Issue',
+        voucherModuleId: getModuleId('inventory'),
+        affectsInventory: true,
+        description: 'Stock issued for production, wastage, or adjustments',
+      },
+    ];
+
+    for (const t of types) {
+      await this.voucherTypeRepo.save(this.voucherTypeRepo.create(t));
+    }
+    this.logger.log(`Seeded ${types.length} voucher types.`);
+  }
+
+  // ── Stock Groups ────────────────────────────────────────────
+
+  private async seedStockGroups(): Promise<void> {
+    const count = await this.stockItemRepo.count();
+    if (count > 0) {
+      this.logger.log(`${count} stock groups already exist — skipping.`);
+      return;
+    }
+
+    const groupDefs = [
+      { name: 'Raw Materials', code: 'RM', alias: 'Ingredients', displayOrder: 1, isActive: true },
+      { name: 'Finished Goods', code: 'FG', alias: 'Menu Items', displayOrder: 2, isActive: true },
+      { name: 'Packaging', code: 'PKG', alias: 'Packing Materials', displayOrder: 3, isActive: true },
+    ];
+
+    for (const g of groupDefs) {
+      await this.stockItemRepo.save(this.stockItemRepo.create(g));
+    }
+    this.logger.log(`Seeded ${groupDefs.length} stock groups (RM, FG, PKG).`);
+  }
+
+  // ── Stock Categories ─────────────────────────────────────────
+
+  private async seedStockCategories(): Promise<void> {
+    const count = await this.stockCategoryRepo.count();
+    if (count > 0) {
+      this.logger.log(`${count} stock categories already exist — skipping.`);
+      return;
+    }
+
+    const categoryDefs = [
+      { name: 'Grains & Cereals', alias: 'Flours & Grains' },
+      { name: 'Spices & Herbs', alias: 'Masala & Seasoning' },
+      { name: 'Dairy & Eggs', alias: 'Milk Products' },
+      { name: 'Oils & Fats', alias: 'Cooking Oils' },
+      { name: 'Vegetables', alias: 'Fresh Veggies' },
+      { name: 'Meat & Poultry', alias: 'Non-Veg' },
+      { name: 'Beverages', alias: 'Drinks' },
+      { name: 'Desserts', alias: 'Sweets' },
+      { name: 'Appetizers', alias: 'Starters' },
+      { name: 'Main Course', alias: 'Entrees' },
+      { name: 'Boxes & Containers', alias: 'Storage Boxes' },
+      { name: 'Bottles & Jars', alias: 'Liquid Containers' },
+      { name: 'Bags & Pouches', alias: 'Packaging Bags' },
+    ];
+
+    for (const c of categoryDefs) {
+      await this.stockCategoryRepo.save(this.stockCategoryRepo.create({ ...c, isActive: true }));
+    }
+    this.logger.log(`Seeded ${categoryDefs.length} stock categories.`);
   }
 
   // ── Usage guide ─────────────────────────────────────────────

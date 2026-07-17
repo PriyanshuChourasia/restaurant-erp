@@ -1,7 +1,7 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { UnitRepository } from '../repositories/unit.repository';
 import { UnitConversionRepository } from '../repositories/unit-conversion.repository';
-import { Unit } from '../entities/unit.entity';
+import { UnitOfMeasure } from '../entities/unit-of-measure.entity';
 import {
   formatQuantity as fmtQty,
   compactQuantity as cmpQty,
@@ -15,17 +15,17 @@ export class UnitsService {
     private readonly conversionRepo: UnitConversionRepository,
   ) {}
 
-  async findAll(includeInactive = false): Promise<Unit[]> {
+  async findAll(includeInactive = false): Promise<UnitOfMeasure[]> {
     return this.unitRepo.findAll(includeInactive);
   }
 
-  async findById(id: string): Promise<Unit> {
+  async findById(id: string): Promise<UnitOfMeasure> {
     const unit = await this.unitRepo.findById(id);
     if (!unit) throw new NotFoundException(`Unit with ID "${id}" not found`);
     return unit;
   }
 
-  async findByCode(code: string): Promise<Unit | null> {
+  async findByCode(code: string): Promise<UnitOfMeasure | null> {
     return this.unitRepo.findByCode(code);
   }
 

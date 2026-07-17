@@ -1,13 +1,9 @@
 import {
   Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Index,
+  ManyToOne, JoinColumn,
 } from 'typeorm';
 import { decimalTransformer } from '../../shared/transformers/decimal.transformer';
-
-export enum VoucherType {
-  PAYMENT = 'payment',
-  RECEIPT = 'receipt',
-  JOURNAL = 'journal',
-}
+import { VoucherType } from './voucher-type.entity';
 
 export enum VoucherStatus {
   POSTED = 'posted',
@@ -15,7 +11,7 @@ export enum VoucherStatus {
 }
 
 @Entity('vouchers')
-@Index('idx_voucher_type', ['voucherType'])
+@Index('idx_voucher_type', ['voucherTypeId'])
 @Index('idx_voucher_date', ['voucherDate'])
 @Index('idx_voucher_reference_invoice', ['referenceInvoiceId'])
 export class Voucher {
@@ -25,8 +21,15 @@ export class Voucher {
   @Column({ name: 'voucher_number', length: 50, unique: true })
   voucherNumber!: string;
 
-  @Column({ type: 'enum', enum: VoucherType, name: 'voucher_type' })
-  voucherType!: VoucherType;
+  // Nullable: existing `vouchers` rows predate the VoucherType lookup table and
+  // still carry the legacy `voucher_type` enum value — making this required would
+  // break synchronize against that data.
+  @Column({ name: 'voucher_type_id', type: 'uuid', nullable: true })
+  voucherTypeId!: string | null;
+
+  @ManyToOne(() => VoucherType, { nullable: true })
+  @JoinColumn({ name: 'voucher_type_id' })
+  voucherType!: VoucherType | null;
 
   @Column({ type: 'enum', enum: VoucherStatus, default: VoucherStatus.POSTED })
   status!: VoucherStatus;

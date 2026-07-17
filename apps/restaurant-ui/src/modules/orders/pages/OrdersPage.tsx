@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Plus,
   Search,
@@ -6,237 +7,197 @@ import {
   Clock,
   CheckCircle2,
   XCircle,
-  ArrowUpRight,
-  ChevronDown,
   Eye,
   IndianRupee,
+  Send,
+  CreditCard,
+  Users,
+  Truck,
+  UtensilsCrossed,
+  CalendarClock,
+  AlertTriangle,
+  Pencil,
+  Trash2,
 } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
+import {
+  getOrders, confirmOrder, sendOrderToKitchen, chargeOrder, cancelOrder, updateOrderItems,
+} from '../api/orders.api'
+import { getItems } from '@/modules/items/api/items.api'
+import type { Order, OrderStatus, OrderType } from '../types/order.types'
 
-// ─── Types ────────────────────────────────────────────────────────────
-
-type OrderStatus = 'New' | 'In Progress' | 'Completed' | 'Cancelled'
-
-interface Order {
-  id: string
-  table: string
-  server: string
-  items: number
-  total: number
-  status: OrderStatus
-  payment: string
-  time: string
-}
-
-// ─── Mock data ────────────────────────────────────────────────────────
-
-const orders: Order[] = [
-  { id: '#1042', table: 'Table 7', server: 'Mike', items: 3, total: 52.00, status: 'In Progress', payment: 'Card', time: '2 min ago' },
-  { id: '#1041', table: 'Table 12', server: 'Sarah', items: 5, total: 78.50, status: 'New', payment: 'Cash', time: '5 min ago' },
-  { id: '#1040', table: 'Table 3', server: 'Mike', items: 2, total: 34.00, status: 'Completed', payment: 'Card', time: '12 min ago' },
-  { id: '#1039', table: 'Table 8', server: 'Emma', items: 4, total: 67.25, status: 'Completed', payment: 'Card', time: '18 min ago' },
-  { id: '#1038', table: 'Table 5', server: 'Sarah', items: 1, total: 18.00, status: 'In Progress', payment: 'Cash', time: '22 min ago' },
-  { id: '#1037', table: 'Table 10', server: 'Emma', items: 6, total: 95.00, status: 'Completed', payment: 'Card', time: '35 min ago' },
-  { id: '#1036', table: 'Table 2', server: 'Mike', items: 2, total: 28.50, status: 'Cancelled', payment: '-', time: '45 min ago' },
-  { id: '#1035', table: 'Table 15', server: 'Sarah', items: 3, total: 44.00, status: 'New', payment: 'Cash', time: '48 min ago' },
-  { id: '#1034', table: 'Table 6', server: 'Emma', items: 4, total: 61.00, status: 'Completed', payment: 'Card', time: '55 min ago' },
-  { id: '#1033', table: 'Table 9', server: 'Mike', items: 2, total: 22.50, status: 'In Progress', payment: 'UPI', time: '1 hr ago' },
-  { id: '#1032', table: 'Table 4', server: 'Sarah', items: 5, total: 89.00, status: 'New', payment: 'Card', time: '1 hr ago' },
-  { id: '#1031', table: 'Table 11', server: 'Emma', items: 3, total: 47.00, status: 'Completed', payment: 'Cash', time: '1 hr ago' },
+const STATUS_TABS: { key: OrderStatus | 'all'; label: string }[] = [
+  { key: 'all', label: 'All Orders' },
+  { key: 'pending_confirmation', label: 'Pending' },
+  { key: 'confirmed', label: 'Confirmed' },
+  { key: 'billed', label: 'Billed' },
+  { key: 'cancelled', label: 'Cancelled' },
 ]
 
-const STATUS_TABS = [
-  { key: 'all', label: 'All Orders', count: orders.length },
-  { key: 'New', label: 'New', count: orders.filter((o) => o.status === 'New').length },
-  { key: 'In Progress', label: 'In Progress', count: orders.filter((o) => o.status === 'In Progress').length },
-  { key: 'Completed', label: 'Completed', count: orders.filter((o) => o.status === 'Completed').length },
-  { key: 'Cancelled', label: 'Cancelled', count: orders.filter((o) => o.status === 'Cancelled').length },
-] as const
-
-const statusConfig: Record<OrderStatus, { label: string; dot: string; bg: string; text: string; icon: typeof Clock }> = {
-  'New': { label: 'New', dot: 'bg-blue-500', bg: 'bg-blue-50', text: 'text-blue-700', icon: Clock },
-  'In Progress': { label: 'In Progress', dot: 'bg-amber-500', bg: 'bg-amber-50', text: 'text-amber-700', icon: Clock },
-  'Completed': { label: 'Completed', dot: 'bg-emerald-500', bg: 'bg-emerald-50', text: 'text-emerald-700', icon: CheckCircle2 },
-  'Cancelled': { label: 'Cancelled', dot: 'bg-red-500', bg: 'bg-red-50', text: 'text-red-700', icon: XCircle },
+const statusConfig: Record<OrderStatus, { label: string; bg: string; text: string; icon: typeof Clock }> = {
+  pending_confirmation: { label: 'Pending', bg: 'bg-blue-50', text: 'text-blue-700', icon: Clock },
+  confirmed: { label: 'Confirmed', bg: 'bg-amber-50', text: 'text-amber-700', icon: Clock },
+  billed: { label: 'Billed', bg: 'bg-emerald-50', text: 'text-emerald-700', icon: CheckCircle2 },
+  cancelled: { label: 'Cancelled', bg: 'bg-red-50', text: 'text-red-700', icon: XCircle },
 }
 
-// ─── Component ────────────────────────────────────────────────────────
+const typeConfig: Record<OrderType, { label: string; bg: string; text: string; icon: typeof Users }> = {
+  regular: { label: 'Regular', bg: 'bg-gray-100', text: 'text-gray-700', icon: UtensilsCrossed },
+  party: { label: 'Party', bg: 'bg-purple-50', text: 'text-purple-700', icon: Users },
+  scheduled: { label: 'Scheduled', bg: 'bg-cyan-50', text: 'text-cyan-700', icon: CalendarClock },
+}
+
+const fulfillmentIcon: Record<string, typeof UtensilsCrossed> = {
+  dine_in: UtensilsCrossed,
+  takeaway: ShoppingCart,
+  delivery: Truck,
+}
+
+const PAYMENT_METHODS = ['cash', 'card', 'upi', 'online', 'credit']
 
 export function OrdersPage() {
-  const [activeTab, setActiveTab] = useState<string>('all')
+  const [activeTab, setActiveTab] = useState<OrderStatus | 'all'>('all')
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedOrder, setSelectedOrder] = useState<string | null>(null)
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null)
+  const [chargingOrderId, setChargingOrderId] = useState<string | null>(null)
+  const [paymentMethod, setPaymentMethod] = useState('cash')
+  const [editingItems, setEditingItems] = useState<{ itemId: string; itemName: string; quantity: string }[] | null>(null)
+  const [pickerItemId, setPickerItemId] = useState('')
+  const queryClient = useQueryClient()
 
-  const filteredOrders = orders.filter((order) => {
-    const matchesTab = activeTab === 'all' || order.status === activeTab
-    const matchesSearch =
-      !searchQuery ||
-      order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.table.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.server.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesTab && matchesSearch
+  const { data, isLoading } = useQuery({
+    queryKey: ['orders', activeTab],
+    queryFn: () => getOrders({ page: 1, limit: 50, status: activeTab === 'all' ? undefined : activeTab }),
   })
 
-  const selectedOrderData = selectedOrder
-    ? orders.find((o) => o.id === selectedOrder)
-    : null
+  const { data: itemsData } = useQuery({
+    queryKey: ['items-order-picker'],
+    queryFn: () => getItems({ limit: 200 }),
+  })
 
-  const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0)
-  const completedCount = orders.filter((o) => o.status === 'Completed').length
-  const inProgressCount = orders.filter((o) => o.status === 'In Progress').length
+  const orders: Order[] = data?.data || []
+
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['orders'] })
+
+  const confirmMutation = useMutation({ mutationFn: confirmOrder, onSuccess: invalidate })
+  const sendToKitchenMutation = useMutation({ mutationFn: sendOrderToKitchen, onSuccess: invalidate })
+  const cancelMutation = useMutation({
+    mutationFn: cancelOrder,
+    onSuccess: () => { invalidate(); setSelectedOrderId(null) },
+  })
+  const chargeMutation = useMutation({
+    mutationFn: ({ id, method }: { id: string; method: string }) => chargeOrder(id, method),
+    onSuccess: () => { invalidate(); setChargingOrderId(null); setSelectedOrderId(null) },
+  })
+  const updateItemsMutation = useMutation({
+    mutationFn: ({ id, items }: { id: string; items: Array<{ itemId: string; quantity: number }> }) => updateOrderItems(id, items),
+    onSuccess: () => { invalidate(); setEditingItems(null) },
+  })
+
+  const startEditingItems = (order: Order) => {
+    setEditingItems(order.items.map((i) => ({ itemId: i.itemId, itemName: i.itemName, quantity: String(i.quantity) })))
+  }
+
+  const addPickerItem = () => {
+    const item = (itemsData?.items || []).find((i: any) => i.id === pickerItemId)
+    if (!item || !editingItems) return
+    if (editingItems.some((i) => i.itemId === item.id)) return
+    setEditingItems([...editingItems, { itemId: item.id, itemName: item.name, quantity: '1' }])
+    setPickerItemId('')
+  }
+
+  const filteredOrders = orders.filter((order) => {
+    if (!searchQuery) return true
+    const q = searchQuery.toLowerCase()
+    return (
+      order.orderNumber.toLowerCase().includes(q) ||
+      (order.customerName || '').toLowerCase().includes(q)
+    )
+  })
+
+  const selectedOrder = selectedOrderId ? orders.find((o) => o.id === selectedOrderId) : null
+
+  const totalRevenue = orders.filter((o) => o.status === 'billed').reduce((sum, o) => sum + Number(o.grandTotal), 0)
+  const confirmedCount = orders.filter((o) => o.status === 'confirmed').length
+  const billedCount = orders.filter((o) => o.status === 'billed').length
 
   return (
     <div className="space-y-6">
-      {/* ─── Page Header ─── */}
+      {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Orders</h1>
-          <p className="text-sm text-gray-500 mt-1">Track and manage all incoming orders.</p>
+          <p className="text-sm text-gray-500 mt-1">Regular, party, and scheduled orders — from placement to bill.</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Link
-            to="/pos"
-            className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-primary-dark hover:shadow-md hover:-translate-y-0.5"
-          >
-            <Plus size={16} />
-            New Order
-          </Link>
-        </div>
+        <Link
+          to="/pos"
+          className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-primary-dark hover:shadow-md hover:-translate-y-0.5"
+        >
+          <Plus size={16} />
+          New Order
+        </Link>
       </div>
 
-      {/* ─── KPI Cards ─── */}
+      {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          {
-            label: 'Total Orders',
-            value: orders.length,
-            change: '+12% vs yesterday',
-            trend: 'up' as const,
-            icon: ShoppingCart,
-            iconBg: 'bg-blue-500',
-            bg: 'bg-blue-50',
-          },
-          {
-            label: 'In Progress',
-            value: inProgressCount,
-            change: `${((inProgressCount / orders.length) * 100).toFixed(0)}% of total`,
-            trend: 'neutral' as const,
-            icon: Clock,
-            iconBg: 'bg-amber-500',
-            bg: 'bg-amber-50',
-          },
-          {
-            label: 'Completed',
-            value: completedCount,
-            change: `${((completedCount / orders.length) * 100).toFixed(0)}% completion rate`,
-            trend: 'up' as const,
-            icon: CheckCircle2,
-            iconBg: 'bg-emerald-500',
-            bg: 'bg-emerald-50',
-          },
-          {
-            label: 'Total Revenue',
-            value: `₹${totalRevenue.toFixed(2)}`,
-            change: `Avg ₹${(totalRevenue / orders.length).toFixed(2)} per order`,
-            trend: 'up' as const,
-            icon: IndianRupee,
-            iconBg: 'bg-purple-500',
-            bg: 'bg-purple-50',
-          },
+          { label: 'Total Orders', value: orders.length, icon: ShoppingCart, iconBg: 'bg-blue-500' },
+          { label: 'Awaiting Kitchen/Bill', value: confirmedCount, icon: Clock, iconBg: 'bg-amber-500' },
+          { label: 'Billed', value: billedCount, icon: CheckCircle2, iconBg: 'bg-emerald-500' },
+          { label: 'Revenue (billed)', value: `₹${totalRevenue.toFixed(2)}`, icon: IndianRupee, iconBg: 'bg-purple-500' },
         ].map((stat) => (
-          <div
-            key={stat.label}
-            className="rounded-xl border border-gray-200 bg-white p-5 transition-all hover:shadow-sm hover:border-gray-300"
-          >
+          <div key={stat.label} className="rounded-xl border border-gray-200 bg-white p-5">
             <div className="flex items-center justify-between mb-4">
               <span className="text-sm font-medium text-gray-500">{stat.label}</span>
               <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${stat.iconBg} text-white`}>
                 <stat.icon size={20} />
               </div>
             </div>
-            <div className="flex items-end justify-between">
-              <div>
-                <p className="text-2xl font-bold text-gray-900">
-                  {typeof stat.value === 'number' ? stat.value : stat.value}
-                </p>
-                <div className="flex items-center gap-1 mt-1">
-                  {stat.trend === 'up' && <ArrowUpRight size={14} className="text-emerald-500" />}
-                  <span className={`text-xs font-medium ${stat.trend === 'up' ? 'text-emerald-600' : 'text-gray-500'}`}>
-                    {stat.change}
-                  </span>
-                </div>
-              </div>
-            </div>
+            <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
           </div>
         ))}
       </div>
 
-      {/* ─── Filters & Search Bar ─── */}
+      {/* Filters & Search */}
       <div className="rounded-xl border border-gray-200 bg-white">
-        {/* Status Tabs */}
         <div className="flex items-center gap-1 px-5 pt-4 pb-3 border-b border-gray-100 overflow-x-auto">
           {STATUS_TABS.map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
-                activeTab === tab.key
-                  ? 'bg-primary text-white shadow-sm'
-                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                activeTab === tab.key ? 'bg-primary text-white shadow-sm' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
               }`}
             >
               {tab.label}
-              <span
-                className={`inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-semibold ${
-                  activeTab === tab.key
-                    ? 'bg-white/20 text-white'
-                    : 'bg-gray-100 text-gray-500'
-                }`}
-              >
-                {tab.count}
-              </span>
             </button>
           ))}
         </div>
-
-        {/* Search Row */}
         <div className="flex items-center gap-3 px-5 py-3">
           <div className="relative flex-1 max-w-sm">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              placeholder="Search orders, tables, servers..."
+              placeholder="Search order #, customer..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-9 pl-9 pr-3 rounded-lg border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder:text-gray-400 outline-none transition-all focus:border-primary/40 focus:bg-white focus:ring-3 focus:ring-primary/10"
+              className="w-full h-9 pl-9 pr-3 rounded-lg border border-gray-200 bg-gray-50 text-sm outline-none focus:border-primary/40 focus:bg-white focus:ring-3 focus:ring-primary/10"
             />
           </div>
-          <button className="inline-flex items-center gap-2 h-9 px-4 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 transition-all hover:bg-gray-50 hover:border-gray-300">
-            <ChevronDown size={15} />
-            More Filters
-          </button>
         </div>
       </div>
 
-      {/* ─── Orders Table ─── */}
+      {/* Orders Table */}
       <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
-        {filteredOrders.length === 0 ? (
+        {isLoading ? (
+          <div className="py-16 text-center text-sm text-gray-400">Loading orders...</div>
+        ) : filteredOrders.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 px-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 mb-4">
               <ShoppingCart size={28} className="text-gray-400" />
             </div>
             <h3 className="text-base font-semibold text-gray-900 mb-1">No orders found</h3>
-            <p className="text-sm text-gray-500 mb-6">
-              {searchQuery ? 'Try a different search term.' : 'No orders match the selected filter.'}
-            </p>
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="text-sm font-medium text-primary hover:text-primary-dark transition-colors"
-              >
-                Clear search
-              </button>
-            )}
+            <p className="text-sm text-gray-500">No orders match the selected filter.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -244,71 +205,104 @@ export function OrdersPage() {
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50/50">
                   <th className="text-left py-3.5 px-5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Order #</th>
-                  <th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Table</th>
-                  <th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Server</th>
+                  <th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
+                  <th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Fulfillment</th>
+                  <th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Scheduled</th>
                   <th className="text-center py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Items</th>
                   <th className="text-right py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
                   <th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Payment</th>
-                  <th className="text-left py-3.5 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Time</th>
-                  <th className="text-right py-3.5 px-5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Action</th>
+                  <th className="text-right py-3.5 px-5 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredOrders.map((order) => {
-                  const config = statusConfig[order.status]
-                  const StatusIcon = config.icon
+                  const sConfig = statusConfig[order.status]
+                  const tConfig = typeConfig[order.orderType]
+                  const StatusIcon = sConfig.icon
+                  const TypeIcon = tConfig.icon
+                  const FulfillIcon = fulfillmentIcon[order.fulfillmentMethod] || UtensilsCrossed
                   return (
                     <tr
                       key={order.id}
-                      className={`border-b border-gray-50 transition-all hover:bg-gray-50/80 cursor-pointer ${
-                        selectedOrder === order.id ? 'bg-primary/5' : ''
-                      }`}
-                      onClick={() => setSelectedOrder(selectedOrder === order.id ? null : order.id)}
+                      className={`border-b border-gray-50 transition-all hover:bg-gray-50/80 cursor-pointer ${selectedOrderId === order.id ? 'bg-primary/5' : ''}`}
+                      onClick={() => { setSelectedOrderId(selectedOrderId === order.id ? null : order.id); setEditingItems(null) }}
                     >
                       <td className="py-3.5 px-5">
-                        <span className="font-semibold text-gray-900">{order.id}</span>
+                        <span className="font-semibold text-gray-900">{order.orderNumber}</span>
+                        {order.customerName && <p className="text-xs text-gray-400">{order.customerName}</p>}
                       </td>
-                      <td className="py-3.5 px-4 text-gray-700">{order.table}</td>
                       <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-2">
-                          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gray-200 text-[10px] font-bold text-gray-600 uppercase">
-                            {order.server.charAt(0)}
-                          </div>
-                          <span className="text-gray-700">{order.server}</span>
-                        </div>
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${tConfig.bg} ${tConfig.text}`}>
+                          <TypeIcon size={12} />
+                          {tConfig.label}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <span className="inline-flex items-center gap-1.5 text-gray-600 text-xs">
+                          <FulfillIcon size={13} />
+                          {order.fulfillmentMethod.replace('_', ' ')}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4 text-xs text-gray-500">
+                        {order.scheduledFor ? new Date(order.scheduledFor).toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—'}
                       </td>
                       <td className="py-3.5 px-4 text-center">
                         <span className="inline-flex items-center justify-center min-w-[28px] h-6 rounded-full bg-gray-100 text-xs font-semibold text-gray-600">
-                          {order.items}
+                          {order.items.length}
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 text-right font-semibold text-gray-900">
-                        ₹{order.total.toFixed(2)}
-                      </td>
+                      <td className="py-3.5 px-4 text-right font-semibold text-gray-900">₹{Number(order.grandTotal).toFixed(2)}</td>
                       <td className="py-3.5 px-4">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
-                          <StatusIcon size={12} />
-                          {order.status}
-                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${sConfig.bg} ${sConfig.text}`}>
+                            <StatusIcon size={12} />
+                            {sConfig.label}
+                          </span>
+                          {!!order.unavailableItems?.length && (
+                            <span title={order.unavailableItems.map((i) => i.itemName).join(', ') + ' unavailable'} className="flex items-center justify-center h-5 w-5 rounded-full bg-red-100 text-red-600">
+                              <AlertTriangle size={11} />
+                            </span>
+                          )}
+                        </div>
                       </td>
-                      <td className="py-3.5 px-4">
-                        <span className="text-gray-600">{order.payment}</span>
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <span className="text-gray-400 text-xs">{order.time}</span>
-                      </td>
-                      <td className="py-3.5 px-5 text-right">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setSelectedOrder(selectedOrder === order.id ? null : order.id)
-                          }}
-                          className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-gray-200 text-xs font-medium text-gray-600 transition-all hover:bg-gray-100 hover:border-gray-300"
-                        >
-                          <Eye size={14} />
-                          View
-                        </button>
+                      <td className="py-3.5 px-5 text-right" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-end gap-1.5">
+                          {order.status === 'pending_confirmation' && (
+                            <button
+                              onClick={() => confirmMutation.mutate(order.id)}
+                              disabled={confirmMutation.isPending}
+                              className="inline-flex items-center gap-1 h-7 px-2.5 rounded-md border border-gray-200 text-xs font-medium text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200"
+                            >
+                              <CheckCircle2 size={12} />
+                              Confirm
+                            </button>
+                          )}
+                          {order.status === 'confirmed' && !order.kotSent && (
+                            <button
+                              onClick={() => sendToKitchenMutation.mutate(order.id)}
+                              disabled={sendToKitchenMutation.isPending}
+                              className="inline-flex items-center gap-1 h-7 px-2.5 rounded-md border border-gray-200 text-xs font-medium text-gray-600 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200"
+                            >
+                              <Send size={12} />
+                              Send to Kitchen
+                            </button>
+                          )}
+                          {order.status === 'confirmed' && (
+                            <button
+                              onClick={() => setChargingOrderId(order.id)}
+                              className="inline-flex items-center gap-1 h-7 px-2.5 rounded-md bg-primary text-white text-xs font-medium hover:bg-primary-dark"
+                            >
+                              <CreditCard size={12} />
+                              Charge
+                            </button>
+                          )}
+                          <button
+                            onClick={() => { setSelectedOrderId(selectedOrderId === order.id ? null : order.id); setEditingItems(null) }}
+                            className="inline-flex items-center gap-1 h-7 px-2.5 rounded-md border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-100"
+                          >
+                            <Eye size={12} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   )
@@ -317,108 +311,177 @@ export function OrdersPage() {
             </table>
           </div>
         )}
-
-        {/* Footer stats */}
-        <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100 bg-gray-50/50">
-          <p className="text-xs text-gray-500">
-            Showing <span className="font-medium text-gray-700">{filteredOrders.length}</span> of{' '}
-            <span className="font-medium text-gray-700">{orders.length}</span> orders
-          </p>
-          <div className="flex items-center gap-4">
-            <span className="text-xs text-gray-500">
-              Revenue: <span className="font-semibold text-gray-700">₹{totalRevenue.toFixed(2)}</span>
-            </span>
-          </div>
-        </div>
       </div>
 
-      {/* ─── Order Details Drawer ─── */}
-      {selectedOrderData && (() => {
-        const order = selectedOrderData
-        const config = statusConfig[order.status]
-        const StatusIcon = config.icon
-
-        const handleClose = () => setSelectedOrder(null)
-        const handleKeyDown = (e: React.KeyboardEvent) => {
-          if (e.key === 'Escape') handleClose()
-        }
+      {/* Order Details Drawer */}
+      {selectedOrder && (() => {
+        const order = selectedOrder
+        const sConfig = statusConfig[order.status]
+        const StatusIcon = sConfig.icon
+        const canCancel = order.status === 'pending_confirmation' || order.status === 'confirmed'
 
         return (
           <>
-            {/* Backdrop */}
-            <div
-              className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm transition-opacity"
-              onClick={handleClose}
-            />
-            {/* Drawer */}
-            <div
-              role="dialog"
-              aria-modal="true"
-              aria-label={`Order details for ${order.id}`}
-              tabIndex={-1}
-              onKeyDown={handleKeyDown}
-              className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-white shadow-2xl border-l border-gray-200 flex flex-col transition-transform duration-300 ease-out"
-            >
-              {/* Drawer Header */}
+            <div className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm" onClick={() => setSelectedOrderId(null)} />
+            <div className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-white shadow-2xl border-l border-gray-200 flex flex-col">
               <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
                 <div>
-                  <h2 className="text-lg font-bold text-gray-900" id="order-drawer-title">{order.id}</h2>
-                  <p className="text-sm text-gray-500">{order.table} · {order.server}</p>
+                  <h2 className="text-lg font-bold text-gray-900">{order.orderNumber}</h2>
+                  <p className="text-sm text-gray-500">{order.customerName || 'Walk-in'}</p>
                 </div>
-                <button
-                  onClick={handleClose}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"
-                  aria-label="Close order details"
-                >
+                <button onClick={() => { setSelectedOrderId(null); setEditingItems(null) }} className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100">
                   <XCircle size={18} />
                 </button>
               </div>
 
-              {/* Drawer Content */}
               <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
-                {/* Status */}
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-500">Status</span>
-                  <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium ${config.bg} ${config.text}`}>
+                  <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium ${sConfig.bg} ${sConfig.text}`}>
                     <StatusIcon size={14} />
-                    {order.status}
+                    {sConfig.label}
                   </span>
                 </div>
 
-                {/* Order Details */}
+                {!!order.unavailableItems?.length && (
+                  <div className="rounded-lg bg-red-50 border border-red-200 p-3 space-y-1">
+                    <p className="text-xs font-semibold text-red-700 flex items-center gap-1.5">
+                      <AlertTriangle size={13} />
+                      Kitchen flagged as unavailable
+                    </p>
+                    {order.unavailableItems.map((u, i) => (
+                      <p key={i} className="text-xs text-red-600">
+                        {u.itemName}{u.note ? ` — ${u.note}` : ''}
+                      </p>
+                    ))}
+                  </div>
+                )}
+
                 <div className="rounded-xl border border-gray-200 divide-y divide-gray-100">
                   {[
-                    { label: 'Order ID', value: order.id },
-                    { label: 'Table', value: order.table },
-                    { label: 'Server', value: order.server },
-                    { label: 'Items', value: `${order.items} ${order.items === 1 ? 'item' : 'items'}` },
-                    { label: 'Total', value: `₹${order.total.toFixed(2)}` },
-                    { label: 'Payment', value: order.payment },
-                    { label: 'Time', value: order.time },
+                    { label: 'Type', value: typeConfig[order.orderType].label },
+                    { label: 'Fulfillment', value: order.fulfillmentMethod.replace('_', ' ') },
+                    ...(order.scheduledFor ? [{ label: 'Scheduled for', value: new Date(order.scheduledFor).toLocaleString('en-IN') }] : []),
+                    ...(order.partySize ? [{ label: 'Party size', value: String(order.partySize) }] : []),
+                    { label: 'Items', value: `${order.items.length} line(s)` },
+                    { label: 'Subtotal', value: `₹${Number(order.subtotal).toFixed(2)}` },
+                    ...(order.discountPercent ? [{ label: 'Discount', value: `${order.discountPercent}%` }] : []),
+                    { label: 'Grand Total', value: `₹${Number(order.grandTotal).toFixed(2)}` },
                   ].map((detail) => (
                     <div key={detail.label} className="flex items-center justify-between px-4 py-3">
                       <span className="text-sm text-gray-500">{detail.label}</span>
-                      <span className="text-sm font-medium text-gray-900">{detail.value}</span>
+                      <span className="text-sm font-medium text-gray-900 capitalize">{detail.value}</span>
                     </div>
                   ))}
                 </div>
 
-                {/* Action Buttons */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Line items</p>
+                    {(order.status === 'pending_confirmation' || order.status === 'confirmed') && editingItems === null && (
+                      <button onClick={() => startEditingItems(order)} className="flex items-center gap-1 text-xs text-primary hover:underline">
+                        <Pencil size={11} />
+                        Edit
+                      </button>
+                    )}
+                  </div>
+
+                  {editingItems === null ? (
+                    <div className="space-y-1.5">
+                      {order.items.map((item) => (
+                        <div key={item.id} className="flex justify-between text-sm">
+                          <span className="text-gray-700">{item.itemName} × {Number(item.quantity)}</span>
+                          <span className="text-gray-900 font-medium">₹{Number(item.totalAmount).toFixed(2)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {editingItems.map((line, i) => (
+                        <div key={line.itemId} className="flex items-center gap-2">
+                          <span className="flex-1 text-sm text-gray-700 truncate">{line.itemName}</span>
+                          <input
+                            type="number" min="0" step="0.01" value={line.quantity}
+                            onChange={(e) => setEditingItems((prev) => prev!.map((l, j) => (j === i ? { ...l, quantity: e.target.value } : l)))}
+                            className="w-16 h-8 rounded-lg border border-gray-300 px-2 text-xs outline-none focus:border-primary/40"
+                          />
+                          <button onClick={() => setEditingItems((prev) => prev!.filter((_, j) => j !== i))} className="text-gray-400 hover:text-red-500">
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      ))}
+                      <div className="flex items-center gap-2 pt-1">
+                        <select
+                          value={pickerItemId} onChange={(e) => setPickerItemId(e.target.value)}
+                          className="flex-1 h-8 rounded-lg border border-gray-300 px-2 text-xs outline-none focus:border-primary/40"
+                        >
+                          <option value="">Add item...</option>
+                          {(itemsData?.items || []).map((item: any) => (
+                            <option key={item.id} value={item.id}>{item.name}</option>
+                          ))}
+                        </select>
+                        <button onClick={addPickerItem} className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50">
+                          <Plus size={14} />
+                        </button>
+                      </div>
+                      <div className="flex items-center gap-2 pt-1">
+                        <button
+                          onClick={() => setEditingItems(null)}
+                          className="flex-1 h-8 rounded-lg border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={() => {
+                            const items = editingItems
+                              .filter((l) => Number(l.quantity) > 0)
+                              .map((l) => ({ itemId: l.itemId, quantity: Number(l.quantity) }))
+                            if (items.length === 0) return
+                            updateItemsMutation.mutate({ id: order.id, items })
+                          }}
+                          disabled={updateItemsMutation.isPending}
+                          className="flex-1 h-8 rounded-lg bg-primary text-white text-xs font-medium hover:bg-primary-dark disabled:opacity-50"
+                        >
+                          {updateItemsMutation.isPending ? 'Saving...' : 'Save changes'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <div className="space-y-3">
-                  {order.status === 'New' && (
-                    <button className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-medium text-white transition-all hover:bg-primary-dark hover:shadow-md">
-                      <Clock size={16} />
-                      Mark In Progress
-                    </button>
-                  )}
-                  {order.status === 'In Progress' && (
-                    <button className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-5 py-3 text-sm font-medium text-white transition-all hover:bg-emerald-600 hover:shadow-md">
+                  {order.status === 'pending_confirmation' && (
+                    <button
+                      onClick={() => confirmMutation.mutate(order.id)}
+                      className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-medium text-white hover:bg-primary-dark"
+                    >
                       <CheckCircle2 size={16} />
-                      Mark Completed
+                      Confirm Order
                     </button>
                   )}
-                  {order.status !== 'Cancelled' && order.status !== 'Completed' && (
-                    <button className="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 px-5 py-3 text-sm font-medium text-red-600 transition-all hover:bg-red-50">
+                  {order.status === 'confirmed' && !order.kotSent && (
+                    <button
+                      onClick={() => sendToKitchenMutation.mutate(order.id)}
+                      className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-blue-500 px-5 py-3 text-sm font-medium text-white hover:bg-blue-600"
+                    >
+                      <Send size={16} />
+                      Send to Kitchen
+                    </button>
+                  )}
+                  {order.status === 'confirmed' && (
+                    <button
+                      onClick={() => setChargingOrderId(order.id)}
+                      className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-5 py-3 text-sm font-medium text-white hover:bg-emerald-600"
+                    >
+                      <CreditCard size={16} />
+                      Charge
+                    </button>
+                  )}
+                  {canCancel && (
+                    <button
+                      onClick={() => window.confirm(`Cancel order ${order.orderNumber}?`) && cancelMutation.mutate(order.id)}
+                      className="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-red-200 px-5 py-3 text-sm font-medium text-red-600 hover:bg-red-50"
+                    >
                       <XCircle size={16} />
                       Cancel Order
                     </button>
@@ -429,6 +492,35 @@ export function OrdersPage() {
           </>
         )
       })()}
+
+      {/* Charge payment-method picker */}
+      {chargingOrderId && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/20 backdrop-blur-sm" onClick={() => setChargingOrderId(null)}>
+          <div className="relative w-full max-w-sm rounded-2xl border border-gray-200 bg-white shadow-xl p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-base font-semibold text-gray-900">Select payment method</h3>
+            <div className="grid grid-cols-3 gap-2">
+              {PAYMENT_METHODS.map((m) => (
+                <button
+                  key={m}
+                  onClick={() => setPaymentMethod(m)}
+                  className={`h-10 rounded-lg border-2 text-xs font-medium capitalize transition-all ${
+                    paymentMethod === m ? 'border-primary bg-primary/5 text-primary' : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                  }`}
+                >
+                  {m}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => chargeMutation.mutate({ id: chargingOrderId, method: paymentMethod })}
+              disabled={chargeMutation.isPending}
+              className="w-full h-10 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary-dark disabled:opacity-50"
+            >
+              {chargeMutation.isPending ? 'Charging...' : 'Confirm Charge'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

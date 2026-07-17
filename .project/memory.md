@@ -9,6 +9,26 @@ Newest entries at the top.
 
 ---
 
+## 2026-07-16 — Order item editing + kitchen availability flag + cancel-sync
+
+- `OrdersService.updateItems()` (`PATCH /orders/:id/items`) lets staff swap/cancel items any time before charge (pending_confirmation or confirmed), even after the KOT was already sent — in that case it fires a labeled supplementary KOT rather than editing the original ticket. Reuses `PriceLevelsService.resolveLineItems()`.
+- New advisory-only flag: `KotItem.isUnavailable`/`unavailableNote`, settable via `PATCH /kots/:kotId/items/:itemId/availability`. Never auto-changes the order — just surfaces on `Order.unavailableItems` (computed in `OrdersService`) so staff see it before charging.
+- **Gotcha:** `KotService.findByOrderId()` didn't eager-load `items` — fine for its original callers (only touched `.id`/`.status`) but silently NPE'd the moment something needed `.items`. Fixed at the source. If you add a new consumer of an existing "find" method, check what relations it actually loads before assuming they're there.
+- `SalesService.cancel()` now syncs the linked Order's status to cancelled (was a real gap — Order stayed "billed" forever after its Invoice got cancelled). Solved the SalesModule↔OrdersModule circular-import risk by injecting `Repository<Order>` directly into `SalesService` (register the entity via `TypeOrmModule.forFeature`, don't import the whole module) rather than depending on `OrdersService`.
+- See `.project/tasks/2026-07-16-order-item-editing-kitchen-availability.md`.
+
+---
+
+## 2026-07-16 — Order stage added in front of Invoice (Regular/Party/Scheduled)
+
+- New `orders` module: an `Order` now sits before `Invoice` in the sales flow. Regular (walk-in) orders go through it transparently (cashier still sees one Charge button); Party/Scheduled orders are placed+confirmed ahead of time, hold a table via an auto-created `Reservation`, and wait for an explicit "Send to Kitchen" action before the KOT fires. See `.project/tasks/2026-07-16-order-stage-regular-party-scheduled.md`.
+- `SalesService.create()`'s price/GST resolution is now shared via `PriceLevelsService.resolveLineItems()` — reuse this for any future thing that needs to price a cart server-side (don't re-copy the old inline block).
+- `Invoice.orderId` and `Order.invoiceId` cross-reference each other once charged; `Kot.orderId` now points at `Order.id` (it was already a loose unvalidated uuid, no schema change needed there).
+- **Known gap, not fixed:** `ReservationRepository.findUpcomingForTable`'s conflict check computes a `deadline` but never applies it — it's not real interval-overlap logic, just "next upcoming reservation regardless of how far out." Pre-existing, surfaced during this feature's research, not touched. Worth fixing if double-booking of tables for party orders ever actually happens.
+- **Known scope limit, not a bug:** no cron/time-based auto-firing of KOTs for Party/Scheduled orders — always a manual "Send to Kitchen" click. Flagged as a clean v2 if it turns out staff forget to do it manually.
+
+---
+
 ## 2026-07-15 — Credit Note feature (post-serve bill correction)
 
 - New `SalesService.createCreditNote()` — the answer to "customer wants to change a meal after billing": reverses specific line items' revenue/tax (not the whole invoice), optional per-line stock restore, optional same-flow replacement item charge. Reuses the Journal/Voucher engine built earlier today (posts a reversing entry crediting whichever account the original sale debited). See `.project/tasks/2026-07-15-credit-note-feature.md`.

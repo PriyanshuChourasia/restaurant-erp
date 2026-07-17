@@ -342,7 +342,9 @@ export function LandingPage() {
       setError(null)
       try {
         await auth.login({ email: email.trim(), password })
-        await navigate({ to: '/dashboard' })
+        const stored = localStorage.getItem('authUser')
+        const userRole = stored ? JSON.parse(stored)?.role : ''
+        await navigate({ to: userRole === 'developer' ? '/developer' : '/dashboard' })
       } catch (err: any) {
         const message = err?.response?.data?.message || err?.message || 'Invalid email or password'
         setError(message)
@@ -602,6 +604,13 @@ export function LandingPage() {
                       </code>
                     </div>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => { setEmail('developer@restaurant.com'); setPassword('Developer@123456') }}
+                    className="mt-3 w-full rounded-lg border border-violet-200 bg-violet-50 px-3 py-2 text-xs font-medium text-violet-700 hover:bg-violet-100 transition-colors"
+                  >
+                    Use Developer Credentials
+                  </button>
                 </div>
               )}
             </div>

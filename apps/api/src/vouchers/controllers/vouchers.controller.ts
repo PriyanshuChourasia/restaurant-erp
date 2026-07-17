@@ -3,7 +3,7 @@ import { VouchersService } from '../services/vouchers.service';
 import { CreatePaymentVoucherDto } from '../dto/create-payment-voucher.dto';
 import { CreateReceiptVoucherDto } from '../dto/create-receipt-voucher.dto';
 import { CreateJournalVoucherDto } from '../dto/create-journal-voucher.dto';
-import { VoucherType, VoucherStatus } from '../entities/voucher.entity';
+import { VoucherStatus } from '../entities/voucher.entity';
 import { Permissions } from '../../shared/decorators/permissions.decorator';
 
 @Controller('vouchers')
@@ -15,7 +15,7 @@ export class VouchersController {
   findAll(
     @Query('page') page?: number,
     @Query('limit') limit?: number,
-    @Query('voucherType') voucherType?: VoucherType,
+    @Query('voucherType') voucherType?: string,
     @Query('status') status?: VoucherStatus,
   ) {
     return this.service.findAll(page, limit, voucherType, status);

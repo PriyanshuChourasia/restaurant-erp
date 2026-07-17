@@ -17,6 +17,28 @@ import { Item } from '../../items/entities/item.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ItemPriceLevel } from '../entities/item-price-level.entity';
+import { CustomersService } from '../../customers/services/customers.service';
+
+export interface ResolvedLineItem {
+  itemId: string;
+  itemName: string;
+  hsnCode: string;
+  quantity: number;
+  unitPrice: number;
+  gstRate: number;
+  taxableValue: number;
+  cgstAmount: number;
+  sgstAmount: number;
+  totalAmount: number;
+}
+
+export interface ResolvedLines {
+  itemEntities: ResolvedLineItem[];
+  subtotal: number;
+  cgstTotal: number;
+  sgstTotal: number;
+  taxTotal: number;
+}
 
 @Injectable()
 export class PriceLevelsService {
@@ -27,6 +49,7 @@ export class PriceLevelsService {
     private readonly itemRepo: Repository<Item>,
     @InjectDataSource()
     private readonly dataSource: DataSource,
+    private readonly customersService: CustomersService,
   ) {}
 
   // ───── CRUD ─────
@@ -224,6 +247,72 @@ export class PriceLevelsService {
 
   // ───── Pricing ─────
 
+  /**
+   * Resolves a customer's (or the default) price level and computes per-item price + GST
+   * breakdown for a cart. Shared by SalesService.create() and OrdersService.create() so
+   * both invoices and orders price identically — callers apply their own discount/rounding
+   * on top since that varies (flat rupee discount vs. a negotiated percent, etc).
+   */
+  async resolveLineItems(
+    items: Array<{ itemId: string; quantity: number }>,
+    customerId?: string,
+  ): Promise<ResolvedLines> {
+    let resolvedPriceLevelId: string | null = null;
+
+    if (customerId) {
+      const customer = await this.customersService.findOne(customerId);
+      resolvedPriceLevelId = customer.priceLevelId;
+    }
+
+    if (!resolvedPriceLevelId) {
+      const activeLevels = await this.findAllActive();
+      const defaultLevel = activeLevels.find((pl) => pl.isDefault);
+      resolvedPriceLevelId = defaultLevel?.id ?? null;
+    }
+
+    const itemEntities: ResolvedLineItem[] = [];
+
+    for (const cartItem of items) {
+      const item = await this.itemRepo.findOne({ where: { id: cartItem.itemId } });
+      if (!item) {
+        throw new NotFoundException(`Item with ID "${cartItem.itemId}" not found`);
+      }
+
+      let unitPrice = item.price;
+      if (resolvedPriceLevelId) {
+        try {
+          unitPrice = await this.getEffectivePrice(cartItem.itemId, resolvedPriceLevelId);
+        } catch {
+          unitPrice = item.price;
+        }
+      }
+
+      const taxableValue = cartItem.quantity * unitPrice;
+      const gstRateHalf = item.gstRate / 2;
+      const cgstAmount = (taxableValue * gstRateHalf) / 100;
+      const sgstAmount = (taxableValue * gstRateHalf) / 100;
+
+      itemEntities.push({
+        itemId: item.id,
+        itemName: item.name,
+        hsnCode: item.hsnCode,
+        quantity: cartItem.quantity,
+        unitPrice,
+        gstRate: item.gstRate,
+        taxableValue,
+        cgstAmount,
+        sgstAmount,
+        totalAmount: taxableValue + cgstAmount + sgstAmount,
+      });
+    }
+
+    const subtotal = itemEntities.reduce((s, i) => s + i.taxableValue, 0);
+    const cgstTotal = itemEntities.reduce((s, i) => s + i.cgstAmount, 0);
+    const sgstTotal = itemEntities.reduce((s, i) => s + i.sgstAmount, 0);
+
+    return { itemEntities, subtotal, cgstTotal, sgstTotal, taxTotal: cgstTotal + sgstTotal };
+  }
+
   async getEffectivePrice(itemId: string, priceLevelId: string): Promise<number> {
     // Verify item exists
     const item = await this.itemRepo.findOne({ where: { id: itemId } });
@@ -265,7 +354,7 @@ export class PriceLevelsService {
         sku: item.sku,
         hsnCode: item.hsnCode,
         gstRate: item.gstRate,
-        unit: item.unit?.code || item.unitId,
+        unit: item.unit?.symbol || item.unitId,
         categoryId: item.categoryId,
         categoryName: item.category?.name ?? null,
         basePrice: item.price,

@@ -75,8 +75,8 @@ export function ItemListPage() {
           categoryName: item.categoryName,
           isVeg: item.isVeg,
           isActive: item.isActive,
-          unitCode: item.unit?.code || '',
-          unitName: item.unit?.name || item.unit?.code || '',
+          unitCode: item.unit?.symbol || '',
+          unitName: item.unit?.name || item.unit?.symbol || '',
         })),
     [items, gstFilter],
   )

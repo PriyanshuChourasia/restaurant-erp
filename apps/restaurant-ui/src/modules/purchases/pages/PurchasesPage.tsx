@@ -5,6 +5,7 @@ import { Search, ClipboardList, Plus, Eye, PackageCheck, Package } from 'lucide-
 import { apiClient } from '@/lib/axios-client'
 import { DataTable } from '@/components/ui/data-table'
 import { PurchaseDetailDialog } from '../dialogs/PurchaseDetailDialog'
+import { CreatePurchaseDialog } from '../dialogs/CreatePurchaseDialog'
 
 interface PurchaseOrder {
   id: string
@@ -37,6 +38,7 @@ export function PurchasesPage() {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
+  const [showCreate, setShowCreate] = useState(false)
   const [receiveTarget, setReceiveTarget] = useState<PurchaseOrder | null>(null)
   const [detailTarget, setDetailTarget] = useState<string | null>(null)
   const queryClient = useQueryClient()
@@ -157,7 +159,10 @@ export function PurchasesPage() {
               className="h-9 w-48 rounded-lg border border-gray-200 bg-white pl-9 pr-3 text-sm outline-none focus:border-primary/40 focus:ring-3 focus:ring-primary/10"
             />
           </div>
-          <button className="inline-flex items-center gap-2 h-9 px-4 rounded-lg bg-primary text-sm font-medium text-white transition-all hover:bg-primary/90">
+          <button
+            onClick={() => setShowCreate(true)}
+            className="inline-flex items-center gap-2 h-9 px-4 rounded-lg bg-primary text-sm font-medium text-white transition-all hover:bg-primary/90"
+          >
             <Plus size={15} />
             New Purchase
           </button>
@@ -188,6 +193,11 @@ export function PurchasesPage() {
         isLoading={isLoading}
         emptyMessage="No purchases yet"
       />
+
+      {/* New Purchase Dialog */}
+      {showCreate && (
+        <CreatePurchaseDialog onClose={() => setShowCreate(false)} />
+      )}
 
       {/* Receive Confirmation Dialog */}
       {detailTarget && (

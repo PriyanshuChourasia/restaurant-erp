@@ -31,6 +31,8 @@ import {
   Scale,
   HeartPulse,
   Star,
+  Archive,
+  Code2,
 } from 'lucide-react'
 import { Link, useLocation, useNavigate } from '@tanstack/react-router'
 import { useAuth } from '@/lib/auth-context'
@@ -65,6 +67,7 @@ const navSections = [
       { to: '/pos', label: 'POS Terminal', icon: Monitor },
       { to: '/orders', label: 'Orders', icon: ShoppingCart },
       { to: '/kot', label: 'KOT Board', icon: CookingPot },
+      { to: '/kot-terminal', label: 'KOT Terminal', icon: CookingPot },
     ],
   },
   {
@@ -79,7 +82,8 @@ const navSections = [
   {
     title: 'Inventory',
     links: [
-      { to: '/inventory', label: 'Stock', icon: Package },
+      { to: '/inventory', label: 'Stock Levels', icon: Package },
+      { to: '/stock-items', label: 'Stock Items', icon: Archive },
       { to: '/storage-units', label: 'Storage Units', icon: Warehouse },
       { to: '/purchases', label: 'Purchases', icon: ClipboardList },
       { to: '/inventory/stock-counts', label: 'Stock Counts', icon: Scale },
@@ -144,6 +148,8 @@ const navSections = [
   },
 ]
 
+const devLink = { to: '/developer', label: 'Developer Portal', icon: Code2 }
+
 export function AppSidebar() {
   const location = useLocation()
   const navigate = useNavigate()
@@ -176,8 +182,11 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="p-2">
-        {navSections.map((section) => (
+        {navSections.map((section, index) => (
           <SidebarGroup key={section.title}>
+            {index > 0 && (
+              <SidebarSeparator className="mx-0 mb-2 group-data-[collapsible=icon]:mb-1" />
+            )}
             <SidebarGroupLabel className="px-2 text-xs font-medium text-sidebar-foreground/50 uppercase tracking-wider">
               {section.title}
             </SidebarGroupLabel>
@@ -252,10 +261,24 @@ export function AppSidebar() {
 
       <SidebarFooter className="p-4">
         <SidebarMenu>
+          {user?.role === 'developer' && (
+            <SidebarMenuItem>
+              <SidebarMenuButton tooltip={devLink.label} render={<Link to={devLink.to} />}>
+                <devLink.icon size={18} />
+                <span>{devLink.label}</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
           <SidebarMenuItem>
             <SidebarMenuButton tooltip="POS Terminal" render={<Link to="/pos" />}>
               <Monitor size={18} />
               <span>POS Terminal</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton tooltip="KOT Terminal" render={<Link to="/kot-terminal" />}>
+              <CookingPot size={18} />
+              <span>KOT Terminal</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>

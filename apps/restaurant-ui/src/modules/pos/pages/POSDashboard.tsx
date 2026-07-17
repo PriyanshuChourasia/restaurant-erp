@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import {
   Plus, Search, Minus, ShoppingCart, Trash2, CreditCard, UtensilsCrossed,
-  IndianRupee, Hash, Users,
+  IndianRupee, Hash, Users, Send, CalendarClock,
 } from 'lucide-react'
 import { getItems } from '@/modules/items/api/items.api'
 import { getCategories } from '@/modules/category/api/category.api'
@@ -11,9 +11,16 @@ import { CustomerCombobox } from '@/modules/customers/components/CustomerCombobo
 import { SeatingPanel } from '@/modules/pos/components/SeatingPanel'
 import { ChargeModal } from '@/modules/pos/components/ChargeModal'
 import { ReceiptDialog } from '@/modules/pos/components/ReceiptDialog'
-import { createInvoice, createKot } from '../api/pos.api'
+import { createOrder, confirmOrder, chargeOrder } from '@/modules/orders/api/orders.api'
+import type { OrderType } from '@/modules/orders/types/order.types'
 import type { CustomerSearchResult } from '@/modules/customers/types/customer.types'
 import { FormattedQuantity } from '@/components/ui/FormattedQuantity'
+
+const ORDER_MODES: { value: OrderType; label: string; icon: typeof UtensilsCrossed }[] = [
+  { value: 'regular', label: 'Walk-in', icon: UtensilsCrossed },
+  { value: 'party', label: 'Party', icon: Users },
+  { value: 'scheduled', label: 'Scheduled', icon: CalendarClock },
+]
 
 interface CartItem {
   id: string
@@ -34,6 +41,11 @@ export function POSDashboard() {
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerSearchResult | null>(null)
   const [showChargeModal, setShowChargeModal] = useState(false)
   const [receiptInvoiceId, setReceiptInvoiceId] = useState<string | null>(null)
+  const [orderMode, setOrderMode] = useState<OrderType>('regular')
+  const [scheduledFor, setScheduledFor] = useState('')
+  const [partySize, setPartySize] = useState('')
+  const [discountPercent, setDiscountPercent] = useState('')
+  const [placedOrderNumber, setPlacedOrderNumber] = useState<string | null>(null)
 
   const { data: itemsData } = useQuery({
     queryKey: ['items-pos'],
@@ -108,39 +120,55 @@ export function POSDashboard() {
   const roundOff = Math.round((Math.round(grandTotal) - grandTotal) * 100) / 100
   const finalTotal = Math.round(grandTotal)
 
+  // Walk-in Charge: creates the Order, confirms it (which auto-fires the KOT for
+  // regular orders), then charges it into an Invoice — all in one Charge button click,
+  // same as before, just now going through the Order stage instead of a direct Invoice.
   const billMutation = useMutation({
     mutationFn: async (paymentMethod: string) => {
-      const invoice = await createInvoice({
+      const order = await createOrder({
+        orderType: 'regular',
         customerId: selectedCustomer?.id ?? undefined,
         tableIds: selectedTableIds.length > 0 ? selectedTableIds : undefined,
-        paymentMethod,
-        items: cart.map((i) => ({
-          itemId: i.itemId,
-          quantity: i.quantity,
-        })),
+        items: cart.map((i) => ({ itemId: i.itemId, quantity: i.quantity })),
       })
-
-      // Create KOT
-      if (cart.length > 0) {
-        await createKot({
-          orderId: invoice.id,
-          tableIds: selectedTableIds.length > 0 ? selectedTableIds : undefined,
-          station: 'main_kitchen',
-          items: cart.map((i) => ({
-            itemId: i.itemId,
-            itemName: i.name,
-            quantity: i.quantity,
-          })),
-        })
-      }
-
-      return invoice
+      await confirmOrder(order.id)
+      const result = await chargeOrder(order.id, paymentMethod)
+      return result.invoice
     },
     onSuccess: (invoice) => {
       setShowChargeModal(false)
       setReceiptInvoiceId(invoice.id)
       setCart([])
       setSelectedTableIds([])
+    },
+  })
+
+  // Party/Scheduled: places and confirms the order (kitchen ticket fires later via an
+  // explicit "Send to Kitchen" action on the Orders page) — nothing is charged yet.
+  const placeOrderMutation = useMutation({
+    mutationFn: async () => {
+      const order = await createOrder({
+        orderType: orderMode,
+        customerId: selectedCustomer?.id ?? undefined,
+        customerName: selectedCustomer?.name,
+        customerPhone: selectedCustomer?.phone,
+        tableIds: selectedTableIds.length > 0 ? selectedTableIds : undefined,
+        scheduledFor: scheduledFor ? new Date(scheduledFor).toISOString() : undefined,
+        partySize: partySize ? Number(partySize) : undefined,
+        discountPercent: discountPercent ? Number(discountPercent) : undefined,
+        items: cart.map((i) => ({ itemId: i.itemId, quantity: i.quantity })),
+      })
+      await confirmOrder(order.id)
+      return order
+    },
+    onSuccess: (order) => {
+      setPlacedOrderNumber(order.orderNumber)
+      setCart([])
+      setSelectedTableIds([])
+      setScheduledFor('')
+      setPartySize('')
+      setDiscountPercent('')
+      setTimeout(() => setPlacedOrderNumber(null), 6000)
     },
   })
 
@@ -215,7 +243,7 @@ export function POSDashboard() {
                   </p>
                 </div>
                 <p className="text-xs text-gray-400">
-                  GST {item.gstRate}%{item.unit?.code ? ` | ${item.unit.code}` : ''} | {item.hsnCode}
+                  GST {item.gstRate}%{item.unit?.symbol ? ` | ${item.unit.symbol}` : ''} | {item.hsnCode}
                 </p>
               </button>
             ))}
@@ -225,8 +253,67 @@ export function POSDashboard() {
 
       {/* Right - Cart */}
       <div className="flex w-96 flex-col border-l border-gray-200 bg-white">
-        {/* Cart Header - Customer + Seating + Payment */}
+        {/* Cart Header - Order type + Customer + Seating + Party/Scheduled details */}
         <div className="border-b border-gray-200 p-4 space-y-3">
+          {/* Order type */}
+          <div>
+            <label className="text-xs font-medium text-gray-500 mb-1 block">Order Type</label>
+            <div className="grid grid-cols-3 gap-1.5">
+              {ORDER_MODES.map(({ value, label, icon: Icon }) => (
+                <button
+                  key={value}
+                  onClick={() => setOrderMode(value)}
+                  className={`flex flex-col items-center gap-1 rounded-lg border-2 py-2 text-xs font-medium transition-all ${
+                    orderMode === value
+                      ? 'border-primary bg-primary/5 text-primary'
+                      : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                  }`}
+                >
+                  <Icon size={16} />
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Party/Scheduled details */}
+          {orderMode !== 'regular' && (
+            <div className="grid grid-cols-2 gap-2">
+              <div className="col-span-2">
+                <label className="text-xs font-medium text-gray-500 mb-1 block">
+                  <CalendarClock size={12} className="inline mr-1" />
+                  Scheduled For
+                </label>
+                <input
+                  type="datetime-local"
+                  value={scheduledFor}
+                  onChange={(e) => setScheduledFor(e.target.value)}
+                  className="w-full h-8 rounded-lg border border-gray-300 px-2 text-xs outline-none focus:border-primary/40"
+                />
+              </div>
+              {orderMode === 'party' && (
+                <>
+                  <div>
+                    <label className="text-xs font-medium text-gray-500 mb-1 block">Party Size</label>
+                    <input
+                      type="number" min="1" value={partySize}
+                      onChange={(e) => setPartySize(e.target.value)}
+                      className="w-full h-8 rounded-lg border border-gray-300 px-2 text-xs outline-none focus:border-primary/40"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-gray-500 mb-1 block">Discount %</label>
+                    <input
+                      type="number" min="0" max="100" value={discountPercent}
+                      onChange={(e) => setDiscountPercent(e.target.value)}
+                      className="w-full h-8 rounded-lg border border-gray-300 px-2 text-xs outline-none focus:border-primary/40"
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
           {/* Customer picker */}
           <div>
             <label className="text-xs font-medium text-gray-500 mb-1 block">
@@ -327,14 +414,32 @@ export function POSDashboard() {
             </span>
           </div>
 
-          <button
-            disabled={cart.length === 0 || billMutation.isPending}
-            onClick={() => setShowChargeModal(true)}
-            className="flex w-full h-10 items-center justify-center gap-2 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <CreditCard size={18} />
-            Charge ₹{finalTotal.toFixed(2)}
-          </button>
+          {placedOrderNumber && (
+            <div className="rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs p-2.5 text-center">
+              {placedOrderNumber} placed — send to kitchen &amp; charge later from the Orders page.
+            </div>
+          )}
+
+          {orderMode === 'regular' ? (
+            <button
+              disabled={cart.length === 0 || billMutation.isPending}
+              onClick={() => setShowChargeModal(true)}
+              className="flex w-full h-10 items-center justify-center gap-2 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <CreditCard size={18} />
+              Charge ₹{finalTotal.toFixed(2)}
+            </button>
+          ) : (
+            <button
+              disabled={cart.length === 0 || !scheduledFor || placeOrderMutation.isPending}
+              onClick={() => placeOrderMutation.mutate()}
+              className="flex w-full h-10 items-center justify-center gap-2 rounded-lg bg-primary text-white text-sm font-medium hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title={!scheduledFor ? 'Set a scheduled date/time first' : undefined}
+            >
+              <Send size={18} />
+              {placeOrderMutation.isPending ? 'Placing...' : `Place Order ₹${finalTotal.toFixed(2)}`}
+            </button>
+          )}
         </div>
       </div>
 

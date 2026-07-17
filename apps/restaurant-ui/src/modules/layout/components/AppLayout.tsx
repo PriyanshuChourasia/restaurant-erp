@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Outlet, useLocation, useNavigate } from '@tanstack/react-router'
 import { DashboardLayout } from '../../../layouts/DashboardLayout'
 import { POSLayout } from '../../../layouts/POSLayout'
+import { KOTLayout } from '../../../layouts/KOTLayout'
 import { useAuth } from '@/lib/auth-context'
 
 const PUBLIC_PATHS = ['/']
@@ -47,6 +48,20 @@ export function AppLayout() {
         <Outlet />
       </POSLayout>
     )
+  }
+
+  // KOT Terminal: uses KOT layout
+  if (location.pathname === '/kot-terminal') {
+    return (
+      <KOTLayout>
+        <Outlet />
+      </KOTLayout>
+    )
+  }
+
+  // Developer Portal: route owns its layout, skip DashboardLayout
+  if (location.pathname.startsWith('/developer')) {
+    return <Outlet />
   }
 
   // All other pages: dashboard layout with sidebar

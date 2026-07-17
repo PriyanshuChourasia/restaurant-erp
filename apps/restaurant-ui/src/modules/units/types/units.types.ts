@@ -1,9 +1,12 @@
 export interface Unit {
   id: string
-  code: string
+  superKey: number
+  symbol: string
   name: string
-  unitType: 'weight' | 'volume' | 'count'
-  isBaseUnit: boolean
+  description: string | null
+  baseUnitId: string | null
+  conversionFactor: number
+  decimalAllowed: boolean
   isActive: boolean
 }
 

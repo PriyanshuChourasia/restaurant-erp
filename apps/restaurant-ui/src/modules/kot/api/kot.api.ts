@@ -30,3 +30,8 @@ export async function updateKotItemStatus(kotId: string, itemId: string, status:
   const { data } = await apiClient.patch<Kot>(`/kots/${kotId}/items/${itemId}/status`, { status, preparedBy })
   return data
 }
+
+export async function updateKotItemAvailability(kotId: string, itemId: string, isUnavailable: boolean, note?: string) {
+  const { data } = await apiClient.patch<Kot>(`/kots/${kotId}/items/${itemId}/availability`, { isUnavailable, note })
+  return data
+}
