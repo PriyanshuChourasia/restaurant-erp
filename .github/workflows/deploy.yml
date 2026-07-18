@@ -29,7 +29,7 @@ jobs:
             registry: ghcr.io
             username: ${{github.actor}}
             password: ${{secrets.GITHUB_TOKEN}}
-        
+
         - name: Build & Push API Image
           uses: docker/build-push-action@v6
           with:
@@ -39,7 +39,6 @@ jobs:
             tags: |
                     ghcr.io/priyanshuchourasia/restaurant-api:latest
                     ghcr.io/priyanshuchourasia/restaurant-api:${{ github.sha }}
-
 
         - name: Deploy to VPS
           uses: appleboy/ssh-action@v1.2.2
