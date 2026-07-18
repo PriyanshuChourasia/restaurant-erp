@@ -50,6 +50,6 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             cd ${{ secrets.VPS_PATH }}
-            docker compose pull api
-            docker compose up -d api
+            docker compose pull
+            docker compose up -d
             docker image prune -f
