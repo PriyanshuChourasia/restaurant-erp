@@ -91,6 +91,12 @@ cd apps/restaurant-ui && pnpm build   # Type-check + build
 - UI primitives in `src/components/ui/` (Button, Input, Sheet, Sidebar, etc.)
 - Layout components in `src/components/layout/`
 
+### Environment Files (READ-ONLY for LLM)
+- **ALL `.env*` files are READ-ONLY.** Never modify them unless the user explicitly requests it.
+- Affected files: `apps/api/.env.*`, `apps/restaurant-ui/.env*`, `.env*`
+- These contain secrets (JWT_SECRET, DB_PASSWORD) and environment-specific config.
+- If a change is needed, ask the user to make it manually.
+
 ### Git
 - No direct commits to main — always be careful with state-changing operations
 

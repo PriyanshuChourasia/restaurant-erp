@@ -446,6 +446,7 @@ export function LandingPage() {
                   variant="outline"
                   className="h-auto px-6 py-3 text-sm font-semibold shadow-sm"
                   render={<a href="#features" />}
+                  nativeButton={false}
                 >
                   Explore Features
                   <ArrowRight size={16} />
