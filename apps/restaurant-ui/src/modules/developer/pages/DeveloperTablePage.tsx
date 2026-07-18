@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { useParams, Link } from '@tanstack/react-router'
-import { Database, ArrowLeft, RefreshCw, ChevronLeft, ChevronRight, Columns3 } from 'lucide-react'
+import { useParams } from '@tanstack/react-router'
+import { Database, RefreshCw, ChevronLeft, ChevronRight, Columns3 } from 'lucide-react'
 import { useDevTableData, useDevTableColumns } from '../hooks/useDeveloper'
 
 const PAGE_SIZE = 50
@@ -26,12 +26,6 @@ export function DeveloperTablePage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-3">
-          <Link
-            to="/developer"
-            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <ArrowLeft size={18} />
-          </Link>
           <div className="flex items-center gap-2">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-100 text-violet-600">
               <Database size={16} />

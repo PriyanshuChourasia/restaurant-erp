@@ -49,6 +49,18 @@ export async function getDevTableColumns(tableName: string): Promise<DevColumn[]
   return data
 }
 
+export interface TableStat {
+  tableName: string
+  totalSize: string
+  totalSizeBytes: number
+  estimatedRows: number
+}
+
+export async function getTableStats(): Promise<TableStat[]> {
+  const { data } = await apiClient.get<TableStat[]>(`${BASE}/tables`)
+  return data
+}
+
 export async function getModuleSchema(): Promise<ModuleSchema[]> {
   const { data } = await apiClient.get<ModuleSchema[]>(`${BASE}/schema`)
   return data

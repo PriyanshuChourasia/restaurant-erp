@@ -8,7 +8,7 @@ import { PriceLevelsService } from '../../price-levels/services/price-levels.ser
 import { TablesService } from '../../seating/services/tables.service';
 import { CustomersService } from '../../customers/services/customers.service';
 import { RecipesService } from '../../recipes/services/recipes.service';
-import { Item } from '../../items/entities/item.entity';
+import { StockItem } from '../../stock-items/entities/stock-item.entity';
 import { Inventory, StockMovement, MovementType } from '../../inventory/entities/inventory.entity';
 import { InventoryService } from '../../inventory/services/inventory.service';
 import { KotService } from '../../kot/services/kot.service';
@@ -31,8 +31,8 @@ export class SalesService {
     private readonly tablesService: TablesService,
     private readonly customersService: CustomersService,
     private readonly recipesService: RecipesService,
-    @InjectRepository(Item)
-    private readonly itemRepo: Repository<Item>,
+    @InjectRepository(StockItem)
+    private readonly itemRepo: Repository<StockItem>,
     @InjectRepository(Inventory)
     private readonly inventoryRepo: Repository<Inventory>,
     @InjectRepository(StockMovement)

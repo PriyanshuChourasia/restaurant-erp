@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { ArrowLeft, Database, Table2, Link2, ChevronRight, ChevronDown, KeyRound, ArrowUpRight } from 'lucide-react'
+import { Database, Table2, Link2, ChevronRight, ChevronDown, KeyRound, ArrowUpRight } from 'lucide-react'
 
 type Column = { name: string; type: string; nullable: boolean; default: string | null; description: string }
 
@@ -185,12 +185,6 @@ export function VoucherSchemaPage() {
     <div className="max-w-5xl mx-auto space-y-5 sm:space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <Link
-          to="/developer"
-          className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors shrink-0"
-        >
-          <ArrowLeft size={18} />
-        </Link>
         <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
           <div className="flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-md shadow-violet-500/20 shrink-0">
             <Database size={16} className="sm:hidden" />

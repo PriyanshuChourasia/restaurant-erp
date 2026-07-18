@@ -10,7 +10,7 @@ import {
   Index,
 } from 'typeorm';
 import { UnitOfMeasure } from './unit-of-measure.entity';
-import { Item } from '../../items/entities/item.entity';
+import { StockItem } from '../../stock-items/entities/stock-item.entity';
 
 @Entity('unit_conversions')
 @Unique(['itemId', 'fromUnitId', 'toUnitId'])
@@ -24,9 +24,9 @@ export class UnitConversion {
   @Column({ name: 'item_id', type: 'uuid', nullable: true })
   itemId!: string | null;
 
-  @ManyToOne(() => Item, { nullable: true, onDelete: 'CASCADE' })
+  @ManyToOne(() => StockItem, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'item_id' })
-  item!: Item | null;
+  item!: StockItem | null;
 
   @Column({ name: 'from_unit_id', type: 'uuid' })
   fromUnitId!: string;

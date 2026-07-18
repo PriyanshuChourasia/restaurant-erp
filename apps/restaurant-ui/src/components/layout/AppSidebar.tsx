@@ -31,7 +31,6 @@ import {
   Scale,
   HeartPulse,
   Star,
-  Archive,
   Code2,
 } from 'lucide-react'
 import { Link, useLocation, useNavigate } from '@tanstack/react-router'
@@ -83,7 +82,6 @@ const navSections = [
     title: 'Inventory',
     links: [
       { to: '/inventory', label: 'Stock Levels', icon: Package },
-      { to: '/stock-items', label: 'Stock Items', icon: Archive },
       { to: '/storage-units', label: 'Storage Units', icon: Warehouse },
       { to: '/purchases', label: 'Purchases', icon: ClipboardList },
       { to: '/inventory/stock-counts', label: 'Stock Counts', icon: Scale },

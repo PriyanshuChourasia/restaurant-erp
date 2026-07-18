@@ -1,15 +1,17 @@
 import {
   Store, Globe, MapPin, Phone, Mail, FileText, Hash,
-  IndianRupee, DollarSign, Clock,
+  IndianRupee, DollarSign, Clock, Files,
 } from 'lucide-react'
 
 import { useOrganizationSettings } from '../hooks/useOrganizationSettings'
+import { useOrganization } from '../hooks/useOrganizationQueries'
 import { PageHeader } from '../components/PageHeader'
 import { SettingsSection } from '../components/SettingsSection'
 import { FormField, NumberField, TextAreaField } from '../components/FormField'
 import { LoadingState } from '../components/LoadingState'
 import { ErrorState } from '../components/ErrorState'
 import { SuccessToast } from '../components/SuccessToast'
+import { EntityDocuments } from '@/modules/document/components/EntityDocuments'
 
 /**
  * Settings page — pure composition layer.
@@ -30,6 +32,8 @@ export function SettingsPage() {
     handleNumericChange,
     handleSave,
   } = useOrganizationSettings()
+
+  const { data: organization } = useOrganization()
 
   if (isLoading) return <LoadingState />
   if (error) return <ErrorState message="Failed to load settings. Make sure the server is running." />
@@ -93,6 +97,17 @@ export function SettingsPage() {
             placeholder="Thank you! Please visit again."
           />
         </SettingsSection>
+
+        {/* ── Organization Documents ──────────────────────────── */}
+        {organization?.id && (
+          <SettingsSection icon={Files} title="Organization Documents">
+            <EntityDocuments
+              entityType="organization"
+              entityId={organization.id}
+              entityName={form.restaurantName || 'Organization'}
+            />
+          </SettingsSection>
+        )}
       </div>
     </div>
   )

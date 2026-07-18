@@ -1,37 +1,39 @@
-# ---- Build Stage ----
-FROM node:22-alpine AS builder
+# ---------- Dependencies ----------
+FROM node:22-alpine AS deps
+
 WORKDIR /app
 
-# Enable pnpm via corepack
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable
 
-# Copy workspace manifests
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+COPY packages ./packages
 COPY apps/api ./apps/api
 
-# Install all dependencies (including devDependencies for build)
 RUN pnpm install --frozen-lockfile
 
-# Build the NestJS app
-RUN pnpm --filter @repo/api build
+# ---------- Build ----------
+FROM deps AS builder
 
-# Prune dev dependencies for production
-RUN pnpm install --frozen-lockfile --prod
-
-# ---- Production Stage ----
-FROM node:22-alpine AS runner
 WORKDIR /app
 
-# Copy production artifacts from builder
+RUN pnpm --filter @repo/api build
+
+
+# ---------- Production ----------
+FROM node:22-alpine
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+RUN corepack enable
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/api/package.json ./apps/api/package.json
+
+COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/apps/api/dist ./dist
-COPY --from=builder /app/apps/api/package.json ./
-COPY --from=builder /app/node_modules ./node_modules
 
 EXPOSE 3000
-
-# NODE_ENV=development enables TypeORM schema sync + auto-seed on startup
-# (DatabaseSeedService.onApplicationBootstrap), since this project has no
-# migrations yet. Override to "production" once migrations exist.
-ENV NODE_ENV=development
 
 CMD ["node", "dist/main.js"]

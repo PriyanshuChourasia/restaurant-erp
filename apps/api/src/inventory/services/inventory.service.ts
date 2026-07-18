@@ -10,7 +10,7 @@ import { LedgerService } from '../../ledger/services/ledger.service';
 import { JournalService, JournalLineInput } from '../../ledger/services/journal.service';
 import { JournalSourceType } from '../../ledger/entities/journal-entry.entity';
 import { LedgerAccount, LedgerEntryType, LedgerCategory } from '../../ledger/entities/ledger.entity';
-import { Item } from '../../items/entities/item.entity';
+import { StockItem } from '../../stock-items/entities/stock-item.entity';
 
 @Injectable()
 export class InventoryService {
@@ -25,8 +25,8 @@ export class InventoryService {
     private readonly ledgerAccountRepo: Repository<LedgerAccount>,
     @InjectRepository(StockBatch)
     private readonly batchRepo: Repository<StockBatch>,
-    @InjectRepository(Item)
-    private readonly itemRepo: Repository<Item>,
+    @InjectRepository(StockItem)
+    private readonly itemRepo: Repository<StockItem>,
     private readonly storageUnitsService: StorageUnitsService,
     private readonly ledgerService: LedgerService,
     private readonly journalService: JournalService,
@@ -619,7 +619,7 @@ export class InventoryService {
     const balanceBefore = inv.currentStock - quantity;
 
     // Compute expiry date from item's shelfLifeDays
-    const item = await (manager ? manager.getRepository(Item) : this.itemRepo).findOne({ where: { id: itemId } });
+    const item = await (manager ? manager.getRepository(StockItem) : this.itemRepo).findOne({ where: { id: itemId } });
     const receivedDate = new Date();
     let expiryDate: Date | null = null;
     if (item?.shelfLifeDays && item.shelfLifeDays > 0) {

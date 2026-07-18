@@ -9,6 +9,15 @@ Newest entries at the top.
 
 ---
 
+## 2026-07-17 — AGENTS.md documentation for all 27 API modules
+
+- Created `AGENTS.md` files with help info + schema references for all 27 NestJS modules in `apps/api/src/`.
+- Each file documents: module overview, entity schemas (all columns/types/descriptions), API endpoints (method/path/permissions/description), and key module dependencies.
+- Consistent formatting across all files: tables use pipe syntax, permissions column included in all endpoint tables (with `—` for unguarded endpoints).
+- See `.project/tasks/2026-07-17-api-module-agents-docs.md`.
+
+---
+
 ## 2026-07-16 — Order item editing + kitchen availability flag + cancel-sync
 
 - `OrdersService.updateItems()` (`PATCH /orders/:id/items`) lets staff swap/cancel items any time before charge (pending_confirmation or confirmed), even after the KOT was already sent — in that case it fires a labeled supplementary KOT rather than editing the original ticket. Reuses `PriceLevelsService.resolveLineItems()`.

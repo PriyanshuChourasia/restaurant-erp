@@ -3,7 +3,7 @@ import {
   ValidateNested, Min, IsEnum,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ItemUnit } from '../../items/entities/item.entity';
+import { ItemUnit } from '../../stock-items/entities/stock-item.entity';
 
 export class RecipeIngredientEntryDto {
   @IsUUID()

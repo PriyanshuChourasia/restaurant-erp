@@ -22,16 +22,13 @@ services:
   api:
     build:
       context: .
-      dockerfile: apps/api/Dockerfile
+      dockerfile: Dockerfile
     container_name: restaurant-erp-api
     restart: unless-stopped
     ports:
       - "3000:3000"
-    # .env.production provides defaults; environment below overrides DB_HOST
-    # to the Docker service name so the API connects to the containerized DB.
-    # NODE_ENV=development enables TypeORM schema sync + auto-seed on startup.
     env_file:
-      - apps/api/.env.production
+      - .env.production
     environment:
       NODE_ENV: development
       DB_HOST: db

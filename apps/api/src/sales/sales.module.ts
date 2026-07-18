@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Invoice, InvoiceItem } from './entities/sales.entity';
 import { CreditNote, CreditNoteItem } from './entities/credit-note.entity';
 import { Order } from '../orders/entities/order.entity';
-import { Item } from '../items/entities/item.entity';
+import { StockItem } from '../stock-items/entities/stock-item.entity';
 import { Inventory, StockMovement } from '../inventory/entities/inventory.entity';
 import { SalesService } from './services/sales.service';
 import { SalesController } from './controllers/sales.controller';
@@ -18,7 +18,7 @@ import { KotModule } from '../kot/kot.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Invoice, InvoiceItem, CreditNote, CreditNoteItem, Order, Item, Inventory, StockMovement]),
+    TypeOrmModule.forFeature([Invoice, InvoiceItem, CreditNote, CreditNoteItem, Order, StockItem, Inventory, StockMovement]),
     PriceLevelsModule,
     CustomersModule,
     SeatingModule,

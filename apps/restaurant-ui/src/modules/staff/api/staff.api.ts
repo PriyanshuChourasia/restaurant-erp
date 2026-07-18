@@ -59,3 +59,13 @@ export async function deleteStaff(id: string) {
 export async function restoreStaff(id: string) {
   await apiClient.post(`/users/${id}/restore`)
 }
+
+export interface Role {
+  id: string
+  name: string
+}
+
+export async function getRoles(): Promise<Role[]> {
+  const { data } = await apiClient.get<Role[]>('/roles')
+  return data
+}

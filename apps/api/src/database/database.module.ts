@@ -1,10 +1,13 @@
+// ⚠️ READ-ONLY: This file is part of database configuration and seeding. Do not modify unless explicitly directed.
+// Any changes must be explicitly requested.
+
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Permission } from '../permissions/entities/permission.entity';
 import { Role } from '../roles/entities/role.entity';
 import { User } from '../users/entities/user.entity';
 import { CategoryEntity } from '../category/entities/category.entity';
-import { Item } from '../items/entities/item.entity';
+import { StockItem } from '../stock-items/entities/stock-item.entity';
 import { Supplier } from '../suppliers/entities/supplier.entity';
 import { Inventory, StockMovement } from '../inventory/entities/inventory.entity';
 import { OpeningStockEntry } from '../inventory/entities/opening-stock-entry.entity';
@@ -14,13 +17,12 @@ import { Kot, KotItem } from '../kot/entities/kot.entity';
 import { Purchase, PurchaseItem } from '../purchases/entities/purchase.entity';
 import { Zone } from '../seating/entities/zone.entity';
 import { Table } from '../seating/entities/table.entity';
-import { Unit } from '../units/entities/unit.entity';
 import { UnitOfMeasure } from '../units/entities/unit-of-measure.entity';
 import { UnitConversion } from '../units/entities/unit-conversion.entity';
 import { StorageUnit } from '../inventory/entities/storage-unit.entity';
 import { StockBatch } from '../inventory/entities/stock-batch.entity';
 import { StockCount, StockCountLine } from '../inventory/entities/stock-count.entity';
-import { StockItem } from '../inventory/entities/stock-item.entity';
+import { StockGroup } from '../inventory/entities/stock-group.entity';
 import { StockCategory } from '../inventory/entities/stock-category.entity';
 import { Customer } from '../customers/entities/customer.entity';
 import { PriceLevel } from '../price-levels/entities/price-level.entity';
@@ -39,7 +41,7 @@ import { DatabaseSeedService } from './database-seed.service';
       Role,
       User,
       CategoryEntity,
-      Item,
+      StockItem,
       Supplier,
       Inventory,
       StockMovement,
@@ -54,14 +56,13 @@ import { DatabaseSeedService } from './database-seed.service';
       PurchaseItem,
       Zone,
       Table,
-      Unit,
       UnitOfMeasure,
       UnitConversion,
       StorageUnit,
       StockBatch,
       StockCount,
       StockCountLine,
-      StockItem,
+      StockGroup,
       StockCategory,
       Customer,
       PriceLevel,

@@ -15,6 +15,7 @@ export interface UnitBrief {
 export interface Item {
   id: string
   name: string
+  alias: string | null
   description: string | null
   sku: string
   hsnCode: string
@@ -34,6 +35,16 @@ export interface Item {
   image: string | null
   categoryId: string | null
   categoryName: string | null
+  stockGroupId: string | null
+  stockGroup: { id: string; code: string; name: string } | null
+  stockCategoryId: string | null
+  stockCategory: { id: string; name: string } | null
+  openingQuantity: number | null
+  openingRate: number | null
+  reorderLevel: number | null
+  barcode: string | null
+  trackBatch: boolean
+  trackExpiry: boolean
   gstBreakdown: { cgst: number; sgst: number; total: number }
   createdAt: string
   updatedAt: string
@@ -48,6 +59,7 @@ export interface ItemsResponse {
 
 export interface CreateItemRequest {
   name: string
+  alias?: string
   sku: string
   hsnCode: string
   price: number
@@ -64,32 +76,40 @@ export interface CreateItemRequest {
   productType?: string
   isVeg?: boolean
   isActive?: boolean
+  stockGroupId?: string
+  stockCategoryId?: string
+  openingQuantity?: number
+  openingRate?: number
+  reorderLevel?: number
+  barcode?: string
+  trackBatch?: boolean
+  trackExpiry?: boolean
 }
 
 export async function getItems(params?: { page?: number; limit?: number; search?: string; categoryId?: string }) {
-  const { data } = await apiClient.get<ItemsResponse>('/items', { params })
+  const { data } = await apiClient.get<ItemsResponse>('/stock-items', { params })
   return data
 }
 
 export async function getItem(id: string) {
-  const { data } = await apiClient.get<Item>(`/items/${id}`)
+  const { data } = await apiClient.get<Item>(`/stock-items/${id}`)
   return data
 }
 
 export async function createItem(payload: CreateItemRequest) {
-  const { data } = await apiClient.post<Item>('/items', payload)
+  const { data } = await apiClient.post<Item>('/stock-items', payload)
   return data
 }
 
 export async function updateItem(id: string, payload: Partial<CreateItemRequest>) {
-  const { data } = await apiClient.patch<Item>(`/items/${id}`, payload)
+  const { data } = await apiClient.patch<Item>(`/stock-items/${id}`, payload)
   return data
 }
 
 export async function deleteItem(id: string) {
-  await apiClient.delete(`/items/${id}`)
+  await apiClient.delete(`/stock-items/${id}`)
 }
 
 export async function restoreItem(id: string) {
-  await apiClient.post(`/items/${id}/restore`)
+  await apiClient.post(`/stock-items/${id}/restore`)
 }

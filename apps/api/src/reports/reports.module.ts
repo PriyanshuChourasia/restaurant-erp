@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Invoice, InvoiceItem } from '../sales/entities/sales.entity';
-import { Item } from '../items/entities/item.entity';
+import { StockItem } from '../stock-items/entities/stock-item.entity';
 import { CategoryEntity } from '../category/entities/category.entity';
 import { Inventory, StockMovement } from '../inventory/entities/inventory.entity';
 import { StockCount, StockCountLine } from '../inventory/entities/stock-count.entity';
@@ -23,7 +23,7 @@ import { ReportsController } from './controllers/reports.controller';
     TypeOrmModule.forFeature([
       Invoice,
       InvoiceItem,
-      Item,
+      StockItem,
       CategoryEntity,
       Inventory,
       StockMovement,

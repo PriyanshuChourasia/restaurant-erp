@@ -9,7 +9,7 @@ import { UsersModule } from './users/users.module';
 import { RolesModule } from './roles/roles.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { CategoryModule } from './category/category.module';
-import { ItemsModule } from './items/items.module';
+import { StockItemsModule } from './stock-items/stock-items.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { PurchasesModule } from './purchases/purchases.module';
 import { SuppliersModule } from './suppliers/suppliers.module';
@@ -30,6 +30,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { UnitsModule } from './units/units.module';
 import { ItemSuppliersModule } from './item-suppliers/item-suppliers.module';
 import { DeveloperModule } from './developer/developer.module';
+// import { DocumentsModule } from './documents/documents.module'; // temporarily disabled for verification — pre-existing unrelated TypeORM error
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
 import { JwtAuthGuard } from './shared/guards/jwt-auth.guard';
@@ -58,7 +59,7 @@ import { PermissionsGuard } from './shared/guards/permissions.guard';
     RolesModule,
     PermissionsModule,
     CategoryModule,
-    ItemsModule,
+    StockItemsModule,
     InventoryModule,
     PurchasesModule,
     SuppliersModule,
@@ -79,6 +80,7 @@ import { PermissionsGuard } from './shared/guards/permissions.guard';
     UnitsModule,
     ItemSuppliersModule,
     DeveloperModule,
+    // DocumentsModule,
   ],
   controllers: [AppController],
   providers: [

@@ -1,3 +1,6 @@
+// ⚠️ READ-ONLY: This file is auto-generated seed data. Do not modify unless explicitly directed.
+// Any changes must be explicitly requested.
+
 import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,7 +9,7 @@ import { Permission } from '../permissions/entities/permission.entity';
 import { Role } from '../roles/entities/role.entity';
 import { User } from '../users/entities/user.entity';
 import { CategoryEntity } from '../category/entities/category.entity';
-import { Item, GstRate, ItemType } from '../items/entities/item.entity';
+import { StockItem, GstRate, ItemType } from '../stock-items/entities/stock-item.entity';
 import { Supplier } from '../suppliers/entities/supplier.entity';
 import { Inventory, StockMovement, MovementType } from '../inventory/entities/inventory.entity';
 import { OpeningStockEntry } from '../inventory/entities/opening-stock-entry.entity';
@@ -17,7 +20,6 @@ import { Purchase, PurchaseItem, PurchaseStatus } from '../purchases/entities/pu
 import { Zone } from '../seating/entities/zone.entity';
 import { Table, TableCategory, TableStatus } from '../seating/entities/table.entity';
 import { UnitOfMeasure } from '../units/entities/unit-of-measure.entity';
-import { Unit } from '../units/entities/unit.entity';
 import { UnitConversion } from '../units/entities/unit-conversion.entity';
 import { StorageUnit, StorageUnitType } from '../inventory/entities/storage-unit.entity';
 import { StockBatch, BatchStatus } from '../inventory/entities/stock-batch.entity';
@@ -27,7 +29,7 @@ import { PriceLevel } from '../price-levels/entities/price-level.entity';
 import { ItemPriceLevel } from '../price-levels/entities/item-price-level.entity';
 import { Recipe, RecipeIngredient } from '../recipes/entities/recipe.entity';
 import { Reservation, ReservationStatus, ReservationSource } from '../reservations/entities/reservation.entity';
-import { StockItem } from '../inventory/entities/stock-item.entity';
+import { StockGroup } from '../inventory/entities/stock-group.entity';
 import { StockCategory } from '../inventory/entities/stock-category.entity';
 import { ItemSupplier } from '../item-suppliers/entities/item-supplier.entity';
 import { VoucherType } from '../vouchers/entities/voucher-type.entity';
@@ -180,7 +182,7 @@ interface DemoItemDef {
   price: number
   costPrice: number
   gstRate: GstRate
-  unitCode: string       // references a seeded Unit.code
+  unitCode: string       // references a seeded UnitOfMeasure.symbol
   purchaseUnitCode?: string
   isVeg: boolean
   categoryId: string
@@ -260,8 +262,8 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
     private readonly userRepo: Repository<User>,
     @InjectRepository(CategoryEntity)
     private readonly categoryRepo: Repository<CategoryEntity>,
-    @InjectRepository(Item)
-    private readonly itemRepo: Repository<Item>,
+    @InjectRepository(StockItem)
+    private readonly itemRepo: Repository<StockItem>,
     @InjectRepository(Supplier)
     private readonly supplierRepo: Repository<Supplier>,
     @InjectRepository(Inventory)
@@ -290,8 +292,6 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
     private readonly tableRepo: Repository<Table>,
     @InjectRepository(UnitOfMeasure)
     private readonly uomRepo: Repository<UnitOfMeasure>,
-    @InjectRepository(Unit)
-    private readonly unitRepo: Repository<Unit>,
     @InjectRepository(UnitConversion)
     private readonly conversionRepo: Repository<UnitConversion>,
     @InjectRepository(OpeningStockEntry)
@@ -316,8 +316,8 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
     private readonly ingredientRepo: Repository<RecipeIngredient>,
     @InjectRepository(Reservation)
     private readonly reservationRepo: Repository<Reservation>,
-    @InjectRepository(StockItem)
-    private readonly stockItemRepo: Repository<StockItem>,
+    @InjectRepository(StockGroup)
+    private readonly stockGroupRepo: Repository<StockGroup>,
     @InjectRepository(StockCategory)
     private readonly stockCategoryRepo: Repository<StockCategory>,
     @InjectRepository(ItemSupplier)
@@ -361,7 +361,7 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
     await this.seedVoucherTypes();                 // Voucher types master data
     await this.seedStockGroups();
     await this.seedStockCategories();
-    await this.seedItemSuppliers(items);          // Item-Supplier links
+    await this.seedItemSuppliers(items);          // StockItem-Supplier links
 
     this.logger.log('Seed check complete.');
     this.logUsageGuide();
@@ -600,14 +600,14 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
 
   // ── Items ───────────────────────────────────────────────────
 
-  private async seedItems(): Promise<Item[]> {
+  private async seedItems(): Promise<StockItem[]> {
     const uoms = await this.uomRepo.find();
     const uomBySymbol = new Map(uoms.map((u) => [u.symbol, u.id]));
 
     // Load existing items by SKU to make this additive
     const existing = await this.itemRepo.find();
     const existingSkus = new Set(existing.map((i) => i.sku));
-    const saved: Item[] = [...existing];
+    const saved: StockItem[] = [...existing];
     let addedCount = 0;
 
     for (const def of DEMO_ITEM_DEFS) {
@@ -624,7 +624,7 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
         purchaseUnitId = uomBySymbol.get(def.purchaseUnitCode) || null;
       }
 
-      const itemData: Partial<Item> = {
+      const itemData: Partial<StockItem> = {
         name: def.name,
         sku: def.sku,
         hsnCode: def.hsnCode,
@@ -643,7 +643,7 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
         productType: (def.productType || 'finished') as any,
         shelfLifeDays: def.shelfLifeDays ?? null,
       };
-      const item = this.itemRepo.create(itemData as Item);
+      const item = this.itemRepo.create(itemData as StockItem);
       saved.push(await this.itemRepo.save(item));
       addedCount++;
     }
@@ -658,7 +658,7 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
 
   // ── Inventory ───────────────────────────────────────────────
 
-  private async seedInventory(items: Item[]): Promise<void> {
+  private async seedInventory(items: StockItem[]): Promise<void> {
     const defaultSu = await this.storageUnitRepo.findOne({ where: { isDefault: true } });
     const storageUnitId = defaultSu ? defaultSu.id : (await this.storageUnitRepo.find())[0]?.id;
     if (!storageUnitId) {
@@ -695,7 +695,7 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
 
   // ── Stock Movements ─────────────────────────────────────────
 
-  private async seedStockMovements(items: Item[]): Promise<void> {
+  private async seedStockMovements(items: StockItem[]): Promise<void> {
     const defaultSu = await this.storageUnitRepo.findOne({ where: { isDefault: true } });
     const storageUnitId = defaultSu ? defaultSu.id : null;
     if (!storageUnitId) return;
@@ -731,7 +731,7 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
 
   // ── Opening Stock Entries ─────────────────────────────────────
 
-  private async seedOpeningStockEntries(items: Item[]): Promise<void> {
+  private async seedOpeningStockEntries(items: StockItem[]): Promise<void> {
     const defaultSu = await this.storageUnitRepo.findOne({ where: { isDefault: true } });
     const storageUnitId = defaultSu ? defaultSu.id : null;
     if (!storageUnitId) return;
@@ -771,7 +771,7 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
 
   // ── Purchases ───────────────────────────────────────────────
 
-  private async seedPurchases(items: Item[]): Promise<void> {
+  private async seedPurchases(items: StockItem[]): Promise<void> {
     const count = await this.purchaseRepo.count();
     if (count > 0) {
       this.logger.log(`${count} purchases already exist — skipping.`);
@@ -858,7 +858,7 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
 
   // ── Invoices ────────────────────────────────────────────────
 
-  private async seedInvoices(items: Item[]): Promise<void> {
+  private async seedInvoices(items: StockItem[]): Promise<void> {
     const count = await this.invoiceRepo.count();
     if (count > 0) {
       this.logger.log(`${count} invoices already exist — skipping.`);
@@ -1008,7 +1008,7 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
 
   // ── KOTs ─────────────────────────────────────────────────────
 
-  private async seedKots(items: Item[]): Promise<void> {
+  private async seedKots(items: StockItem[]): Promise<void> {
     const count = await this.kotRepo.count();
     if (count > 0) {
       this.logger.log(`${count} KOTs already exist — skipping.`);
@@ -1586,7 +1586,7 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
 
   // ── Stock Batches (Module 6) ────────────────────────────────
 
-  private async seedBatches(items: Item[]): Promise<void> {
+  private async seedBatches(items: StockItem[]): Promise<void> {
     const count = await this.batchRepo.count();
     if (count > 0) {
       this.logger.log(`${count} stock batches already exist — skipping.`);
@@ -1652,7 +1652,7 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
 
   // ── Price Levels (Module) ───────────────────────────────────
 
-  private async seedPriceLevels(items: Item[]): Promise<void> {
+  private async seedPriceLevels(items: StockItem[]): Promise<void> {
     const count = await this.priceLevelRepo.count();
     if (count > 0) {
       this.logger.log(`${count} price levels already exist — skipping.`);
@@ -1679,7 +1679,7 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
       }),
     );
 
-    // Item price mappings: corporate = 10% off, premium = 25% premium
+    // StockItem price mappings: corporate = 10% off, premium = 25% premium
     let mappingCount = 0;
     for (const item of items) {
       // Corporate pricing: 10% off
@@ -1704,7 +1704,7 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
 
   // ── Recipes (Module) ────────────────────────────────────────
 
-  private async seedRecipes(items: Item[]): Promise<void> {
+  private async seedRecipes(items: StockItem[]): Promise<void> {
     const count = await this.recipeRepo.count();
     if (count > 0) {
       this.logger.log(`${count} recipes already exist — skipping.`);
@@ -1716,7 +1716,7 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
     // Helper to find item by name
     const get = (name: string) => {
       const item = itemByName.get(name);
-      if (!item) throw new Error(`Item "${name}" not found`);
+      if (!item) throw new Error(`StockItem "${name}" not found`);
       return item;
     };
 
@@ -1855,7 +1855,7 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
 
   // ── Stock Counts (Module 8) ─────────────────────────────────
 
-  private async seedStockCounts(items: Item[]): Promise<void> {
+  private async seedStockCounts(items: StockItem[]): Promise<void> {
     const count = await this.stockCountRepo.count();
     if (count > 0) {
       this.logger.log(`${count} stock counts already exist — skipping.`);
@@ -1899,9 +1899,9 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
     this.logger.log(`Seeded 1 completed stock count with ${countItems.length} lines (2 variances).`);
   }
 
-  // ── Item-Supplier Links ────────────────────────────────────
+  // ── StockItem-Supplier Links ────────────────────────────────────
 
-  private async seedItemSuppliers(items: Item[]): Promise<void> {
+  private async seedItemSuppliers(items: StockItem[]): Promise<void> {
     const count = await this.itemSupplierRepo.count();
     if (count > 0) {
       this.logger.log(`${count} item-supplier links already exist — skipping.`);
@@ -1911,9 +1911,9 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
     const suppliers = await this.supplierRepo.find();
     if (suppliers.length === 0) return;
 
-    const units = await this.unitRepo.find();
-    const unitByCode = new Map(units.map((u) => [u.code, u.id])); // Unit.entity has `code` (different from UnitOfMeasure.symbol)
-    const getUnitId = (code: string) => unitByCode.get(code) || null;
+    const uoms = await this.uomRepo.find();
+    const unitBySymbol = new Map(uoms.map((u) => [u.symbol, u.id]));
+    const getUnitId = (symbol: string) => unitBySymbol.get(symbol) || null;
 
     const itemByName = new Map(items.map((i) => [i.name, i]));
     const supplierByName = new Map(suppliers.map((s) => [s.name, s.id]));
@@ -2049,7 +2049,7 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
   // ── Stock Groups ────────────────────────────────────────────
 
   private async seedStockGroups(): Promise<void> {
-    const count = await this.stockItemRepo.count();
+    const count = await this.stockGroupRepo.count();
     if (count > 0) {
       this.logger.log(`${count} stock groups already exist — skipping.`);
       return;
@@ -2062,7 +2062,7 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
     ];
 
     for (const g of groupDefs) {
-      await this.stockItemRepo.save(this.stockItemRepo.create(g));
+      await this.stockGroupRepo.save(this.stockGroupRepo.create(g));
     }
     this.logger.log(`Seeded ${groupDefs.length} stock groups (RM, FG, PKG).`);
   }

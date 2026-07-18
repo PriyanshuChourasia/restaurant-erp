@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { Recipe, RecipeIngredient } from '../entities/recipe.entity';
 import { ProductionEntry } from '../entities/production-entry.entity';
-import { Item, ProductType } from '../../items/entities/item.entity';
+import { StockItem, ProductType } from '../../stock-items/entities/stock-item.entity';
 import { Inventory, StockMovement, MovementType } from '../../inventory/entities/inventory.entity';
 import { RecipeRepository, ProductionEntryRepository } from '../repositories/recipe.repository';
 import { CreateRecipeDto, CreateProductionEntryDto } from '../dto/create-recipe.dto';
@@ -14,7 +14,7 @@ export class RecipesService {
   constructor(
     private readonly recipeRepo: RecipeRepository,
     private readonly productionEntryRepo: ProductionEntryRepository,
-    @InjectRepository(Item) private readonly itemRepo: Repository<Item>,
+    @InjectRepository(StockItem) private readonly itemRepo: Repository<StockItem>,
     @InjectRepository(Inventory) private readonly inventoryRepo: Repository<Inventory>,
     @InjectRepository(StockMovement) private readonly movementRepo: Repository<StockMovement>,
     private readonly dataSource: DataSource,

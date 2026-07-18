@@ -14,8 +14,8 @@ const MODULE_ENTITY_MAP = [
   { module: 'RolesModule', entities: ['Role'], description: 'Role-based access control' },
   { module: 'PermissionsModule', entities: ['Permission'], description: 'Granular permission definitions' },
   { module: 'CategoryModule', entities: ['CategoryEntity'], description: 'Tree-structured category management' },
-  { module: 'ItemsModule', entities: ['Item'], description: 'Menu items, raw materials, products' },
-  { module: 'InventoryModule', entities: ['Inventory', 'StockMovement', 'StorageUnit', 'OpeningStockEntry', 'StockBatch', 'StockCount', 'StockCountLine', 'StockItem', 'StockCategory', 'StockLedger'], description: 'Stock tracking, batches, movements' },
+  { module: 'StockItemsModule', entities: ['StockItem'], description: 'Menu items, raw materials, products' },
+  { module: 'InventoryModule', entities: ['Inventory', 'StockMovement', 'StorageUnit', 'OpeningStockEntry', 'StockBatch', 'StockCount', 'StockCountLine', 'StockGroup', 'StockCategory', 'StockLedger'], description: 'Stock tracking, batches, movements' },
   { module: 'PurchasesModule', entities: ['Purchase', 'PurchaseItem'], description: 'Purchase orders & line items' },
   { module: 'SuppliersModule', entities: ['Supplier'], description: 'Supplier directory' },
   { module: 'SalesModule', entities: ['Invoice', 'InvoiceItem', 'CreditNote', 'CreditNoteItem'], description: 'Invoices, payments, credit notes' },
@@ -29,11 +29,11 @@ const MODULE_ENTITY_MAP = [
   { module: 'SeatingModule', entities: ['Zone', 'Table'], description: 'Restaurant zones & table layout' },
   { module: 'RecipesModule', entities: ['Recipe', 'RecipeIngredient', 'ProductionEntry'], description: 'Recipes & kitchen prep' },
   { module: 'ReservationsModule', entities: ['Reservation'], description: 'Table reservations' },
-  { module: 'UnitsModule', entities: ['UnitOfMeasure', 'Unit', 'UnitConversion'], description: 'Units of measure & conversions' },
+  { module: 'UnitsModule', entities: ['UnitOfMeasure', 'UnitConversion'], description: 'Units of measure & conversions' },
   { module: 'ItemSuppliersModule', entities: ['ItemSupplier'], description: 'Item-supplier linking' },
-  { module: 'ReportsModule', entities: ['Invoice', 'InvoiceItem', 'Item', 'CategoryEntity', 'Inventory', 'StockMovement', 'StockCount', 'StockCountLine', 'Purchase', 'PurchaseItem', 'LedgerAccount', 'LedgerEntry', 'Kot', 'KotItem', 'Reservation', 'Customer', 'Zone', 'Table', 'Supplier', 'User', 'Organization'], description: 'Cross-module report queries (read-only)' },
+  { module: 'ReportsModule', entities: ['Invoice', 'InvoiceItem', 'StockItem', 'CategoryEntity', 'Inventory', 'StockMovement', 'StockCount', 'StockCountLine', 'Purchase', 'PurchaseItem', 'LedgerAccount', 'LedgerEntry', 'Kot', 'KotItem', 'Reservation', 'Customer', 'Zone', 'Table', 'Supplier', 'User', 'Organization'], description: 'Cross-module report queries (read-only)' },
   { module: 'DashboardModule', entities: ['Invoice', 'InvoiceItem'], description: 'Dashboard aggregates' },
-  { module: 'DatabaseModule', entities: ['Permission', 'Role', 'User', 'CategoryEntity', 'Item', 'Supplier', 'Inventory', 'StockMovement', 'OpeningStockEntry', 'LedgerAccount', 'LedgerEntry', 'Invoice', 'InvoiceItem', 'Kot', 'KotItem', 'Purchase', 'PurchaseItem', 'Zone', 'Table', 'Unit', 'UnitOfMeasure', 'UnitConversion', 'StorageUnit', 'StockBatch', 'StockCount', 'StockCountLine', 'StockItem', 'StockCategory', 'Customer', 'PriceLevel', 'ItemPriceLevel', 'Recipe', 'RecipeIngredient', 'Reservation', 'ItemSupplier', 'VoucherType', 'VoucherModuleEntity'], description: 'Database seeding & migrations' },
+  { module: 'DatabaseModule', entities: ['Permission', 'Role', 'User', 'CategoryEntity', 'StockItem', 'Supplier', 'Inventory', 'StockMovement', 'OpeningStockEntry', 'LedgerAccount', 'LedgerEntry', 'Invoice', 'InvoiceItem', 'Kot', 'KotItem', 'Purchase', 'PurchaseItem', 'Zone', 'Table', 'UnitOfMeasure', 'UnitConversion', 'StorageUnit', 'StockBatch', 'StockCount', 'StockCountLine', 'StockGroup', 'StockCategory', 'Customer', 'PriceLevel', 'ItemPriceLevel', 'Recipe', 'RecipeIngredient', 'Reservation', 'ItemSupplier', 'VoucherType', 'VoucherModuleEntity'], description: 'Database seeding & migrations' },
 ];
 
 @Injectable()

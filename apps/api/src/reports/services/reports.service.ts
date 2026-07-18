@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import { Invoice, InvoiceStatus } from '../../sales/entities/sales.entity';
 import { InvoiceItem } from '../../sales/entities/sales.entity';
-import { Item } from '../../items/entities/item.entity';
+import { StockItem } from '../../stock-items/entities/stock-item.entity';
 import { CategoryEntity } from '../../category/entities/category.entity';
 import { Inventory, StockMovement, MovementType } from '../../inventory/entities/inventory.entity';
 import { StockCount, StockCountLine, StockCountStatus } from '../../inventory/entities/stock-count.entity';
@@ -25,8 +25,8 @@ export class ReportsService {
     private readonly invoiceRepo: Repository<Invoice>,
     @InjectRepository(InvoiceItem)
     private readonly invoiceItemRepo: Repository<InvoiceItem>,
-    @InjectRepository(Item)
-    private readonly itemRepo: Repository<Item>,
+    @InjectRepository(StockItem)
+    private readonly itemRepo: Repository<StockItem>,
     @InjectRepository(CategoryEntity)
     private readonly categoryRepo: Repository<CategoryEntity>,
     @InjectRepository(Inventory)
@@ -202,7 +202,7 @@ export class ReportsService {
 
     const categorySales = await this.invoiceItemRepo.createQueryBuilder('ii')
       .innerJoin('ii.invoice', 'inv')
-      .innerJoin(Item, 'item', 'item.id = ii.itemId')
+      .innerJoin(StockItem, 'item', 'item.id = ii.itemId')
       .innerJoin(CategoryEntity, 'cat', 'cat.id = item.categoryId')
       .select('cat.id', 'categoryId')
       .addSelect('cat.name', 'categoryName')
@@ -221,7 +221,7 @@ export class ReportsService {
 
     const uncategorized = await this.invoiceItemRepo.createQueryBuilder('ii')
       .innerJoin('ii.invoice', 'inv')
-      .innerJoin(Item, 'item', 'item.id = ii.itemId')
+      .innerJoin(StockItem, 'item', 'item.id = ii.itemId')
       .select('COALESCE(SUM(ii.quantity), 0)', 'quantitySold')
       .addSelect('COALESCE(SUM(ii.totalAmount), 0)', 'revenue')
       .where('inv.invoiceDate BETWEEN :from AND :to', { from, to })
@@ -601,7 +601,7 @@ export class ReportsService {
 
     const split = await this.invoiceItemRepo.createQueryBuilder('ii')
       .innerJoin('ii.invoice', 'inv')
-      .innerJoin(Item, 'item', 'item.id = ii.itemId')
+      .innerJoin(StockItem, 'item', 'item.id = ii.itemId')
       .select('item.isVeg', 'isVeg')
       .addSelect('COALESCE(SUM(ii.quantity), 0)', 'quantitySold')
       .addSelect('COALESCE(SUM(ii.totalAmount), 0)', 'revenue')
@@ -874,7 +874,7 @@ export class ReportsService {
   async getStockMovements(fromDate?: string, toDate?: string) {
     const { from, to } = this.getDateRange(fromDate, toDate);
     const movements = await this.movementRepo.createQueryBuilder('sm')
-      .leftJoinAndSelect(Item, 'item', 'item.id = sm.itemId')
+      .leftJoinAndSelect(StockItem, 'item', 'item.id = sm.itemId')
       .select('sm.createdAt', 'date')
       .addSelect('item.name', 'itemName')
       .addSelect('sm.type', 'movementType')
@@ -942,7 +942,7 @@ export class ReportsService {
   async getWastageReport(fromDate?: string, toDate?: string) {
     const { from, to } = this.getDateRange(fromDate, toDate);
     const wastage = await this.movementRepo.createQueryBuilder('sm')
-      .leftJoinAndSelect(Item, 'item', 'item.id = sm.itemId')
+      .leftJoinAndSelect(StockItem, 'item', 'item.id = sm.itemId')
       .select('item.name', 'itemName')
       .addSelect('sm.quantity', 'wastageQuantity')
       .addSelect('sm.quantity * inv.unitCost', 'wastageValue')
@@ -979,7 +979,7 @@ export class ReportsService {
   async getConsumptionAnalysis(fromDate?: string, toDate?: string) {
     const { from, to } = this.getDateRange(fromDate, toDate);
     const consumption = await this.movementRepo.createQueryBuilder('sm')
-      .leftJoinAndSelect(Item, 'item', 'item.id = sm.itemId')
+      .leftJoinAndSelect(StockItem, 'item', 'item.id = sm.itemId')
       .select('item.name', 'itemName')
       .addSelect('COALESCE(SUM(sm.quantity), 0)', 'totalConsumed')
       .leftJoin(Inventory, 'inv', 'inv.itemId = sm.itemId')
@@ -1017,7 +1017,7 @@ export class ReportsService {
   async getProductionReport(fromDate?: string, toDate?: string) {
     const { from, to } = this.getDateRange(fromDate, toDate);
     const production = await this.movementRepo.createQueryBuilder('sm')
-      .leftJoinAndSelect(Item, 'item', 'item.id = sm.itemId')
+      .leftJoinAndSelect(StockItem, 'item', 'item.id = sm.itemId')
       .select('sm.createdAt', 'date')
       .addSelect('item.name', 'itemName')
       .addSelect('sm.quantity', 'batchQuantity')
@@ -1655,7 +1655,7 @@ export class ReportsService {
     const { from, to } = this.getDateRange(fromDate, toDate);
     const mix = await this.kotItemRepo.createQueryBuilder('ki')
       .innerJoin('ki.kot', 'kot')
-      .innerJoin(Item, 'item', 'item.id = ki.itemId')
+      .innerJoin(StockItem, 'item', 'item.id = ki.itemId')
       .select('item.isVeg', 'isVeg')
       .addSelect('COALESCE(SUM(ki.quantity), 0)', 'itemCount')
       .where('kot.createdAt BETWEEN :from AND :to', { from, to })
@@ -2382,7 +2382,7 @@ export class ReportsService {
     const { from, to } = this.getDateRange(fromDate, toDate);
     const items = await this.purchaseItemRepo.createQueryBuilder('pi')
       .innerJoin('pi.purchase', 'p')
-      .leftJoin(Item, 'item', 'item.id = pi.itemId')
+      .leftJoin(StockItem, 'item', 'item.id = pi.itemId')
       .leftJoin(CategoryEntity, 'cat', 'cat.id = item.categoryId')
       .select('COALESCE(item.name, pi.itemId::text)', 'itemName')
       .addSelect('COALESCE(cat.name, \'Uncategorized\')', 'categoryName')
@@ -2418,7 +2418,7 @@ export class ReportsService {
     const items = await this.purchaseItemRepo.createQueryBuilder('pi')
       .innerJoin('pi.purchase', 'p')
       .innerJoin('p.supplier', 'supplier')
-      .leftJoin(Item, 'item', 'item.id = pi.itemId')
+      .leftJoin(StockItem, 'item', 'item.id = pi.itemId')
       .select('item.name', 'itemName')
       .addSelect('supplier.name', 'supplierName')
       .addSelect('AVG(pi.unitPrice)', 'avgPrice')
@@ -3024,7 +3024,7 @@ export class ReportsService {
 
     const itemProfit = await this.invoiceItemRepo.createQueryBuilder('ii')
       .innerJoin('ii.invoice', 'inv')
-      .innerJoin(Item, 'item', 'item.id = ii.itemId')
+      .innerJoin(StockItem, 'item', 'item.id = ii.itemId')
       .select('item.name', 'dimension')
       .addSelect('COALESCE(SUM(ii.totalAmount), 0)', 'revenue')
       .addSelect('COALESCE(SUM(ii.quantity * item.costPrice), 0)', 'cost')

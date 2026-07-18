@@ -3,7 +3,7 @@ import {
   ManyToOne, OneToMany, JoinColumn, Index,
 } from 'typeorm';
 import { Supplier } from '../../suppliers/entities/supplier.entity';
-import { Item } from '../../items/entities/item.entity';
+import { StockItem } from '../../stock-items/entities/stock-item.entity';
 import { decimalTransformer } from '../../shared/transformers/decimal.transformer';
 
 export enum PurchaseStatus {
@@ -83,9 +83,9 @@ export class PurchaseItem {
   @Column({ name: 'item_id', type: 'uuid' })
   itemId!: string;
 
-  @ManyToOne(() => Item)
+  @ManyToOne(() => StockItem)
   @JoinColumn({ name: 'item_id' })
-  item!: Item;
+  item!: StockItem;
 
   @Column({ type: 'decimal', precision: 12, scale: 2 , transformer: decimalTransformer })
   quantity!: number;

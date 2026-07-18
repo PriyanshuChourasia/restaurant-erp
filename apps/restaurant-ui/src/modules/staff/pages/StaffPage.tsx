@@ -1,12 +1,15 @@
 import { useState } from 'react'
-import { Plus, Search, Users, Mail, Phone, Trash2, Undo2, RefreshCw } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
+import { Plus, Search, Users, Mail, Phone, Trash2, Undo2, RefreshCw, FileText } from 'lucide-react'
 import { useStaff, useDeleteStaff, useRestoreStaff, useUpdateStaff } from '../hooks/useStaffQueries'
 import type { StaffMember } from '../api/staff.api'
+import { AddStaffDialog } from '../dialogs/AddStaffDialog'
 
 export function StaffPage() {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [selectedDept, setSelectedDept] = useState('all')
+  const [showAddDialog, setShowAddDialog] = useState(false)
 
   const { data, isLoading } = useStaff({ page, limit: 20, search: search || undefined })
   const deleteMutation = useDeleteStaff()
@@ -69,7 +72,10 @@ export function StaffPage() {
             <RefreshCw size={14} />
             Refresh
           </button>
-          <button className="inline-flex items-center gap-2 h-9 px-4 rounded-lg bg-primary text-sm font-medium text-white transition-all hover:bg-primary/90">
+          <button
+            onClick={() => setShowAddDialog(true)}
+            className="inline-flex items-center gap-2 h-9 px-4 rounded-lg bg-primary text-sm font-medium text-white transition-all hover:bg-primary/90"
+          >
             <Plus size={15} />
             Add Staff
           </button>
@@ -209,9 +215,17 @@ export function StaffPage() {
                   </button>
                 ) : (
                   <>
+                    <Link
+                      to={`/staff/$id`}
+                      params={{ id: member.id }}
+                      className="flex-1 flex items-center justify-center gap-1 h-8 rounded-lg border border-violet-200 text-xs font-medium text-violet-600 transition-all hover:bg-violet-50"
+                    >
+                      <FileText size={13} />
+                      View & Docs
+                    </Link>
                     <button
                       onClick={() => handleToggleActive(member)}
-                      className={`flex-1 flex items-center justify-center gap-1 h-8 rounded-lg border text-xs font-medium transition-all ${
+                      className={`flex items-center justify-center gap-1 h-8 px-2 rounded-lg border text-xs font-medium transition-all ${
                         member.isActive
                           ? 'border-amber-200 text-amber-600 hover:bg-amber-50'
                           : 'border-emerald-200 text-emerald-600 hover:bg-emerald-50'
@@ -221,7 +235,7 @@ export function StaffPage() {
                     </button>
                     <button
                       onClick={() => handleDelete(member.id)}
-                      className="flex items-center justify-center gap-1 h-8 px-3 rounded-lg border border-red-200 text-xs font-medium text-red-600 transition-all hover:bg-red-50"
+                      className="flex items-center justify-center gap-1 h-8 px-2 rounded-lg border border-red-200 text-xs font-medium text-red-600 transition-all hover:bg-red-50"
                     >
                       <Trash2 size={13} />
                     </button>
@@ -257,6 +271,8 @@ export function StaffPage() {
           </div>
         </div>
       )}
+
+      <AddStaffDialog open={showAddDialog} onClose={() => setShowAddDialog(false)} />
     </div>
   )
 }

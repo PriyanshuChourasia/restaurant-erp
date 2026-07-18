@@ -4,7 +4,7 @@ import { NotFoundException, ConflictException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Invoice, InvoiceItem, InvoiceStatus, PaymentMethod } from '../entities/sales.entity';
 import { SalesService } from './sales.service';
-import { Item } from '../../items/entities/item.entity';
+import { StockItem } from '../../stock-items/entities/stock-item.entity';
 import { Inventory, StockMovement } from '../../inventory/entities/inventory.entity';
 
 describe('SalesService', () => {
@@ -60,7 +60,7 @@ describe('SalesService', () => {
           useValue: {},
         },
         {
-          provide: getRepositoryToken(Item),
+          provide: getRepositoryToken(StockItem),
           useValue: {
             findOne: jest.fn().mockResolvedValue({ id: 'item-1', name: 'Item 1', price: 200, gstRate: 18, hsnCode: '2105' }),
           },

@@ -8,7 +8,7 @@ import {
   JoinColumn,
   Index,
 } from 'typeorm';
-import { Unit } from '../../units/entities/unit.entity';
+import { StockItem } from '../../stock-items/entities/stock-item.entity';
 import { StorageUnit } from './storage-unit.entity';
 import { StockBatch } from './stock-batch.entity';
 import { decimalTransformer } from '../../shared/transformers/decimal.transformer';
@@ -45,9 +45,9 @@ export class StockLedger {
   @Column({ name: 'stock_item_id', type: 'uuid' })
   stockItemId!: string;
 
-  @ManyToOne(() => Unit)
+  @ManyToOne(() => StockItem)
   @JoinColumn({ name: 'stock_item_id' })
-  stockItem!: Unit;
+  stockItem!: StockItem;
 
   @Column({ name: 'warehouse_id', type: 'uuid' })
   warehouseId!: string;

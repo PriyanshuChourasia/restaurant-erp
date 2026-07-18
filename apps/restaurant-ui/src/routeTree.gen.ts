@@ -13,7 +13,6 @@ import { Route as ZonesRouteImport } from './routes/zones'
 import { Route as VouchersRouteImport } from './routes/vouchers'
 import { Route as TablesRouteImport } from './routes/tables'
 import { Route as StorageUnitsRouteImport } from './routes/storage-units'
-import { Route as StockItemsRouteImport } from './routes/stock-items'
 import { Route as StaffRouteImport } from './routes/staff'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SalesRouteImport } from './routes/sales'
@@ -33,10 +32,12 @@ import { Route as KotRouteImport } from './routes/kot'
 import { Route as KitchenPrepRouteImport } from './routes/kitchen-prep'
 import { Route as ItemsRouteImport } from './routes/items'
 import { Route as InventoryRouteImport } from './routes/inventory'
+import { Route as DocumentsRouteImport } from './routes/documents'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ZonesZoneIdRouteImport } from './routes/zones.$zoneId'
+import { Route as StaffIdRouteImport } from './routes/staff.$id'
 import { Route as ReportsZonePerformanceRouteImport } from './routes/reports/zone-performance'
 import { Route as ReportsTrendsRouteImport } from './routes/reports/trends'
 import { Route as ReportsTableUtilizationRouteImport } from './routes/reports/table-utilization'
@@ -111,6 +112,8 @@ import { Route as ItemsCreateRouteImport } from './routes/items_.create'
 import { Route as ItemsIdRouteImport } from './routes/items_.$id'
 import { Route as InventoryStockCountsRouteImport } from './routes/inventory/stock-counts'
 import { Route as InventoryBatchesRouteImport } from './routes/inventory/batches'
+import { Route as DocumentsCreateRouteImport } from './routes/documents_.create'
+import { Route as DocumentsIdRouteImport } from './routes/documents.$id'
 import { Route as DeveloperDeveloperRouteImport } from './routes/developer/_developer'
 import { Route as CategoriesTreeRouteImport } from './routes/categories_.tree'
 import { Route as CategoriesCreateRouteImport } from './routes/categories_.create'
@@ -118,10 +121,18 @@ import { Route as CategoriesIdRouteImport } from './routes/categories_.$id'
 import { Route as DeveloperDeveloperIndexRouteImport } from './routes/developer/_developer/index'
 import { Route as PriceLevelsIdPricingRouteImport } from './routes/price-levels_.$id_.pricing'
 import { Route as PriceLevelsIdEditRouteImport } from './routes/price-levels_.$id_.edit'
+import { Route as DocumentsIdEditRouteImport } from './routes/documents_.$id_.edit'
 import { Route as DeveloperDeveloperVoucherSchemaRouteImport } from './routes/developer/_developer/voucher-schema'
 import { Route as DeveloperDeveloperUsersRouteImport } from './routes/developer/_developer/users'
-import { Route as DeveloperDeveloperStockItemsRouteImport } from './routes/developer/_developer/stock-items'
+import { Route as DeveloperDeveloperUserSchemaRouteImport } from './routes/developer/_developer/user-schema'
+import { Route as DeveloperDeveloperSupplierSchemaRouteImport } from './routes/developer/_developer/supplier-schema'
+import { Route as DeveloperDeveloperSeatingSchemaRouteImport } from './routes/developer/_developer/seating-schema'
 import { Route as DeveloperDeveloperSchemaRouteImport } from './routes/developer/_developer/schema'
+import { Route as DeveloperDeveloperRecipeSchemaRouteImport } from './routes/developer/_developer/recipe-schema'
+import { Route as DeveloperDeveloperPriceLevelSchemaRouteImport } from './routes/developer/_developer/price-level-schema'
+import { Route as DeveloperDeveloperOrderSchemaRouteImport } from './routes/developer/_developer/order-schema'
+import { Route as DeveloperDeveloperLedgerSchemaRouteImport } from './routes/developer/_developer/ledger-schema'
+import { Route as DeveloperDeveloperCustomerSchemaRouteImport } from './routes/developer/_developer/customer-schema'
 import { Route as CategoriesIdEditRouteImport } from './routes/categories_.$id_.edit'
 import { Route as DeveloperDeveloperTablesTableNameRouteImport } from './routes/developer/_developer/tables.$tableName'
 
@@ -143,11 +154,6 @@ const TablesRoute = TablesRouteImport.update({
 const StorageUnitsRoute = StorageUnitsRouteImport.update({
   id: '/storage-units',
   path: '/storage-units',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const StockItemsRoute = StockItemsRouteImport.update({
-  id: '/stock-items',
-  path: '/stock-items',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StaffRoute = StaffRouteImport.update({
@@ -245,6 +251,11 @@ const InventoryRoute = InventoryRouteImport.update({
   path: '/inventory',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DocumentsRoute = DocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -264,6 +275,11 @@ const ZonesZoneIdRoute = ZonesZoneIdRouteImport.update({
   id: '/$zoneId',
   path: '/$zoneId',
   getParentRoute: () => ZonesRoute,
+} as any)
+const StaffIdRoute = StaffIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => StaffRoute,
 } as any)
 const ReportsZonePerformanceRoute = ReportsZonePerformanceRouteImport.update({
   id: '/zone-performance',
@@ -681,6 +697,16 @@ const InventoryBatchesRoute = InventoryBatchesRouteImport.update({
   path: '/batches',
   getParentRoute: () => InventoryRoute,
 } as any)
+const DocumentsCreateRoute = DocumentsCreateRouteImport.update({
+  id: '/documents_/create',
+  path: '/documents/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocumentsIdRoute = DocumentsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => DocumentsRoute,
+} as any)
 const DeveloperDeveloperRoute = DeveloperDeveloperRouteImport.update({
   id: '/developer/_developer',
   path: '/developer',
@@ -716,6 +742,11 @@ const PriceLevelsIdEditRoute = PriceLevelsIdEditRouteImport.update({
   path: '/price-levels/$id/edit',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DocumentsIdEditRoute = DocumentsIdEditRouteImport.update({
+  id: '/documents_/$id_/edit',
+  path: '/documents/$id/edit',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DeveloperDeveloperVoucherSchemaRoute =
   DeveloperDeveloperVoucherSchemaRouteImport.update({
     id: '/voucher-schema',
@@ -727,16 +758,58 @@ const DeveloperDeveloperUsersRoute = DeveloperDeveloperUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => DeveloperDeveloperRoute,
 } as any)
-const DeveloperDeveloperStockItemsRoute =
-  DeveloperDeveloperStockItemsRouteImport.update({
-    id: '/stock-items',
-    path: '/stock-items',
+const DeveloperDeveloperUserSchemaRoute =
+  DeveloperDeveloperUserSchemaRouteImport.update({
+    id: '/user-schema',
+    path: '/user-schema',
+    getParentRoute: () => DeveloperDeveloperRoute,
+  } as any)
+const DeveloperDeveloperSupplierSchemaRoute =
+  DeveloperDeveloperSupplierSchemaRouteImport.update({
+    id: '/supplier-schema',
+    path: '/supplier-schema',
+    getParentRoute: () => DeveloperDeveloperRoute,
+  } as any)
+const DeveloperDeveloperSeatingSchemaRoute =
+  DeveloperDeveloperSeatingSchemaRouteImport.update({
+    id: '/seating-schema',
+    path: '/seating-schema',
     getParentRoute: () => DeveloperDeveloperRoute,
   } as any)
 const DeveloperDeveloperSchemaRoute =
   DeveloperDeveloperSchemaRouteImport.update({
     id: '/schema',
     path: '/schema',
+    getParentRoute: () => DeveloperDeveloperRoute,
+  } as any)
+const DeveloperDeveloperRecipeSchemaRoute =
+  DeveloperDeveloperRecipeSchemaRouteImport.update({
+    id: '/recipe-schema',
+    path: '/recipe-schema',
+    getParentRoute: () => DeveloperDeveloperRoute,
+  } as any)
+const DeveloperDeveloperPriceLevelSchemaRoute =
+  DeveloperDeveloperPriceLevelSchemaRouteImport.update({
+    id: '/price-level-schema',
+    path: '/price-level-schema',
+    getParentRoute: () => DeveloperDeveloperRoute,
+  } as any)
+const DeveloperDeveloperOrderSchemaRoute =
+  DeveloperDeveloperOrderSchemaRouteImport.update({
+    id: '/order-schema',
+    path: '/order-schema',
+    getParentRoute: () => DeveloperDeveloperRoute,
+  } as any)
+const DeveloperDeveloperLedgerSchemaRoute =
+  DeveloperDeveloperLedgerSchemaRouteImport.update({
+    id: '/ledger-schema',
+    path: '/ledger-schema',
+    getParentRoute: () => DeveloperDeveloperRoute,
+  } as any)
+const DeveloperDeveloperCustomerSchemaRoute =
+  DeveloperDeveloperCustomerSchemaRouteImport.update({
+    id: '/customer-schema',
+    path: '/customer-schema',
     getParentRoute: () => DeveloperDeveloperRoute,
   } as any)
 const CategoriesIdEditRoute = CategoriesIdEditRouteImport.update({
@@ -755,6 +828,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/categories': typeof CategoriesRoute
   '/dashboard': typeof DashboardRoute
+  '/documents': typeof DocumentsRouteWithChildren
   '/inventory': typeof InventoryRouteWithChildren
   '/items': typeof ItemsRoute
   '/kitchen-prep': typeof KitchenPrepRoute
@@ -773,8 +847,7 @@ export interface FileRoutesByFullPath {
   '/reservations': typeof ReservationsRoute
   '/sales': typeof SalesRoute
   '/settings': typeof SettingsRoute
-  '/staff': typeof StaffRoute
-  '/stock-items': typeof StockItemsRoute
+  '/staff': typeof StaffRouteWithChildren
   '/storage-units': typeof StorageUnitsRoute
   '/tables': typeof TablesRoute
   '/vouchers': typeof VouchersRoute
@@ -783,6 +856,8 @@ export interface FileRoutesByFullPath {
   '/categories/create': typeof CategoriesCreateRoute
   '/categories/tree': typeof CategoriesTreeRoute
   '/developer': typeof DeveloperDeveloperRouteWithChildren
+  '/documents/$id': typeof DocumentsIdRoute
+  '/documents/create': typeof DocumentsCreateRoute
   '/inventory/batches': typeof InventoryBatchesRoute
   '/inventory/stock-counts': typeof InventoryStockCountsRoute
   '/items/$id': typeof ItemsIdRoute
@@ -857,12 +932,21 @@ export interface FileRoutesByFullPath {
   '/reports/table-utilization': typeof ReportsTableUtilizationRoute
   '/reports/trends': typeof ReportsTrendsRoute
   '/reports/zone-performance': typeof ReportsZonePerformanceRoute
+  '/staff/$id': typeof StaffIdRoute
   '/zones/$zoneId': typeof ZonesZoneIdRoute
   '/categories/$id/edit': typeof CategoriesIdEditRoute
+  '/developer/customer-schema': typeof DeveloperDeveloperCustomerSchemaRoute
+  '/developer/ledger-schema': typeof DeveloperDeveloperLedgerSchemaRoute
+  '/developer/order-schema': typeof DeveloperDeveloperOrderSchemaRoute
+  '/developer/price-level-schema': typeof DeveloperDeveloperPriceLevelSchemaRoute
+  '/developer/recipe-schema': typeof DeveloperDeveloperRecipeSchemaRoute
   '/developer/schema': typeof DeveloperDeveloperSchemaRoute
-  '/developer/stock-items': typeof DeveloperDeveloperStockItemsRoute
+  '/developer/seating-schema': typeof DeveloperDeveloperSeatingSchemaRoute
+  '/developer/supplier-schema': typeof DeveloperDeveloperSupplierSchemaRoute
+  '/developer/user-schema': typeof DeveloperDeveloperUserSchemaRoute
   '/developer/users': typeof DeveloperDeveloperUsersRoute
   '/developer/voucher-schema': typeof DeveloperDeveloperVoucherSchemaRoute
+  '/documents/$id/edit': typeof DocumentsIdEditRoute
   '/price-levels/$id/edit': typeof PriceLevelsIdEditRoute
   '/price-levels/$id/pricing': typeof PriceLevelsIdPricingRoute
   '/developer/': typeof DeveloperDeveloperIndexRoute
@@ -872,6 +956,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/categories': typeof CategoriesRoute
   '/dashboard': typeof DashboardRoute
+  '/documents': typeof DocumentsRouteWithChildren
   '/inventory': typeof InventoryRouteWithChildren
   '/items': typeof ItemsRoute
   '/kitchen-prep': typeof KitchenPrepRoute
@@ -890,8 +975,7 @@ export interface FileRoutesByTo {
   '/reservations': typeof ReservationsRoute
   '/sales': typeof SalesRoute
   '/settings': typeof SettingsRoute
-  '/staff': typeof StaffRoute
-  '/stock-items': typeof StockItemsRoute
+  '/staff': typeof StaffRouteWithChildren
   '/storage-units': typeof StorageUnitsRoute
   '/tables': typeof TablesRoute
   '/vouchers': typeof VouchersRoute
@@ -899,6 +983,8 @@ export interface FileRoutesByTo {
   '/categories/$id': typeof CategoriesIdRoute
   '/categories/create': typeof CategoriesCreateRoute
   '/categories/tree': typeof CategoriesTreeRoute
+  '/documents/$id': typeof DocumentsIdRoute
+  '/documents/create': typeof DocumentsCreateRoute
   '/inventory/batches': typeof InventoryBatchesRoute
   '/inventory/stock-counts': typeof InventoryStockCountsRoute
   '/items/$id': typeof ItemsIdRoute
@@ -973,12 +1059,21 @@ export interface FileRoutesByTo {
   '/reports/table-utilization': typeof ReportsTableUtilizationRoute
   '/reports/trends': typeof ReportsTrendsRoute
   '/reports/zone-performance': typeof ReportsZonePerformanceRoute
+  '/staff/$id': typeof StaffIdRoute
   '/zones/$zoneId': typeof ZonesZoneIdRoute
   '/categories/$id/edit': typeof CategoriesIdEditRoute
+  '/developer/customer-schema': typeof DeveloperDeveloperCustomerSchemaRoute
+  '/developer/ledger-schema': typeof DeveloperDeveloperLedgerSchemaRoute
+  '/developer/order-schema': typeof DeveloperDeveloperOrderSchemaRoute
+  '/developer/price-level-schema': typeof DeveloperDeveloperPriceLevelSchemaRoute
+  '/developer/recipe-schema': typeof DeveloperDeveloperRecipeSchemaRoute
   '/developer/schema': typeof DeveloperDeveloperSchemaRoute
-  '/developer/stock-items': typeof DeveloperDeveloperStockItemsRoute
+  '/developer/seating-schema': typeof DeveloperDeveloperSeatingSchemaRoute
+  '/developer/supplier-schema': typeof DeveloperDeveloperSupplierSchemaRoute
+  '/developer/user-schema': typeof DeveloperDeveloperUserSchemaRoute
   '/developer/users': typeof DeveloperDeveloperUsersRoute
   '/developer/voucher-schema': typeof DeveloperDeveloperVoucherSchemaRoute
+  '/documents/$id/edit': typeof DocumentsIdEditRoute
   '/price-levels/$id/edit': typeof PriceLevelsIdEditRoute
   '/price-levels/$id/pricing': typeof PriceLevelsIdPricingRoute
   '/developer': typeof DeveloperDeveloperIndexRoute
@@ -989,6 +1084,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/categories': typeof CategoriesRoute
   '/dashboard': typeof DashboardRoute
+  '/documents': typeof DocumentsRouteWithChildren
   '/inventory': typeof InventoryRouteWithChildren
   '/items': typeof ItemsRoute
   '/kitchen-prep': typeof KitchenPrepRoute
@@ -1007,8 +1103,7 @@ export interface FileRoutesById {
   '/reservations': typeof ReservationsRoute
   '/sales': typeof SalesRoute
   '/settings': typeof SettingsRoute
-  '/staff': typeof StaffRoute
-  '/stock-items': typeof StockItemsRoute
+  '/staff': typeof StaffRouteWithChildren
   '/storage-units': typeof StorageUnitsRoute
   '/tables': typeof TablesRoute
   '/vouchers': typeof VouchersRoute
@@ -1017,6 +1112,8 @@ export interface FileRoutesById {
   '/categories_/create': typeof CategoriesCreateRoute
   '/categories_/tree': typeof CategoriesTreeRoute
   '/developer/_developer': typeof DeveloperDeveloperRouteWithChildren
+  '/documents/$id': typeof DocumentsIdRoute
+  '/documents_/create': typeof DocumentsCreateRoute
   '/inventory/batches': typeof InventoryBatchesRoute
   '/inventory/stock-counts': typeof InventoryStockCountsRoute
   '/items_/$id': typeof ItemsIdRoute
@@ -1091,12 +1188,21 @@ export interface FileRoutesById {
   '/reports/table-utilization': typeof ReportsTableUtilizationRoute
   '/reports/trends': typeof ReportsTrendsRoute
   '/reports/zone-performance': typeof ReportsZonePerformanceRoute
+  '/staff/$id': typeof StaffIdRoute
   '/zones/$zoneId': typeof ZonesZoneIdRoute
   '/categories_/$id_/edit': typeof CategoriesIdEditRoute
+  '/developer/_developer/customer-schema': typeof DeveloperDeveloperCustomerSchemaRoute
+  '/developer/_developer/ledger-schema': typeof DeveloperDeveloperLedgerSchemaRoute
+  '/developer/_developer/order-schema': typeof DeveloperDeveloperOrderSchemaRoute
+  '/developer/_developer/price-level-schema': typeof DeveloperDeveloperPriceLevelSchemaRoute
+  '/developer/_developer/recipe-schema': typeof DeveloperDeveloperRecipeSchemaRoute
   '/developer/_developer/schema': typeof DeveloperDeveloperSchemaRoute
-  '/developer/_developer/stock-items': typeof DeveloperDeveloperStockItemsRoute
+  '/developer/_developer/seating-schema': typeof DeveloperDeveloperSeatingSchemaRoute
+  '/developer/_developer/supplier-schema': typeof DeveloperDeveloperSupplierSchemaRoute
+  '/developer/_developer/user-schema': typeof DeveloperDeveloperUserSchemaRoute
   '/developer/_developer/users': typeof DeveloperDeveloperUsersRoute
   '/developer/_developer/voucher-schema': typeof DeveloperDeveloperVoucherSchemaRoute
+  '/documents_/$id_/edit': typeof DocumentsIdEditRoute
   '/price-levels_/$id_/edit': typeof PriceLevelsIdEditRoute
   '/price-levels_/$id_/pricing': typeof PriceLevelsIdPricingRoute
   '/developer/_developer/': typeof DeveloperDeveloperIndexRoute
@@ -1108,6 +1214,7 @@ export interface FileRouteTypes {
     | '/'
     | '/categories'
     | '/dashboard'
+    | '/documents'
     | '/inventory'
     | '/items'
     | '/kitchen-prep'
@@ -1127,7 +1234,6 @@ export interface FileRouteTypes {
     | '/sales'
     | '/settings'
     | '/staff'
-    | '/stock-items'
     | '/storage-units'
     | '/tables'
     | '/vouchers'
@@ -1136,6 +1242,8 @@ export interface FileRouteTypes {
     | '/categories/create'
     | '/categories/tree'
     | '/developer'
+    | '/documents/$id'
+    | '/documents/create'
     | '/inventory/batches'
     | '/inventory/stock-counts'
     | '/items/$id'
@@ -1210,12 +1318,21 @@ export interface FileRouteTypes {
     | '/reports/table-utilization'
     | '/reports/trends'
     | '/reports/zone-performance'
+    | '/staff/$id'
     | '/zones/$zoneId'
     | '/categories/$id/edit'
+    | '/developer/customer-schema'
+    | '/developer/ledger-schema'
+    | '/developer/order-schema'
+    | '/developer/price-level-schema'
+    | '/developer/recipe-schema'
     | '/developer/schema'
-    | '/developer/stock-items'
+    | '/developer/seating-schema'
+    | '/developer/supplier-schema'
+    | '/developer/user-schema'
     | '/developer/users'
     | '/developer/voucher-schema'
+    | '/documents/$id/edit'
     | '/price-levels/$id/edit'
     | '/price-levels/$id/pricing'
     | '/developer/'
@@ -1225,6 +1342,7 @@ export interface FileRouteTypes {
     | '/'
     | '/categories'
     | '/dashboard'
+    | '/documents'
     | '/inventory'
     | '/items'
     | '/kitchen-prep'
@@ -1244,7 +1362,6 @@ export interface FileRouteTypes {
     | '/sales'
     | '/settings'
     | '/staff'
-    | '/stock-items'
     | '/storage-units'
     | '/tables'
     | '/vouchers'
@@ -1252,6 +1369,8 @@ export interface FileRouteTypes {
     | '/categories/$id'
     | '/categories/create'
     | '/categories/tree'
+    | '/documents/$id'
+    | '/documents/create'
     | '/inventory/batches'
     | '/inventory/stock-counts'
     | '/items/$id'
@@ -1326,12 +1445,21 @@ export interface FileRouteTypes {
     | '/reports/table-utilization'
     | '/reports/trends'
     | '/reports/zone-performance'
+    | '/staff/$id'
     | '/zones/$zoneId'
     | '/categories/$id/edit'
+    | '/developer/customer-schema'
+    | '/developer/ledger-schema'
+    | '/developer/order-schema'
+    | '/developer/price-level-schema'
+    | '/developer/recipe-schema'
     | '/developer/schema'
-    | '/developer/stock-items'
+    | '/developer/seating-schema'
+    | '/developer/supplier-schema'
+    | '/developer/user-schema'
     | '/developer/users'
     | '/developer/voucher-schema'
+    | '/documents/$id/edit'
     | '/price-levels/$id/edit'
     | '/price-levels/$id/pricing'
     | '/developer'
@@ -1341,6 +1469,7 @@ export interface FileRouteTypes {
     | '/'
     | '/categories'
     | '/dashboard'
+    | '/documents'
     | '/inventory'
     | '/items'
     | '/kitchen-prep'
@@ -1360,7 +1489,6 @@ export interface FileRouteTypes {
     | '/sales'
     | '/settings'
     | '/staff'
-    | '/stock-items'
     | '/storage-units'
     | '/tables'
     | '/vouchers'
@@ -1369,6 +1497,8 @@ export interface FileRouteTypes {
     | '/categories_/create'
     | '/categories_/tree'
     | '/developer/_developer'
+    | '/documents/$id'
+    | '/documents_/create'
     | '/inventory/batches'
     | '/inventory/stock-counts'
     | '/items_/$id'
@@ -1443,12 +1573,21 @@ export interface FileRouteTypes {
     | '/reports/table-utilization'
     | '/reports/trends'
     | '/reports/zone-performance'
+    | '/staff/$id'
     | '/zones/$zoneId'
     | '/categories_/$id_/edit'
+    | '/developer/_developer/customer-schema'
+    | '/developer/_developer/ledger-schema'
+    | '/developer/_developer/order-schema'
+    | '/developer/_developer/price-level-schema'
+    | '/developer/_developer/recipe-schema'
     | '/developer/_developer/schema'
-    | '/developer/_developer/stock-items'
+    | '/developer/_developer/seating-schema'
+    | '/developer/_developer/supplier-schema'
+    | '/developer/_developer/user-schema'
     | '/developer/_developer/users'
     | '/developer/_developer/voucher-schema'
+    | '/documents_/$id_/edit'
     | '/price-levels_/$id_/edit'
     | '/price-levels_/$id_/pricing'
     | '/developer/_developer/'
@@ -1459,6 +1598,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CategoriesRoute: typeof CategoriesRoute
   DashboardRoute: typeof DashboardRoute
+  DocumentsRoute: typeof DocumentsRouteWithChildren
   InventoryRoute: typeof InventoryRouteWithChildren
   ItemsRoute: typeof ItemsRoute
   KitchenPrepRoute: typeof KitchenPrepRoute
@@ -1477,8 +1617,7 @@ export interface RootRouteChildren {
   ReservationsRoute: typeof ReservationsRoute
   SalesRoute: typeof SalesRoute
   SettingsRoute: typeof SettingsRoute
-  StaffRoute: typeof StaffRoute
-  StockItemsRoute: typeof StockItemsRoute
+  StaffRoute: typeof StaffRouteWithChildren
   StorageUnitsRoute: typeof StorageUnitsRoute
   TablesRoute: typeof TablesRoute
   VouchersRoute: typeof VouchersRoute
@@ -1487,10 +1626,12 @@ export interface RootRouteChildren {
   CategoriesCreateRoute: typeof CategoriesCreateRoute
   CategoriesTreeRoute: typeof CategoriesTreeRoute
   DeveloperDeveloperRoute: typeof DeveloperDeveloperRouteWithChildren
+  DocumentsCreateRoute: typeof DocumentsCreateRoute
   ItemsIdRoute: typeof ItemsIdRoute
   ItemsCreateRoute: typeof ItemsCreateRoute
   PriceLevelsCreateRoute: typeof PriceLevelsCreateRoute
   CategoriesIdEditRoute: typeof CategoriesIdEditRoute
+  DocumentsIdEditRoute: typeof DocumentsIdEditRoute
   PriceLevelsIdEditRoute: typeof PriceLevelsIdEditRoute
   PriceLevelsIdPricingRoute: typeof PriceLevelsIdPricingRoute
 }
@@ -1523,13 +1664,6 @@ declare module '@tanstack/react-router' {
       path: '/storage-units'
       fullPath: '/storage-units'
       preLoaderRoute: typeof StorageUnitsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/stock-items': {
-      id: '/stock-items'
-      path: '/stock-items'
-      fullPath: '/stock-items'
-      preLoaderRoute: typeof StockItemsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/staff': {
@@ -1665,6 +1799,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InventoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/documents': {
+      id: '/documents'
+      path: '/documents'
+      fullPath: '/documents'
+      preLoaderRoute: typeof DocumentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -1692,6 +1833,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/zones/$zoneId'
       preLoaderRoute: typeof ZonesZoneIdRouteImport
       parentRoute: typeof ZonesRoute
+    }
+    '/staff/$id': {
+      id: '/staff/$id'
+      path: '/$id'
+      fullPath: '/staff/$id'
+      preLoaderRoute: typeof StaffIdRouteImport
+      parentRoute: typeof StaffRoute
     }
     '/reports/zone-performance': {
       id: '/reports/zone-performance'
@@ -2211,6 +2359,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InventoryBatchesRouteImport
       parentRoute: typeof InventoryRoute
     }
+    '/documents_/create': {
+      id: '/documents_/create'
+      path: '/documents/create'
+      fullPath: '/documents/create'
+      preLoaderRoute: typeof DocumentsCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/documents/$id': {
+      id: '/documents/$id'
+      path: '/$id'
+      fullPath: '/documents/$id'
+      preLoaderRoute: typeof DocumentsIdRouteImport
+      parentRoute: typeof DocumentsRoute
+    }
     '/developer/_developer': {
       id: '/developer/_developer'
       path: '/developer'
@@ -2260,6 +2422,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PriceLevelsIdEditRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/documents_/$id_/edit': {
+      id: '/documents_/$id_/edit'
+      path: '/documents/$id/edit'
+      fullPath: '/documents/$id/edit'
+      preLoaderRoute: typeof DocumentsIdEditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/developer/_developer/voucher-schema': {
       id: '/developer/_developer/voucher-schema'
       path: '/voucher-schema'
@@ -2274,11 +2443,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DeveloperDeveloperUsersRouteImport
       parentRoute: typeof DeveloperDeveloperRoute
     }
-    '/developer/_developer/stock-items': {
-      id: '/developer/_developer/stock-items'
-      path: '/stock-items'
-      fullPath: '/developer/stock-items'
-      preLoaderRoute: typeof DeveloperDeveloperStockItemsRouteImport
+    '/developer/_developer/user-schema': {
+      id: '/developer/_developer/user-schema'
+      path: '/user-schema'
+      fullPath: '/developer/user-schema'
+      preLoaderRoute: typeof DeveloperDeveloperUserSchemaRouteImport
+      parentRoute: typeof DeveloperDeveloperRoute
+    }
+    '/developer/_developer/supplier-schema': {
+      id: '/developer/_developer/supplier-schema'
+      path: '/supplier-schema'
+      fullPath: '/developer/supplier-schema'
+      preLoaderRoute: typeof DeveloperDeveloperSupplierSchemaRouteImport
+      parentRoute: typeof DeveloperDeveloperRoute
+    }
+    '/developer/_developer/seating-schema': {
+      id: '/developer/_developer/seating-schema'
+      path: '/seating-schema'
+      fullPath: '/developer/seating-schema'
+      preLoaderRoute: typeof DeveloperDeveloperSeatingSchemaRouteImport
       parentRoute: typeof DeveloperDeveloperRoute
     }
     '/developer/_developer/schema': {
@@ -2286,6 +2469,41 @@ declare module '@tanstack/react-router' {
       path: '/schema'
       fullPath: '/developer/schema'
       preLoaderRoute: typeof DeveloperDeveloperSchemaRouteImport
+      parentRoute: typeof DeveloperDeveloperRoute
+    }
+    '/developer/_developer/recipe-schema': {
+      id: '/developer/_developer/recipe-schema'
+      path: '/recipe-schema'
+      fullPath: '/developer/recipe-schema'
+      preLoaderRoute: typeof DeveloperDeveloperRecipeSchemaRouteImport
+      parentRoute: typeof DeveloperDeveloperRoute
+    }
+    '/developer/_developer/price-level-schema': {
+      id: '/developer/_developer/price-level-schema'
+      path: '/price-level-schema'
+      fullPath: '/developer/price-level-schema'
+      preLoaderRoute: typeof DeveloperDeveloperPriceLevelSchemaRouteImport
+      parentRoute: typeof DeveloperDeveloperRoute
+    }
+    '/developer/_developer/order-schema': {
+      id: '/developer/_developer/order-schema'
+      path: '/order-schema'
+      fullPath: '/developer/order-schema'
+      preLoaderRoute: typeof DeveloperDeveloperOrderSchemaRouteImport
+      parentRoute: typeof DeveloperDeveloperRoute
+    }
+    '/developer/_developer/ledger-schema': {
+      id: '/developer/_developer/ledger-schema'
+      path: '/ledger-schema'
+      fullPath: '/developer/ledger-schema'
+      preLoaderRoute: typeof DeveloperDeveloperLedgerSchemaRouteImport
+      parentRoute: typeof DeveloperDeveloperRoute
+    }
+    '/developer/_developer/customer-schema': {
+      id: '/developer/_developer/customer-schema'
+      path: '/customer-schema'
+      fullPath: '/developer/customer-schema'
+      preLoaderRoute: typeof DeveloperDeveloperCustomerSchemaRouteImport
       parentRoute: typeof DeveloperDeveloperRoute
     }
     '/categories_/$id_/edit': {
@@ -2304,6 +2522,18 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface DocumentsRouteChildren {
+  DocumentsIdRoute: typeof DocumentsIdRoute
+}
+
+const DocumentsRouteChildren: DocumentsRouteChildren = {
+  DocumentsIdRoute: DocumentsIdRoute,
+}
+
+const DocumentsRouteWithChildren = DocumentsRoute._addFileChildren(
+  DocumentsRouteChildren,
+)
 
 interface InventoryRouteChildren {
   InventoryBatchesRoute: typeof InventoryBatchesRoute
@@ -2472,6 +2702,16 @@ const ReportsRouteChildren: ReportsRouteChildren = {
 const ReportsRouteWithChildren =
   ReportsRoute._addFileChildren(ReportsRouteChildren)
 
+interface StaffRouteChildren {
+  StaffIdRoute: typeof StaffIdRoute
+}
+
+const StaffRouteChildren: StaffRouteChildren = {
+  StaffIdRoute: StaffIdRoute,
+}
+
+const StaffRouteWithChildren = StaffRoute._addFileChildren(StaffRouteChildren)
+
 interface ZonesRouteChildren {
   ZonesZoneIdRoute: typeof ZonesZoneIdRoute
 }
@@ -2483,8 +2723,15 @@ const ZonesRouteChildren: ZonesRouteChildren = {
 const ZonesRouteWithChildren = ZonesRoute._addFileChildren(ZonesRouteChildren)
 
 interface DeveloperDeveloperRouteChildren {
+  DeveloperDeveloperCustomerSchemaRoute: typeof DeveloperDeveloperCustomerSchemaRoute
+  DeveloperDeveloperLedgerSchemaRoute: typeof DeveloperDeveloperLedgerSchemaRoute
+  DeveloperDeveloperOrderSchemaRoute: typeof DeveloperDeveloperOrderSchemaRoute
+  DeveloperDeveloperPriceLevelSchemaRoute: typeof DeveloperDeveloperPriceLevelSchemaRoute
+  DeveloperDeveloperRecipeSchemaRoute: typeof DeveloperDeveloperRecipeSchemaRoute
   DeveloperDeveloperSchemaRoute: typeof DeveloperDeveloperSchemaRoute
-  DeveloperDeveloperStockItemsRoute: typeof DeveloperDeveloperStockItemsRoute
+  DeveloperDeveloperSeatingSchemaRoute: typeof DeveloperDeveloperSeatingSchemaRoute
+  DeveloperDeveloperSupplierSchemaRoute: typeof DeveloperDeveloperSupplierSchemaRoute
+  DeveloperDeveloperUserSchemaRoute: typeof DeveloperDeveloperUserSchemaRoute
   DeveloperDeveloperUsersRoute: typeof DeveloperDeveloperUsersRoute
   DeveloperDeveloperVoucherSchemaRoute: typeof DeveloperDeveloperVoucherSchemaRoute
   DeveloperDeveloperIndexRoute: typeof DeveloperDeveloperIndexRoute
@@ -2492,8 +2739,16 @@ interface DeveloperDeveloperRouteChildren {
 }
 
 const DeveloperDeveloperRouteChildren: DeveloperDeveloperRouteChildren = {
+  DeveloperDeveloperCustomerSchemaRoute: DeveloperDeveloperCustomerSchemaRoute,
+  DeveloperDeveloperLedgerSchemaRoute: DeveloperDeveloperLedgerSchemaRoute,
+  DeveloperDeveloperOrderSchemaRoute: DeveloperDeveloperOrderSchemaRoute,
+  DeveloperDeveloperPriceLevelSchemaRoute:
+    DeveloperDeveloperPriceLevelSchemaRoute,
+  DeveloperDeveloperRecipeSchemaRoute: DeveloperDeveloperRecipeSchemaRoute,
   DeveloperDeveloperSchemaRoute: DeveloperDeveloperSchemaRoute,
-  DeveloperDeveloperStockItemsRoute: DeveloperDeveloperStockItemsRoute,
+  DeveloperDeveloperSeatingSchemaRoute: DeveloperDeveloperSeatingSchemaRoute,
+  DeveloperDeveloperSupplierSchemaRoute: DeveloperDeveloperSupplierSchemaRoute,
+  DeveloperDeveloperUserSchemaRoute: DeveloperDeveloperUserSchemaRoute,
   DeveloperDeveloperUsersRoute: DeveloperDeveloperUsersRoute,
   DeveloperDeveloperVoucherSchemaRoute: DeveloperDeveloperVoucherSchemaRoute,
   DeveloperDeveloperIndexRoute: DeveloperDeveloperIndexRoute,
@@ -2508,6 +2763,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CategoriesRoute: CategoriesRoute,
   DashboardRoute: DashboardRoute,
+  DocumentsRoute: DocumentsRouteWithChildren,
   InventoryRoute: InventoryRouteWithChildren,
   ItemsRoute: ItemsRoute,
   KitchenPrepRoute: KitchenPrepRoute,
@@ -2526,8 +2782,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReservationsRoute: ReservationsRoute,
   SalesRoute: SalesRoute,
   SettingsRoute: SettingsRoute,
-  StaffRoute: StaffRoute,
-  StockItemsRoute: StockItemsRoute,
+  StaffRoute: StaffRouteWithChildren,
   StorageUnitsRoute: StorageUnitsRoute,
   TablesRoute: TablesRoute,
   VouchersRoute: VouchersRoute,
@@ -2536,10 +2791,12 @@ const rootRouteChildren: RootRouteChildren = {
   CategoriesCreateRoute: CategoriesCreateRoute,
   CategoriesTreeRoute: CategoriesTreeRoute,
   DeveloperDeveloperRoute: DeveloperDeveloperRouteWithChildren,
+  DocumentsCreateRoute: DocumentsCreateRoute,
   ItemsIdRoute: ItemsIdRoute,
   ItemsCreateRoute: ItemsCreateRoute,
   PriceLevelsCreateRoute: PriceLevelsCreateRoute,
   CategoriesIdEditRoute: CategoriesIdEditRoute,
+  DocumentsIdEditRoute: DocumentsIdEditRoute,
   PriceLevelsIdEditRoute: PriceLevelsIdEditRoute,
   PriceLevelsIdPricingRoute: PriceLevelsIdPricingRoute,
 }

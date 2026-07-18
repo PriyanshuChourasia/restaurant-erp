@@ -13,7 +13,7 @@ import { UpdatePriceLevelDto } from '../dto/update-price-level.dto';
 import { QueryPriceLevelDto } from '../dto/query-price-level.dto';
 import { BulkUpsertItemPriceDto } from '../dto/bulk-upsert-item-price.dto';
 import { PriceLevel } from '../entities/price-level.entity';
-import { Item } from '../../items/entities/item.entity';
+import { StockItem } from '../../stock-items/entities/stock-item.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ItemPriceLevel } from '../entities/item-price-level.entity';
@@ -45,8 +45,8 @@ export class PriceLevelsService {
   constructor(
     private readonly priceLevelRepo: PriceLevelRepository,
     private readonly itemPriceLevelRepo: ItemPriceLevelRepository,
-    @InjectRepository(Item)
-    private readonly itemRepo: Repository<Item>,
+    @InjectRepository(StockItem)
+    private readonly itemRepo: Repository<StockItem>,
     @InjectDataSource()
     private readonly dataSource: DataSource,
     private readonly customersService: CustomersService,

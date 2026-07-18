@@ -11,7 +11,7 @@ import {
 import { Link, useLocation, useNavigate } from '@tanstack/react-router'
 import { useAuth } from '@/lib/auth-context'
 import { useDevTables } from '@/modules/developer/hooks/useDeveloper'
-import type { TableStat } from '@/modules/developer/api/developer.api'
+import type { DevTable } from '@/modules/developer/api/developer.api'
 
 import {
   Sidebar,
@@ -92,7 +92,7 @@ export function DeveloperSidebar() {
     navigate({ to: '/' })
   }
 
-  const tableLinks = (dbTables || []).map((t: TableStat) => ({
+  const tableLinks = (dbTables || []).map((t: DevTable) => ({
     to: `/developer/tables/${t.tableName}`,
     label: t.tableName,
     icon: iconMap[t.tableName] || Database,
@@ -112,8 +112,16 @@ export function DeveloperSidebar() {
       title: 'Developer',
       links: [
         { to: '/developer/users', label: 'Users', icon: Users },
-        { to: '/developer/stock-items', label: 'Stock Items', icon: Package },
         { to: '/developer/schema', label: 'Module Schema', icon: Layers },
+        { to: '/developer/user-schema', label: 'User & RBAC Schema', icon: Shield },
+        { to: '/developer/voucher-schema', label: 'Voucher Schema', icon: FileText },
+        { to: '/developer/price-level-schema', label: 'Price Level Schema', icon: DollarSign },
+        { to: '/developer/supplier-schema', label: 'Supplier Schema', icon: Truck },
+        { to: '/developer/customer-schema', label: 'Customer Schema', icon: Users },
+        { to: '/developer/seating-schema', label: 'Zone & Seating Schema', icon: Armchair },
+        { to: '/developer/order-schema', label: 'Order Schema', icon: ShoppingCart },
+        { to: '/developer/recipe-schema', label: 'Recipe Schema', icon: BookOpen },
+        { to: '/developer/ledger-schema', label: 'Ledger Schema', icon: BarChart3 },
       ],
     },
     {

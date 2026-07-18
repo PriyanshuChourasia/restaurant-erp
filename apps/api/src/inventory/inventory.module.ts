@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Item } from '../items/entities/item.entity';
+import { StockItem } from '../stock-items/entities/stock-item.entity';
 import { LedgerAccount } from '../ledger/entities/ledger.entity';
 import { Inventory, StockMovement } from './entities/inventory.entity';
 import { StockBatch } from './entities/stock-batch.entity';
 import { StorageUnit } from './entities/storage-unit.entity';
 import { OpeningStockEntry } from './entities/opening-stock-entry.entity';
 import { StockCount, StockCountLine } from './entities/stock-count.entity';
-import { StockItem } from './entities/stock-item.entity';
+import { StockGroup } from './entities/stock-group.entity';
 import { StockCategory } from './entities/stock-category.entity';
 import { StockLedger } from './entities/stock-ledger.entity';
 import { InventoryService } from './services/inventory.service';
@@ -21,7 +21,7 @@ import { StorageUnitRepository } from './repositories/storage-unit.repository';
 import { LedgerModule } from '../ledger/ledger.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Inventory, StockMovement, StorageUnit, OpeningStockEntry, StockBatch, StockCount, StockCountLine, StockItem, StockCategory, StockLedger, Item, LedgerAccount]), LedgerModule],
+  imports: [TypeOrmModule.forFeature([Inventory, StockMovement, StorageUnit, OpeningStockEntry, StockBatch, StockCount, StockCountLine, StockGroup, StockCategory, StockLedger, StockItem, LedgerAccount]), LedgerModule],
   controllers: [InventoryController, StorageUnitsController, StockCountController],
   providers: [InventoryService, StorageUnitsService, StockCountService, ExpirySweepService, StorageUnitRepository],
   exports: [InventoryService, StorageUnitsService],

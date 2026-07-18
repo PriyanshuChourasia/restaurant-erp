@@ -2,7 +2,7 @@ import {
   Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn,
   ManyToOne, JoinColumn, Index,
 } from 'typeorm';
-import { Item } from '../../items/entities/item.entity';
+import { StockItem } from '../../stock-items/entities/stock-item.entity';
 import { StorageUnit } from './storage-unit.entity';
 import { decimalTransformer } from '../../shared/transformers/decimal.transformer';
 
@@ -23,9 +23,9 @@ export class StockBatch {
   @Column({ name: 'item_id', type: 'uuid' })
   itemId!: string;
 
-  @ManyToOne(() => Item)
+  @ManyToOne(() => StockItem)
   @JoinColumn({ name: 'item_id' })
-  item!: Item;
+  item!: StockItem;
 
   @Column({ name: 'storage_unit_id', type: 'uuid' })
   storageUnitId!: string;

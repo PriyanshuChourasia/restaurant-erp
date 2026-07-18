@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
-import { ArrowLeft, RefreshCw, Loader2, Users, Mail, Phone, Shield, CheckCircle, XCircle } from 'lucide-react'
+import { RefreshCw, Loader2, Users, Mail, Phone, Shield, CheckCircle, XCircle } from 'lucide-react'
 import { apiClient } from '@/lib/axios-client'
 
 interface UserRow {
@@ -33,12 +32,6 @@ export function DeveloperUsersPage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-3">
-          <Link
-            to="/developer"
-            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <ArrowLeft size={18} />
-          </Link>
           <div className="flex items-center gap-2">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
               <Users size={16} />

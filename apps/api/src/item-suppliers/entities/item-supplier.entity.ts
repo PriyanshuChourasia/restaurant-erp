@@ -10,7 +10,7 @@ import {
   Unique,
   Index,
 } from 'typeorm';
-import { Item } from '../../items/entities/item.entity';
+import { StockItem } from '../../stock-items/entities/stock-item.entity';
 import { Supplier } from '../../suppliers/entities/supplier.entity';
 import { UnitOfMeasure } from '../../units/entities/unit-of-measure.entity';
 import { decimalTransformer } from '../../shared/transformers/decimal.transformer';
@@ -27,9 +27,9 @@ export class ItemSupplier {
   @Column({ name: 'item_id', type: 'uuid' })
   itemId!: string;
 
-  @ManyToOne(() => Item, { onDelete: 'CASCADE' })
+  @ManyToOne(() => StockItem, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'item_id' })
-  item!: Item;
+  item!: StockItem;
 
   @Column({ name: 'supplier_id', type: 'uuid' })
   supplierId!: string;

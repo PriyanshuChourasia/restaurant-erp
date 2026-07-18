@@ -8,7 +8,7 @@ import {
   JoinColumn,
   Index,
 } from 'typeorm';
-import { Item } from '../../items/entities/item.entity';
+import { StockItem } from '../../stock-items/entities/stock-item.entity';
 import { PriceLevel } from './price-level.entity';
 import { decimalTransformer } from '../../shared/transformers/decimal.transformer';
 
@@ -23,9 +23,9 @@ export class ItemPriceLevel {
   @Column({ name: 'item_id', type: 'uuid' })
   itemId!: string;
 
-  @ManyToOne(() => Item, { onDelete: 'CASCADE' })
+  @ManyToOne(() => StockItem, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'item_id' })
-  item!: Item;
+  item!: StockItem;
 
   @Column({ name: 'price_level_id', type: 'uuid' })
   priceLevelId!: string;

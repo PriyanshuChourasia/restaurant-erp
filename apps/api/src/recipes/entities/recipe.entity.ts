@@ -2,7 +2,7 @@ import {
   Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn,
   ManyToOne, OneToMany, JoinColumn, Index,
 } from 'typeorm';
-import { Item, ItemUnit } from '../../items/entities/item.entity';
+import { StockItem, ItemUnit } from '../../stock-items/entities/stock-item.entity';
 import { decimalTransformer } from '../../shared/transformers/decimal.transformer';
 
 @Entity('recipes')
@@ -14,9 +14,9 @@ export class Recipe {
   @Column({ name: 'output_item_id', type: 'uuid', unique: true })
   outputItemId!: string;
 
-  @ManyToOne(() => Item)
+  @ManyToOne(() => StockItem)
   @JoinColumn({ name: 'output_item_id' })
-  outputItem!: Item;
+  outputItem!: StockItem;
 
   @Column({ type: 'decimal', precision: 10, scale: 3, name: 'yield_quantity', transformer: decimalTransformer })
   yieldQuantity!: number;
@@ -54,9 +54,9 @@ export class RecipeIngredient {
   @Column({ name: 'component_item_id', type: 'uuid' })
   componentItemId!: string;
 
-  @ManyToOne(() => Item)
+  @ManyToOne(() => StockItem)
   @JoinColumn({ name: 'component_item_id' })
-  componentItem!: Item;
+  componentItem!: StockItem;
 
   @Column({ type: 'decimal', precision: 10, scale: 3, transformer: decimalTransformer })
   quantity!: number;
