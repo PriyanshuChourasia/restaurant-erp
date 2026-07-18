@@ -41,15 +41,16 @@ jobs:
                     ghcr.io/priyanshuchourasia/restaurant-api:${{ github.sha }}
 
         - name: Deploy to VPS
-          uses: appleboy/ssh-action@v1.2.2
+          uses: webfactory/ssh-agent@v0.9.0
           with:
-            host: ${{ secrets.SSH_HOST }}
-            username: ${{ secrets.SSH_USER }}
-            port: ${{ secrets.SSH_PORT }}
-            key: ${{ secrets.SSH_KEY }}
-            debug: true
-            script: |
-                cd ${{ secrets.VPS_PATH }}
-                docker compose pull
-                docker compose up -d
+            ssh-private-key: ${{ secrets.SSH_KEY }}
+
+        - name: Run deploy script on server
+          run: |
+            ssh -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no \
+              ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} '
+                cd ${{ secrets.VPS_PATH }} &&
+                docker compose pull &&
+                docker compose up -d &&
                 docker image prune -f
+              '
