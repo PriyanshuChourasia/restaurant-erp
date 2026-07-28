@@ -22,7 +22,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: apps/api/Dockerfile
     container_name: restaurant-erp-api
     restart: unless-stopped
     ports:

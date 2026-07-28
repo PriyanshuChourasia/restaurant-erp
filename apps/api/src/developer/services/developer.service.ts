@@ -21,7 +21,7 @@ const MODULE_ENTITY_MAP = [
   { module: 'SalesModule', entities: ['Invoice', 'InvoiceItem', 'CreditNote', 'CreditNoteItem'], description: 'Invoices, payments, credit notes' },
   { module: 'OrdersModule', entities: ['Order', 'OrderItem'], description: 'Order management' },
   { module: 'KotModule', entities: ['Kot', 'KotItem'], description: 'Kitchen Order Tickets' },
-  { module: 'LedgerModule', entities: ['LedgerAccount', 'LedgerEntry', 'JournalEntry'], description: 'Double-entry bookkeeping' },
+  { module: 'LedgerModule', entities: ['LedgerAccount', 'LedgerEntry', 'JournalEntry', 'AccountNature', 'AccountGroup'], description: 'Double-entry bookkeeping' },
   { module: 'VouchersModule', entities: ['Voucher', 'VoucherType', 'VoucherModuleEntity'], description: 'Accounting vouchers' },
   { module: 'PriceLevelsModule', entities: ['PriceLevel', 'ItemPriceLevel'], description: 'Customer-tier pricing' },
   { module: 'CustomersModule', entities: ['Customer'], description: 'Customer directory' },
@@ -33,7 +33,7 @@ const MODULE_ENTITY_MAP = [
   { module: 'ItemSuppliersModule', entities: ['ItemSupplier'], description: 'Item-supplier linking' },
   { module: 'ReportsModule', entities: ['Invoice', 'InvoiceItem', 'StockItem', 'CategoryEntity', 'Inventory', 'StockMovement', 'StockCount', 'StockCountLine', 'Purchase', 'PurchaseItem', 'LedgerAccount', 'LedgerEntry', 'Kot', 'KotItem', 'Reservation', 'Customer', 'Zone', 'Table', 'Supplier', 'User', 'Organization'], description: 'Cross-module report queries (read-only)' },
   { module: 'DashboardModule', entities: ['Invoice', 'InvoiceItem'], description: 'Dashboard aggregates' },
-  { module: 'DatabaseModule', entities: ['Permission', 'Role', 'User', 'CategoryEntity', 'StockItem', 'Supplier', 'Inventory', 'StockMovement', 'OpeningStockEntry', 'LedgerAccount', 'LedgerEntry', 'Invoice', 'InvoiceItem', 'Kot', 'KotItem', 'Purchase', 'PurchaseItem', 'Zone', 'Table', 'UnitOfMeasure', 'UnitConversion', 'StorageUnit', 'StockBatch', 'StockCount', 'StockCountLine', 'StockGroup', 'StockCategory', 'Customer', 'PriceLevel', 'ItemPriceLevel', 'Recipe', 'RecipeIngredient', 'Reservation', 'ItemSupplier', 'VoucherType', 'VoucherModuleEntity'], description: 'Database seeding & migrations' },
+  { module: 'DatabaseModule', entities: ['Permission', 'Role', 'User', 'CategoryEntity', 'StockItem', 'Supplier', 'Inventory', 'StockMovement', 'OpeningStockEntry', 'LedgerAccount', 'LedgerEntry', 'AccountNature', 'AccountGroup', 'Invoice', 'InvoiceItem', 'Kot', 'KotItem', 'Purchase', 'PurchaseItem', 'Zone', 'Table', 'UnitOfMeasure', 'UnitConversion', 'StorageUnit', 'StockBatch', 'StockCount', 'StockCountLine', 'StockGroup', 'StockCategory', 'Customer', 'PriceLevel', 'ItemPriceLevel', 'Recipe', 'RecipeIngredient', 'Reservation', 'ItemSupplier', 'VoucherType', 'VoucherModuleEntity'], description: 'Database seeding & migrations' },
 ];
 
 @Injectable()

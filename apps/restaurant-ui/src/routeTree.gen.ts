@@ -133,6 +133,8 @@ import { Route as DeveloperDeveloperPriceLevelSchemaRouteImport } from './routes
 import { Route as DeveloperDeveloperOrderSchemaRouteImport } from './routes/developer/_developer/order-schema'
 import { Route as DeveloperDeveloperLedgerSchemaRouteImport } from './routes/developer/_developer/ledger-schema'
 import { Route as DeveloperDeveloperCustomerSchemaRouteImport } from './routes/developer/_developer/customer-schema'
+import { Route as DeveloperDeveloperAccountNatureSchemaRouteImport } from './routes/developer/_developer/account-nature-schema'
+import { Route as DeveloperDeveloperAccountGroupSchemaRouteImport } from './routes/developer/_developer/account-group-schema'
 import { Route as CategoriesIdEditRouteImport } from './routes/categories_.$id_.edit'
 import { Route as DeveloperDeveloperTablesTableNameRouteImport } from './routes/developer/_developer/tables.$tableName'
 
@@ -812,6 +814,18 @@ const DeveloperDeveloperCustomerSchemaRoute =
     path: '/customer-schema',
     getParentRoute: () => DeveloperDeveloperRoute,
   } as any)
+const DeveloperDeveloperAccountNatureSchemaRoute =
+  DeveloperDeveloperAccountNatureSchemaRouteImport.update({
+    id: '/account-nature-schema',
+    path: '/account-nature-schema',
+    getParentRoute: () => DeveloperDeveloperRoute,
+  } as any)
+const DeveloperDeveloperAccountGroupSchemaRoute =
+  DeveloperDeveloperAccountGroupSchemaRouteImport.update({
+    id: '/account-group-schema',
+    path: '/account-group-schema',
+    getParentRoute: () => DeveloperDeveloperRoute,
+  } as any)
 const CategoriesIdEditRoute = CategoriesIdEditRouteImport.update({
   id: '/categories_/$id_/edit',
   path: '/categories/$id/edit',
@@ -935,6 +949,8 @@ export interface FileRoutesByFullPath {
   '/staff/$id': typeof StaffIdRoute
   '/zones/$zoneId': typeof ZonesZoneIdRoute
   '/categories/$id/edit': typeof CategoriesIdEditRoute
+  '/developer/account-group-schema': typeof DeveloperDeveloperAccountGroupSchemaRoute
+  '/developer/account-nature-schema': typeof DeveloperDeveloperAccountNatureSchemaRoute
   '/developer/customer-schema': typeof DeveloperDeveloperCustomerSchemaRoute
   '/developer/ledger-schema': typeof DeveloperDeveloperLedgerSchemaRoute
   '/developer/order-schema': typeof DeveloperDeveloperOrderSchemaRoute
@@ -1062,6 +1078,8 @@ export interface FileRoutesByTo {
   '/staff/$id': typeof StaffIdRoute
   '/zones/$zoneId': typeof ZonesZoneIdRoute
   '/categories/$id/edit': typeof CategoriesIdEditRoute
+  '/developer/account-group-schema': typeof DeveloperDeveloperAccountGroupSchemaRoute
+  '/developer/account-nature-schema': typeof DeveloperDeveloperAccountNatureSchemaRoute
   '/developer/customer-schema': typeof DeveloperDeveloperCustomerSchemaRoute
   '/developer/ledger-schema': typeof DeveloperDeveloperLedgerSchemaRoute
   '/developer/order-schema': typeof DeveloperDeveloperOrderSchemaRoute
@@ -1191,6 +1209,8 @@ export interface FileRoutesById {
   '/staff/$id': typeof StaffIdRoute
   '/zones/$zoneId': typeof ZonesZoneIdRoute
   '/categories_/$id_/edit': typeof CategoriesIdEditRoute
+  '/developer/_developer/account-group-schema': typeof DeveloperDeveloperAccountGroupSchemaRoute
+  '/developer/_developer/account-nature-schema': typeof DeveloperDeveloperAccountNatureSchemaRoute
   '/developer/_developer/customer-schema': typeof DeveloperDeveloperCustomerSchemaRoute
   '/developer/_developer/ledger-schema': typeof DeveloperDeveloperLedgerSchemaRoute
   '/developer/_developer/order-schema': typeof DeveloperDeveloperOrderSchemaRoute
@@ -1321,6 +1341,8 @@ export interface FileRouteTypes {
     | '/staff/$id'
     | '/zones/$zoneId'
     | '/categories/$id/edit'
+    | '/developer/account-group-schema'
+    | '/developer/account-nature-schema'
     | '/developer/customer-schema'
     | '/developer/ledger-schema'
     | '/developer/order-schema'
@@ -1448,6 +1470,8 @@ export interface FileRouteTypes {
     | '/staff/$id'
     | '/zones/$zoneId'
     | '/categories/$id/edit'
+    | '/developer/account-group-schema'
+    | '/developer/account-nature-schema'
     | '/developer/customer-schema'
     | '/developer/ledger-schema'
     | '/developer/order-schema'
@@ -1576,6 +1600,8 @@ export interface FileRouteTypes {
     | '/staff/$id'
     | '/zones/$zoneId'
     | '/categories_/$id_/edit'
+    | '/developer/_developer/account-group-schema'
+    | '/developer/_developer/account-nature-schema'
     | '/developer/_developer/customer-schema'
     | '/developer/_developer/ledger-schema'
     | '/developer/_developer/order-schema'
@@ -2506,6 +2532,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DeveloperDeveloperCustomerSchemaRouteImport
       parentRoute: typeof DeveloperDeveloperRoute
     }
+    '/developer/_developer/account-nature-schema': {
+      id: '/developer/_developer/account-nature-schema'
+      path: '/account-nature-schema'
+      fullPath: '/developer/account-nature-schema'
+      preLoaderRoute: typeof DeveloperDeveloperAccountNatureSchemaRouteImport
+      parentRoute: typeof DeveloperDeveloperRoute
+    }
+    '/developer/_developer/account-group-schema': {
+      id: '/developer/_developer/account-group-schema'
+      path: '/account-group-schema'
+      fullPath: '/developer/account-group-schema'
+      preLoaderRoute: typeof DeveloperDeveloperAccountGroupSchemaRouteImport
+      parentRoute: typeof DeveloperDeveloperRoute
+    }
     '/categories_/$id_/edit': {
       id: '/categories_/$id_/edit'
       path: '/categories/$id/edit'
@@ -2723,6 +2763,8 @@ const ZonesRouteChildren: ZonesRouteChildren = {
 const ZonesRouteWithChildren = ZonesRoute._addFileChildren(ZonesRouteChildren)
 
 interface DeveloperDeveloperRouteChildren {
+  DeveloperDeveloperAccountGroupSchemaRoute: typeof DeveloperDeveloperAccountGroupSchemaRoute
+  DeveloperDeveloperAccountNatureSchemaRoute: typeof DeveloperDeveloperAccountNatureSchemaRoute
   DeveloperDeveloperCustomerSchemaRoute: typeof DeveloperDeveloperCustomerSchemaRoute
   DeveloperDeveloperLedgerSchemaRoute: typeof DeveloperDeveloperLedgerSchemaRoute
   DeveloperDeveloperOrderSchemaRoute: typeof DeveloperDeveloperOrderSchemaRoute
@@ -2739,6 +2781,10 @@ interface DeveloperDeveloperRouteChildren {
 }
 
 const DeveloperDeveloperRouteChildren: DeveloperDeveloperRouteChildren = {
+  DeveloperDeveloperAccountGroupSchemaRoute:
+    DeveloperDeveloperAccountGroupSchemaRoute,
+  DeveloperDeveloperAccountNatureSchemaRoute:
+    DeveloperDeveloperAccountNatureSchemaRoute,
   DeveloperDeveloperCustomerSchemaRoute: DeveloperDeveloperCustomerSchemaRoute,
   DeveloperDeveloperLedgerSchemaRoute: DeveloperDeveloperLedgerSchemaRoute,
   DeveloperDeveloperOrderSchemaRoute: DeveloperDeveloperOrderSchemaRoute,

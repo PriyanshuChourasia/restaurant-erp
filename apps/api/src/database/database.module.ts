@@ -12,6 +12,8 @@ import { Supplier } from '../suppliers/entities/supplier.entity';
 import { Inventory, StockMovement } from '../inventory/entities/inventory.entity';
 import { OpeningStockEntry } from '../inventory/entities/opening-stock-entry.entity';
 import { LedgerAccount, LedgerEntry } from '../ledger/entities/ledger.entity';
+import { AccountNature } from '../ledger/entities/account-nature.entity';
+import { AccountGroup } from '../ledger/entities/account-group.entity';
 import { Invoice, InvoiceItem } from '../sales/entities/sales.entity';
 import { Kot, KotItem } from '../kot/entities/kot.entity';
 import { Purchase, PurchaseItem } from '../purchases/entities/purchase.entity';
@@ -48,6 +50,8 @@ import { DatabaseSeedService } from './database-seed.service';
       OpeningStockEntry,
       LedgerAccount,
       LedgerEntry,
+      AccountNature,
+      AccountGroup,
       Invoice,
       InvoiceItem,
       Kot,

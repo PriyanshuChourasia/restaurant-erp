@@ -122,6 +122,8 @@ export function DeveloperSidebar() {
         { to: '/developer/order-schema', label: 'Order Schema', icon: ShoppingCart },
         { to: '/developer/recipe-schema', label: 'Recipe Schema', icon: BookOpen },
         { to: '/developer/ledger-schema', label: 'Ledger Schema', icon: BarChart3 },
+        { to: '/developer/account-nature-schema', label: 'Account Nature Schema', icon: Database },
+        { to: '/developer/account-group-schema', label: 'Account Group Schema', icon: Database },
       ],
     },
     {

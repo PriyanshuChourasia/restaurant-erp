@@ -14,6 +14,8 @@ import { Supplier } from '../suppliers/entities/supplier.entity';
 import { Inventory, StockMovement, MovementType } from '../inventory/entities/inventory.entity';
 import { OpeningStockEntry } from '../inventory/entities/opening-stock-entry.entity';
 import { LedgerAccount, LedgerEntry, LedgerEntryType, LedgerCategory, AccountType } from '../ledger/entities/ledger.entity';
+import { AccountNature, AccountingEffect } from '../ledger/entities/account-nature.entity';
+import { AccountGroup } from '../ledger/entities/account-group.entity';
 import { Invoice, InvoiceItem, InvoiceStatus, PaymentMethod } from '../sales/entities/sales.entity';
 import { Kot, KotItem, KotStatus, KotStation } from '../kot/entities/kot.entity';
 import { Purchase, PurchaseItem, PurchaseStatus } from '../purchases/entities/purchase.entity';
@@ -324,6 +326,10 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
     private readonly itemSupplierRepo: Repository<ItemSupplier>,
     @InjectRepository(VoucherType)
     private readonly voucherTypeRepo: Repository<VoucherType>,
+    @InjectRepository(AccountNature)
+    private readonly accountNatureRepo: Repository<AccountNature>,
+    @InjectRepository(AccountGroup)
+    private readonly accountGroupRepo: Repository<AccountGroup>,
     @InjectRepository(VoucherModuleEntity)
     private readonly voucherModuleRepo: Repository<VoucherModuleEntity>,
   ) {}
@@ -359,6 +365,8 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
     await this.seedStockCounts(items);        // Module 8: completed stock count
     await this.seedVoucherModules();                // Voucher modules
     await this.seedVoucherTypes();                 // Voucher types master data
+    await this.seedAccountNatures();               // Account natures
+    await this.seedAccountGroups();                // Account groups
     await this.seedStockGroups();
     await this.seedStockCategories();
     await this.seedItemSuppliers(items);          // StockItem-Supplier links
@@ -2044,6 +2052,83 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
       await this.voucherTypeRepo.save(this.voucherTypeRepo.create(t));
     }
     this.logger.log(`Seeded ${types.length} voucher types.`);
+  }
+
+  // ── Account Natures ─────────────────────────────────────────
+
+  private async seedAccountNatures(): Promise<void> {
+    const count = await this.accountNatureRepo.count();
+    if (count > 0) {
+      this.logger.log(`${count} account natures already exist — skipping.`);
+      return;
+    }
+
+    const natures = [
+      { name: 'Asset', code: 'AST', description: 'Resources owned by the business', icon: 'building', accountingEffect: AccountingEffect.DEBIT },
+      { name: 'Liability', code: 'LBL', description: 'Obligations owed to external parties', icon: 'banknote', accountingEffect: AccountingEffect.CREDIT },
+      { name: 'Equity', code: 'EQT', description: 'Owner interest in the business after liabilities', icon: 'users', accountingEffect: AccountingEffect.CREDIT },
+      { name: 'Revenue', code: 'REV', description: 'Income from business operations', icon: 'trending-up', accountingEffect: AccountingEffect.CREDIT },
+      { name: 'Expense', code: 'EXP', description: 'Costs incurred in business operations', icon: 'shopping-cart', accountingEffect: AccountingEffect.DEBIT },
+    ];
+
+    for (const n of natures) {
+      await this.accountNatureRepo.save(this.accountNatureRepo.create(n));
+    }
+    this.logger.log(`Seeded ${natures.length} account natures.`);
+  }
+
+  // ── Account Groups ─────────────────────────────────────────
+
+  private async seedAccountGroups(): Promise<void> {
+    const count = await this.accountGroupRepo.count();
+    if (count > 0) {
+      this.logger.log(`${count} account groups already exist — skipping.`);
+      return;
+    }
+
+    // Fetch nature IDs by code
+    const natures = await this.accountNatureRepo.find();
+    const natureByCode = new Map(natures.map((n) => [n.code, n.id]));
+
+    const groups = [
+      // ── Asset (AST) groups ─────────────────────────────────
+      { name: 'Current Assets', code: 'CA', natureCode: 'AST', description: 'Short-term assets (cash, receivables, inventory)', icon: 'wallet' },
+      { name: 'Fixed Assets', code: 'FA', natureCode: 'AST', description: 'Long-term tangible assets (equipment, buildings)', icon: 'building-2' },
+      { name: 'Non-Current Assets', code: 'NCA', natureCode: 'AST', description: 'Other long-term assets', icon: 'briefcase' },
+
+      // ── Liability (LBL) groups ────────────────────────────
+      { name: 'Current Liabilities', code: 'CL', natureCode: 'LBL', description: 'Short-term obligations due within a year', icon: 'credit-card' },
+      { name: 'Non-Current Liabilities', code: 'NCL', natureCode: 'LBL', description: 'Long-term obligations', icon: 'scroll-text' },
+
+      // ── Equity (EQT) groups ───────────────────────────────
+      { name: 'Shareholder Equity', code: 'SHE', natureCode: 'EQT', description: 'Owner capital and retained earnings', icon: 'users' },
+      { name: 'Reserves & Surplus', code: 'RSR', natureCode: 'EQT', description: 'Accumulated reserves and retained earnings', icon: 'piggy-bank' },
+
+      // ── Revenue (REV) groups ──────────────────────────────
+      { name: 'Operating Revenue', code: 'OR', natureCode: 'REV', description: 'Revenue from primary business operations', icon: 'trending-up' },
+      { name: 'Non-Operating Revenue', code: 'NOR', natureCode: 'REV', description: 'Revenue from secondary activities', icon: 'gift' },
+
+      // ── Expense (EXP) groups ───────────────────────────────
+      { name: 'Operating Expenses', code: 'OE', natureCode: 'EXP', description: 'Day-to-day operational costs', icon: 'shopping-cart' },
+      { name: 'Administrative Expenses', code: 'AE', natureCode: 'EXP', description: 'Admin and overhead costs', icon: 'building' },
+      { name: 'Direct Costs', code: 'DC', natureCode: 'EXP', description: 'Cost of goods sold and direct material costs', icon: 'package' },
+    ];
+
+    for (const g of groups) {
+      const natureId = natureByCode.get(g.natureCode);
+      if (!natureId) {
+        this.logger.warn(`Nature "${g.natureCode}" not found — skipping group "${g.name}"`);
+        continue;
+      }
+      await this.accountGroupRepo.save(this.accountGroupRepo.create({
+        name: g.name,
+        code: g.code,
+        natureId,
+        description: g.description,
+        icon: g.icon,
+      }));
+    }
+    this.logger.log(`Seeded ${groups.length} account groups.`);
   }
 
   // ── Stock Groups ────────────────────────────────────────────
