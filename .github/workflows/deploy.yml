@@ -1,56 +1,56 @@
-name: Restaurant API Deployment
+# name: Restaurant API Deployment
 
-on:
-    push:
-        branches: [main]
-        paths:
-        - 'apps/api/**'
-        - 'packages/**'
-        - 'package.json'
-        - 'pnpm-lock.yaml'
-        - 'pnpm-workspace.yaml'
-        - 'turbo.json'
+# on:
+#     push:
+#         branches: [main]
+#         paths:
+#         - 'apps/api/**'
+#         - 'packages/**'
+#         - 'package.json'
+#         - 'pnpm-lock.yaml'
+#         - 'pnpm-workspace.yaml'
+#         - 'turbo.json'
 
-permissions:
-    contents: read
-    packages: write
+# permissions:
+#     contents: read
+#     packages: write
 
-jobs:
-    deploy:
-        runs-on: ubuntu-latest
+# jobs:
+#     deploy:
+#         runs-on: ubuntu-latest
 
-        steps:
-        - name: Checkout Code
-          uses: actions/checkout@v4
+#         steps:
+#         - name: Checkout Code
+#           uses: actions/checkout@v4
 
-        - name: Login in GHCR
-          uses: docker/login-action@v3
-          with:
-            registry: ghcr.io
-            username: ${{github.actor}}
-            password: ${{secrets.GITHUB_TOKEN}}
+#         - name: Login in GHCR
+#           uses: docker/login-action@v3
+#           with:
+#             registry: ghcr.io
+#             username: ${{github.actor}}
+#             password: ${{secrets.GITHUB_TOKEN}}
 
-        - name: Build & Push API Image
-          uses: docker/build-push-action@v6
-          with:
-            context: .
-            file: apps/api/Dockerfile
-            push: true
-            tags: |
-                    ghcr.io/priyanshuchourasia/restaurant-api:latest
-                    ghcr.io/priyanshuchourasia/restaurant-api:${{ github.sha }}
+#         - name: Build & Push API Image
+#           uses: docker/build-push-action@v6
+#           with:
+#             context: .
+#             file: apps/api/Dockerfile
+#             push: true
+#             tags: |
+#                     ghcr.io/priyanshuchourasia/restaurant-api:latest
+#                     ghcr.io/priyanshuchourasia/restaurant-api:${{ github.sha }}
 
-        - name: Deploy to VPS
-          uses: webfactory/ssh-agent@v0.9.0
-          with:
-            ssh-private-key: ${{ secrets.SSH_KEY }}
+#         - name: Deploy to VPS
+#           uses: webfactory/ssh-agent@v0.9.0
+#           with:
+#             ssh-private-key: ${{ secrets.SSH_KEY }}
 
-        - name: Run deploy script on server
-          run: |
-            ssh -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no \
-              ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} '
-                cd ${{ secrets.VPS_PATH }} &&
-                docker compose pull &&
-                docker compose up -d &&
-                docker image prune -f
-              '
+#         - name: Run deploy script on server
+#           run: |
+#             ssh -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no \
+#               ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} '
+#                 cd ${{ secrets.VPS_PATH }} &&
+#                 docker compose pull &&
+#                 docker compose up -d &&
+#                 docker image prune -f
+#               '

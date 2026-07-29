@@ -1,51 +1,51 @@
-name: Restaurant UI Deployment
+# name: Restaurant UI Deployment
 
-on:
-    push:
-        branches: [main]
-        paths:
-        - 'apps/restaurant-ui/**'
-        - 'packages/**'
-        - 'package.json'
-        - 'pnpm-lock.yaml'
-        - 'pnpm-workspace.yaml'
-        - 'turbo.json'
+# on:
+#     push:
+#         branches: [main]
+#         paths:
+#         - 'apps/restaurant-ui/**'
+#         - 'packages/**'
+#         - 'package.json'
+#         - 'pnpm-lock.yaml'
+#         - 'pnpm-workspace.yaml'
+#         - 'turbo.json'
 
-jobs:
-    deploy:
-        runs-on: ubuntu-latest
+# jobs:
+#     deploy:
+#         runs-on: ubuntu-latest
 
-        steps:
-        - name: Checkout Code
-          uses: actions/checkout@v4
+#         steps:
+#         - name: Checkout Code
+#           uses: actions/checkout@v4
 
-        - name: Setup pnpm
-          uses: pnpm/action-setup@v4
-          with:
-            version: 8.15.6
+#         - name: Setup pnpm
+#           uses: pnpm/action-setup@v4
+#           with:
+#             version: 8.15.6
 
-        - name: Setup Node
-          uses: actions/setup-node@v4
-          with:
-            node-version: 22
-            cache: pnpm
+#         - name: Setup Node
+#           uses: actions/setup-node@v4
+#           with:
+#             node-version: 22
+#             cache: pnpm
 
-        - name: Install dependencies
-          run: pnpm install --frozen-lockfile
+#         - name: Install dependencies
+#           run: pnpm install --frozen-lockfile
 
-        - name: Build UI
-          env:
-            VITE_API_URL: https://restaurantapi.codymitra.com
-          run: pnpm --filter @repo/restaurant-ui build
+#         - name: Build UI
+#           env:
+#             VITE_API_URL: https://restaurantapi.codymitra.com/api
+#           run: pnpm --filter @repo/restaurant-ui build
 
-        - name: Deploy to VPS
-          uses: webfactory/ssh-agent@v0.9.0
-          with:
-            ssh-private-key: ${{ secrets.SSH_KEY }}
+#         - name: Deploy to VPS
+#           uses: webfactory/ssh-agent@v0.9.0
+#           with:
+#             ssh-private-key: ${{ secrets.SSH_KEY }}
 
-        - name: Sync build output to server
-          run: |
-            rsync -avz --delete \
-              -e "ssh -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no" \
-              apps/restaurant-ui/dist/ \
-              ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/html/erps/restaurant_erp/frontend/
+#         - name: Sync build output to server
+#           run: |
+#             rsync -avz --delete \
+#               -e "ssh -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no" \
+#               apps/restaurant-ui/dist/ \
+#               ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/html/erps/restaurant_erp/frontend/

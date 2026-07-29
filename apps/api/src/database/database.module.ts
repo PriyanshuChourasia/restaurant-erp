@@ -34,6 +34,7 @@ import { Reservation } from '../reservations/entities/reservation.entity';
 import { ItemSupplier } from '../item-suppliers/entities/item-supplier.entity';
 import { VoucherType } from '../vouchers/entities/voucher-type.entity';
 import { VoucherModuleEntity } from '../vouchers/entities/voucher-module.entity';
+import { CostCentre } from '../cost-centres/entities/cost-centre.entity';
 import { DatabaseSeedService } from './database-seed.service';
 
 @Module({
@@ -77,6 +78,7 @@ import { DatabaseSeedService } from './database-seed.service';
       ItemSupplier,
       VoucherType,
       VoucherModuleEntity,
+      CostCentre,
     ]),
   ],
   providers: [DatabaseSeedService],

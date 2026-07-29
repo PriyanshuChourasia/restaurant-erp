@@ -36,6 +36,7 @@ import { StockCategory } from '../inventory/entities/stock-category.entity';
 import { ItemSupplier } from '../item-suppliers/entities/item-supplier.entity';
 import { VoucherType } from '../vouchers/entities/voucher-type.entity';
 import { VoucherModuleEntity } from '../vouchers/entities/voucher-module.entity';
+import { CostCentre } from '../cost-centres/entities/cost-centre.entity';
 
 const MODULES = [
   'auth', 'users', 'roles', 'permissions',
@@ -332,6 +333,8 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
     private readonly accountGroupRepo: Repository<AccountGroup>,
     @InjectRepository(VoucherModuleEntity)
     private readonly voucherModuleRepo: Repository<VoucherModuleEntity>,
+    @InjectRepository(CostCentre)
+    private readonly costCentreRepo: Repository<CostCentre>,
   ) {}
 
   async onApplicationBootstrap() {
@@ -370,6 +373,7 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
     await this.seedStockGroups();
     await this.seedStockCategories();
     await this.seedItemSuppliers(items);          // StockItem-Supplier links
+    await this.seedCostCentres();                  // Cost centre master data
 
     this.logger.log('Seed check complete.');
     this.logUsageGuide();
@@ -2129,6 +2133,29 @@ export class DatabaseSeedService implements OnApplicationBootstrap {
       }));
     }
     this.logger.log(`Seeded ${groups.length} account groups.`);
+  }
+
+  // ── Cost Centres ─────────────────────────────────────────────
+
+  private async seedCostCentres(): Promise<void> {
+    const count = await this.costCentreRepo.count();
+    if (count > 0) {
+      this.logger.log(`${count} cost centres already exist — skipping.`);
+      return;
+    }
+
+    const costCentres = [
+      { name: 'Kitchen', code: 'KIT', description: 'Food preparation and cooking operations' },
+      { name: 'Bar', code: 'BAR', description: 'Beverage service and bar operations' },
+      { name: 'Front of House', code: 'FOH', description: 'Dining area, service, and guest-facing staff' },
+      { name: 'Delivery', code: 'DEL', description: 'Delivery and takeaway fulfillment' },
+      { name: 'Administration', code: 'ADM', description: 'Management, HR, and back-office overhead' },
+    ];
+
+    for (const c of costCentres) {
+      await this.costCentreRepo.save(this.costCentreRepo.create({ ...c, isActive: true }));
+    }
+    this.logger.log(`Seeded ${costCentres.length} cost centres.`);
   }
 
   // ── Stock Groups ────────────────────────────────────────────
