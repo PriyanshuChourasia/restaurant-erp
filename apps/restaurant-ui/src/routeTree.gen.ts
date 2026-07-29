@@ -34,6 +34,7 @@ import { Route as ItemsRouteImport } from './routes/items'
 import { Route as InventoryRouteImport } from './routes/inventory'
 import { Route as DocumentsRouteImport } from './routes/documents'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as CostCentresRouteImport } from './routes/cost-centres'
 import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ZonesZoneIdRouteImport } from './routes/zones.$zoneId'
@@ -261,6 +262,11 @@ const DocumentsRoute = DocumentsRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CostCentresRoute = CostCentresRouteImport.update({
+  id: '/cost-centres',
+  path: '/cost-centres',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CategoriesRoute = CategoriesRouteImport.update({
@@ -841,6 +847,7 @@ const DeveloperDeveloperTablesTableNameRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/categories': typeof CategoriesRoute
+  '/cost-centres': typeof CostCentresRoute
   '/dashboard': typeof DashboardRoute
   '/documents': typeof DocumentsRouteWithChildren
   '/inventory': typeof InventoryRouteWithChildren
@@ -971,6 +978,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/categories': typeof CategoriesRoute
+  '/cost-centres': typeof CostCentresRoute
   '/dashboard': typeof DashboardRoute
   '/documents': typeof DocumentsRouteWithChildren
   '/inventory': typeof InventoryRouteWithChildren
@@ -1101,6 +1109,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/categories': typeof CategoriesRoute
+  '/cost-centres': typeof CostCentresRoute
   '/dashboard': typeof DashboardRoute
   '/documents': typeof DocumentsRouteWithChildren
   '/inventory': typeof InventoryRouteWithChildren
@@ -1233,6 +1242,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/categories'
+    | '/cost-centres'
     | '/dashboard'
     | '/documents'
     | '/inventory'
@@ -1363,6 +1373,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/categories'
+    | '/cost-centres'
     | '/dashboard'
     | '/documents'
     | '/inventory'
@@ -1492,6 +1503,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/categories'
+    | '/cost-centres'
     | '/dashboard'
     | '/documents'
     | '/inventory'
@@ -1623,6 +1635,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CategoriesRoute: typeof CategoriesRoute
+  CostCentresRoute: typeof CostCentresRoute
   DashboardRoute: typeof DashboardRoute
   DocumentsRoute: typeof DocumentsRouteWithChildren
   InventoryRoute: typeof InventoryRouteWithChildren
@@ -1837,6 +1850,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cost-centres': {
+      id: '/cost-centres'
+      path: '/cost-centres'
+      fullPath: '/cost-centres'
+      preLoaderRoute: typeof CostCentresRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/categories': {
@@ -2808,6 +2828,7 @@ const DeveloperDeveloperRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CategoriesRoute: CategoriesRoute,
+  CostCentresRoute: CostCentresRoute,
   DashboardRoute: DashboardRoute,
   DocumentsRoute: DocumentsRouteWithChildren,
   InventoryRoute: InventoryRouteWithChildren,

@@ -32,6 +32,7 @@ import {
   HeartPulse,
   Star,
   Code2,
+  Wallet,
 } from 'lucide-react'
 import { Link, useLocation, useNavigate } from '@tanstack/react-router'
 import { useAuth } from '@/lib/auth-context'
@@ -94,6 +95,7 @@ const navSections = [
     links: [
       { to: '/sales', label: 'Sales', icon: Receipt },
       { to: '/ledger', label: 'Ledger', icon: BookOpen },
+      { to: '/cost-centres', label: 'Cost Centres', icon: Wallet },
       { to: '/vouchers', label: 'Vouchers', icon: FileText },
     ],
   },

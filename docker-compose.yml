@@ -28,7 +28,7 @@ services:
     ports:
       - "3000:3000"
     env_file:
-      - .env.production
+      - apps/api/.env.production
     environment:
       NODE_ENV: development
       DB_HOST: db

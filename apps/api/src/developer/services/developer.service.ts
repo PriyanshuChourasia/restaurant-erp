@@ -22,6 +22,7 @@ const MODULE_ENTITY_MAP = [
   { module: 'OrdersModule', entities: ['Order', 'OrderItem'], description: 'Order management' },
   { module: 'KotModule', entities: ['Kot', 'KotItem'], description: 'Kitchen Order Tickets' },
   { module: 'LedgerModule', entities: ['LedgerAccount', 'LedgerEntry', 'JournalEntry', 'AccountNature', 'AccountGroup'], description: 'Double-entry bookkeeping' },
+  { module: 'CostCentresModule', entities: ['CostCentre'], description: 'Cost centre master data for expense allocation' },
   { module: 'VouchersModule', entities: ['Voucher', 'VoucherType', 'VoucherModuleEntity'], description: 'Accounting vouchers' },
   { module: 'PriceLevelsModule', entities: ['PriceLevel', 'ItemPriceLevel'], description: 'Customer-tier pricing' },
   { module: 'CustomersModule', entities: ['Customer'], description: 'Customer directory' },

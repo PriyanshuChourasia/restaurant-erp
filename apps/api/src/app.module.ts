@@ -17,6 +17,7 @@ import { SalesModule } from './sales/sales.module';
 import { OrdersModule } from './orders/orders.module';
 import { KotModule } from './kot/kot.module';
 import { LedgerModule } from './ledger/ledger.module';
+import { CostCentresModule } from './cost-centres/cost-centres.module';
 import { VouchersModule } from './vouchers/vouchers.module';
 import { DatabaseModule } from './database/database.module';
 import { PriceLevelsModule } from './price-levels/price-levels.module';
@@ -67,6 +68,7 @@ import { PermissionsGuard } from './shared/guards/permissions.guard';
     OrdersModule,
     KotModule,
     LedgerModule,
+    CostCentresModule,
     VouchersModule,
     DatabaseModule,
     PriceLevelsModule,
